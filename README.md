@@ -1,1 +1,0 @@
-# ikass.in

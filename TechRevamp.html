@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IKASS TechRevamp</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #ffffff;
+    color: #1e293b;
+    overflow-x: hidden;
+}
+
+.glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+}
+
+.feature-card {
+    transition: all 0.3s ease;
+}
+.feature-card:hover {
+    transform: scale(1.02);
+}
+
+.feature-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.bg-glow {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 1000px;
+    background: #166534;
+    filter: blur(200px);
+    opacity: 0.15;
+    z-index: -1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- TOP RIGHT HOME BUTTON -->
+<div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+    <a href="index2.html" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
+        <i class="fas fa-home"></i> Home
+    </a>
+</div>
+
+<!-- HEADER (UNCHANGED) -->
+<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
+        <div class="text-3xl font-black tracking-tighter">
+            IKASS<span style="color:#166534;">.in</span>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto pb-20">
+
+    <!-- TOP SECTION -->
+    <div class="text-center mb-24 max-w-4xl mx-auto px-4">
+        <div class="w-24 h-24 mx-auto mb-8 bg-white p-4 rounded-3xl shadow-xl">
+            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+        </div>
+
+        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
+            Industrial Standard Diagnostics
+        </span>
+
+        <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+            IKASS TechRevamp
+        </h1>
+
+        <p class="text-xl text-slate-500 leading-relaxed font-light">
+            Bringing satellite-grade precision to consumer electronics. We specialize in advanced chip-level repairs and industrial safety standards.
+        </p>
+    </div>
+
+    <!-- HEADING -->
+    <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-black">
+            What Makes Our Mobile Service the Best
+        </h2>
+        <div class="h-1 w-20 mx-auto mt-4 rounded-full bg-green-700"></div>
+    </div>
+
+    <!-- FEATURES GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+
+        <!-- 1 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=ESD+Protection" class="feature-img">
+            <h4 class="text-xl font-black mb-3">ESD Safety First</h4>
+            <p class="text-slate-500 text-sm">We always use anti-static protection before touching your motherboard.</p>
+        </div>
+
+        <!-- 2 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Clean+Environment" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Clean & Professional Handling</h4>
+            <p class="text-slate-500 text-sm">Handled in a dust-free environment.</p>
+        </div>
+
+        <!-- 3 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Diagnostic+Tools" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Transparent Diagnosis</h4>
+            <p class="text-slate-500 text-sm">We clearly explain the issue before repair.</p>
+        </div>
+
+        <!-- 4 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Quality+Testing" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Accurate Testing</h4>
+            <p class="text-slate-500 text-sm">Devices tested before and after repair.</p>
+        </div>
+
+        <!-- 5 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Root+Cause" class="feature-img">
+            <h4 class="text-xl font-black mb-3">No Trial-and-Error Repairs</h4>
+            <p class="text-slate-500 text-sm">We fix only the real issue.</p>
+        </div>
+
+        <!-- 6 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Precision+Heat" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Safe Repair Techniques</h4>
+            <p class="text-slate-500 text-sm">Controlled heat and tools used.</p>
+        </div>
+
+        <!-- 7 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Client+Talk" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Clear Communication</h4>
+            <p class="text-slate-500 text-sm">Simple, honest explanations.</p>
+        </div>
+
+        <!-- 8 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Guarantee" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Service Assurance</h4>
+            <p class="text-slate-500 text-sm">Recheck without extra charges.</p>
+        </div>
+
+        <!-- 9 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Doorstep" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Doorstep Service</h4>
+            <p class="text-slate-500 text-sm">Convenient at-home service.</p>
+        </div>
+
+        <!-- 10 -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="https://via.placeholder.com/600x400?text=Data+Privacy" class="feature-img">
+            <h4 class="text-xl font-black mb-3">Data Safety</h4>
+            <p class="text-slate-500 text-sm">Your data remains secure.</p>
+        </div>
+
+    </div>
+
+</main>
+
+</body>
+</html>

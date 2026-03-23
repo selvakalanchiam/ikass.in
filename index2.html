@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IKASS | Precision Ecosystem</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+
+:root { --accent: #60a5fa; }
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    background-color: #ffffff;
+    color: #1e293b;
+}
+
+.glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+}
+
+.bg-glow {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 1000px;
+    background: var(--accent);
+    filter: blur(200px);
+    opacity: 0.15;
+    z-index: -1;
+}
+
+.sector-card {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.sector-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent);
+    background: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-glow"></div>
+
+<!-- HEADER -->
+<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
+        <div class="text-3xl font-black tracking-tighter">
+            IKASS<span style="color:#60a5fa;">.in</span>
+        </div>
+    </div>
+    <div class="hidden md:block text-[10px] font-black uppercase tracking-[0.5em] text-slate-400">
+        Chennai · HQ · 2026
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto py-10">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24 px-4">
+
+        <div class="flex justify-center">
+            <div class="w-64 h-64 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-[3rem] border-[10px] border-white shadow-2xl overflow-hidden">
+                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/selva.png" class="w-full h-full object-cover">
+            </div>
+        </div>
+
+        <div class="text-center lg:text-left">
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
+                Founder & Visionary
+            </span>
+
+            <h1 class="text-5xl lg:text-7xl font-black mb-6 tracking-tighter">
+                Selvakalanchiam Innasimuthu
+            </h1>
+
+            <p class="text-xl text-slate-500 lg:max-w-lg leading-relaxed font-light mb-8">
+                Founder of Hattrick and IKASS Groups. I have established a unified ecosystem built on precision engineering, spanning technology, health, and sustainable products. We don't just provide services; we build trust through technical mastery.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- SECTORS -->
+    <div class="text-center lg:text-left px-4">
+        <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-400 mb-8">
+            A Unified Vision Across 4 Sectors
+        </h2>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+
+            <!-- TECH -->
+            <a href="techrevamp.html" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">TechRevamp</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-green-700">Precision Electronics</p>
+            </a>
+
+            <!-- EDUCATION -->
+            <a href="education.html" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">Education</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-red-400">Chip-Level Training</p>
+            </a>
+
+            <!-- PAPER -->
+            <a href="paperproduct.html" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">Paper Product</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-green-400">Sustainable Supply</p>
+            </a>
+
+            <!-- HATTRICK -->
+            <a href="hattrick.html" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">Hattrick Lab</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-orange-500">Advanced Diagnostics</p>
+            </a>
+
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>

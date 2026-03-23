@@ -1,204 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IKASS | The Future of Integrated Solutions</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
-        
-        :root { --accent: #3b82f6; }
-        body { 
-            font-family: 'Space Grotesk', sans-serif; 
-            transition: background 0.6s ease; 
-            overflow-x: hidden; 
-            background-color: #f8fafc; 
-        }
-        
-        .glass { 
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.4); 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Floating Nav - Anchored in its own separate safe layer */
-        .nav-container { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            height: 120px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            z-index: 100;
-            pointer-events: none; 
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IKASS | Precision Ecosystem</title>
 
-        .nav-float { 
-            pointer-events: auto; 
-            transform: translateY(-10px);
-            max-width: 95vw;
-            overflow-x: auto;
-            scrollbar-width: none; /* Hide scrollbar for Chrome/Safari */
-        }
-        .nav-float::-webkit-scrollbar { display: none; }
-        
-        .unit-btn { transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); white-space: nowrap; }
-        .unit-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.5); }
-        .unit-btn.active { 
-            background: var(--accent); 
-            color: white !important; 
-            box-shadow: 0 15px 30px -5px var(--accent); 
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-        /* Hero Image - Soft Pop effect */
-        .hero-img { 
-            transition: all 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1));
-        }
-        
-        .entry-anim { animation: entry 0.8s ease forwards; }
-        @keyframes entry {
-            from { opacity: 0; filter: blur(10px); transform: translateY(30px); }
-            to { opacity: 1; filter: blur(0); transform: translateY(0); }
-        }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
 
-        .bg-glow { 
-            position: fixed; 
-            top: 0; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: 800px; 
-            height: 800px; 
-            background: var(--accent); 
-            filter: blur(160px); 
-            opacity: 0.1; 
-            z-index: -1; 
-            transition: background 0.8s ease; 
-        }
-    </style>
+:root { --accent: #60a5fa; }
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    background-color: #ffffff;
+    color: #1e293b;
+}
+
+.glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+}
+
+.bg-glow {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 1000px;
+    background: var(--accent);
+    filter: blur(200px);
+    opacity: 0.15;
+    z-index: -1;
+}
+
+.sector-card {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.sector-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent);
+    background: white;
+}
+</style>
 </head>
-<body class="text-slate-900">
 
-    <div id="glow-bg" class="bg-glow"></div>
+<body>
 
-    <header class="p-8 flex justify-between items-center max-w-7xl mx-auto relative z-10">
-        <div class="text-3xl font-black tracking-tighter text-slate-900 cursor-pointer select-none" onclick="render('home')">
-            IKASS<span id="logo-dot" class="text-blue-600">.in</span>
+<div class="bg-glow"></div>
+
+<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
+        <div class="text-3xl font-black tracking-tighter">
+            IKASS<span style="color:#60a5fa;">.in</span>
         </div>
-        <div class="hidden md:block text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Chennai · HQ · 2026</div>
-    </header>
+    </div>
+    <div class="hidden md:block text-[10px] font-black uppercase tracking-[0.5em] text-slate-400">
+        Chennai · HQ · 2026
+    </div>
+</header>
 
-    <main id="app-root" class="min-h-[85vh] flex items-center justify-center pt-10 pb-40 px-6">
-        </main>
+<main class="max-w-7xl mx-auto py-10">
 
-    <div class="nav-container">
-        <nav class="nav-float glass rounded-full p-2 flex gap-1 md:gap-2">
-            <button id="nav-home" onclick="render('home')" class="unit-btn px-5 md:px-8 py-3.5 rounded-full font-bold text-xs md:text-sm flex items-center gap-2 active">
-                <i class="fas fa-home"></i> <span>Home</span>
-            </button>
-            <button id="nav-tech" onclick="render('tech')" class="unit-btn px-5 md:px-8 py-3.5 rounded-full font-bold text-xs md:text-sm flex items-center gap-2 text-slate-600">
-                <i class="fas fa-bolt text-cyan-500"></i> <span>Tech Revamp</span>
-            </button>
-            <button id="nav-paper" onclick="render('paper')" class="unit-btn px-5 md:px-8 py-3.5 rounded-full font-bold text-xs md:text-sm flex items-center gap-2 text-slate-600">
-                <i class="fas fa-leaf text-emerald-500"></i> <span>Paper Products</span>
-            </button>
-            <button id="nav-hattrick" onclick="render('hattrick')" class="unit-btn px-5 md:px-8 py-3.5 rounded-full font-bold text-xs md:text-sm flex items-center gap-2 text-slate-600">
-                <i class="fas fa-microscope text-rose-500"></i> <span>Hattrick Lab</span>
-            </button>
-        </nav>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24 px-4">
+
+        <div class="flex justify-center">
+            <div class="w-64 h-64 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-[3rem] border-[10px] border-white shadow-2xl overflow-hidden">
+                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/selva.png" class="w-full h-full object-cover">
+            </div>
+        </div>
+
+        <div class="text-center lg:text-left">
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
+                Founder & Visionary
+            </span>
+
+            <h1 class="text-5xl lg:text-7xl font-black mb-6 tracking-tighter">
+                Selvakalanchiam Innasimuthu
+            </h1>
+
+            <p class="text-xl text-slate-500 lg:max-w-lg leading-relaxed font-light mb-8">
+                Founder of Hattrick and IKASS Groups. I have established a unified ecosystem built on precision engineering, spanning technology, health, and sustainable products. We don't just provide services; we build trust through technical mastery.
+            </p>
+        </div>
+
     </div>
 
-    <script>
-        const state = {
-            home: {
-                accent: "#3b82f6",
-                label: "Founder & Visionary",
-                name: "Selvakalanchiam Innasimuthu",
-                bio: "Leading the IKASS ecosystem through software-driven innovation and industrial excellence in the heart of Tamil Nadu.",
-                img: "https://via.placeholder.com/600x600?text=Founder+Selva"
-            },
-            tech: {
-                accent: "#06b6d4",
-                label: "Tech Lead",
-                name: "Selvakalanchiam Innasimuthu",
-                bio: "Crafting professional Python utilities and AI-driven automation tools for global hardware performance.",
-                img: "https://via.placeholder.com/600x600?text=Tech+Lead"
-            },
-            paper: {
-                accent: "#10b981",
-                label: "CEO",
-                name: "Vishal",
-                bio: "Scaling sustainable industrial solutions and supply chain excellence at IKASS Paper Products.",
-                img: "https://via.placeholder.com/600x600?text=CEO+Vishal"
-            },
-            hattrick: {
-                accent: "#f43f5e",
-                isDouble: true,
-                leads: [
-                    { name: "Karthick", role: "MD & Co-Founder", img: "https://via.placeholder.com/400x400?text=Karthick" },
-                    { name: "Eswar", role: "Accountant & Co-Founder", img: "https://via.placeholder.com/400x400?text=Eswar" }
-                ]
-            }
-        };
+    <div class="text-center lg:text-left px-4">
+        <h2 class="text-xs font-black uppercase tracking-[0.4em] text-slate-400 mb-8">
+            A Unified Vision Across 4 Sectors
+        </h2>
 
-        function render(key) {
-            const root = document.getElementById('app-root');
-            const data = state[key];
-            const glow = document.getElementById('glow-bg');
-            const dot = document.getElementById('logo-dot');
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
 
-            // Update Theme
-            document.documentElement.style.setProperty('--accent', data.accent);
-            glow.style.background = data.accent;
-            dot.style.color = data.accent;
+            <a href="https://selvakalanchiam.github.io/ikass.in/TechRevamp.html" target="_blank" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">TechRevamp</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-green-700">Precision Electronics</p>
+            </a>
 
-            // Update Nav UI
-            document.querySelectorAll('.unit-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`nav-${key}`).classList.add('active');
+            <a href="https://selvakalanchiam.github.io/ikass.in/education.html" target="_blank" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">Education</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-red-400">Chip-Level Training</p>
+            </a>
 
-            let html = "";
-            if (!data.isDouble) {
-                html = `
-                <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center entry-anim">
-                    <div class="flex justify-center order-2 md:order-1">
-                        <div class="relative">
-                             <div class="absolute inset-0 bg-white/20 blur-3xl rounded-full"></div>
-                             <img src="${data.img}" class="hero-img w-72 h-72 md:w-[480px] md:h-[480px] rounded-[4rem] relative z-10 border-[12px] border-white shadow-2xl">
-                        </div>
-                    </div>
-                    <div class="text-center md:text-left order-1 md:order-2">
-                        <span class="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-6 block">${data.label}</span>
-                        <h1 class="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold mb-8 leading-[1.1] text-slate-900 tracking-tighter break-words">${data.name}</h1>
-                        <p class="text-xl text-slate-500 max-w-lg mb-12 leading-relaxed font-light">${data.bio}</p>
-                        <button class="bg-slate-900 text-white px-12 py-5 rounded-full font-bold shadow-2xl hover:bg-slate-800 transition transform hover:-translate-y-1 active:scale-95">Explore Division</button>
-                    </div>
-                </div>`;
-            } else {
-                html = `
-                <div class="max-w-5xl mx-auto entry-anim w-full">
-                    <h2 class="text-center text-[10px] font-black uppercase tracking-[0.4em] mb-16 text-slate-400">Hattrick Lab Leadership</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        ${data.leads.map(lead => `
-                            <div class="glass p-12 rounded-[3.5rem] text-center transition-all duration-500 hover:bg-white hover:scale-[1.02]">
-                                <img src="${lead.img}" class="w-44 h-44 rounded-full mx-auto mb-8 border-8 border-white shadow-xl">
-                                <h3 class="text-3xl font-bold mb-2">${lead.name}</h3>
-                                <p class="text-rose-500 font-bold uppercase text-xs tracking-widest">${lead.role}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>`;
-            }
+            <a href="https://selvakalanchiam.github.io/ikass.in/paperproduct.html" target="_blank" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">Paper Product</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-green-400">Sustainable Supply</p>
+            </a>
 
-            root.innerHTML = html;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+            <a href="https://selvakalanchiam.github.io/ikass.in/hattrick.html" target="_blank" class="glass p-6 rounded-[2rem] sector-card block">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 bg-white shadow-inner p-2 border">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+                </div>
+                <h3 class="text-xl font-black mb-1">Hattrick Lab</h3>
+                <p class="text-xs font-bold uppercase tracking-widest text-orange-500">Advanced Diagnostics</p>
+            </a>
 
-        render('home');
-    </script>
+        </div>
+    </div>
+
+</main>
+
 </body>
 </html>

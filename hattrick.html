@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hattrick Diagnostic Lab</title>
+<title>Hattrick Diagnostic Lab | Premium Care</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,38 +22,73 @@ body {
     overflow-x: hidden;
 }
 
-.glass {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
-}
-
 .bg-glow {
     position: fixed;
-    top: 0;
+    top: -10%;
     left: 50%;
     transform: translateX(-50%);
-    width: 1000px;
-    height: 1000px;
-    background: var(--accent);
-    filter: blur(200px);
-    opacity: 0.15;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle, rgba(249,115,22,0.12) 0%, rgba(255,255,255,0) 70%);
     z-index: -1;
 }
 
-.logo-box-formal {
-    background: white;
+.glass {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(20px);
     border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
 }
 
+/* 1. CREATIVE: Pulsing Event Card */
 .event-card {
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    box-shadow: 0 0 0 rgba(249, 115, 22, 0);
 }
+
 .event-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-12px) scale(1.01);
+    box-shadow: 0 20px 40px rgba(249, 115, 22, 0.15);
     background: white;
+}
+
+.pulse-border {
+    animation: pulse-orange 3s infinite;
+}
+
+@keyframes pulse-orange {
+    0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.2); }
+    70% { box-shadow: 0 0 0 20px rgba(249, 115, 22, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
+/* 2. CREATIVE: Background Floating Shapes */
+.floating-blob {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: var(--accent);
+    filter: blur(80px);
+    opacity: 0.05;
+    border-radius: 50%;
+    z-index: -1;
+    animation: float 20s infinite alternate;
+}
+
+@keyframes float {
+    from { transform: translate(0, 0); }
+    to { transform: translate(100px, 50px); }
+}
+
+/* 3. CREATIVE: Image Reveal Styles */
+.reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease-out;
+}
+
+.reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 </style>
 </head>
@@ -61,86 +96,96 @@ body {
 <body>
 
 <div class="bg-glow"></div>
+<div class="floating-blob" style="top: 20%; left: -5%;"></div>
+<div class="floating-blob" style="top: 60%; right: -5%; animation-delay: -5s;"></div>
 
 <main class="max-w-7xl mx-auto pb-32">
 
-    <div class="text-center mb-24 max-w-4xl mx-auto px-4 pt-20">
-        <div class="w-28 h-28 mx-auto mb-8 logo-box-formal p-1 rounded-[2.5rem] flex items-center justify-center">
-            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" alt="IKASS Logo" class="w-full h-full object-contain">
-        </div>
-
-        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
-            Chennai's No.1 Patient-Centrick Diagnostic Lab
+    <div class="max-w-4xl mx-auto px-4 pt-10 mb-24 reveal">
+        <span class="text-center text-[10px] font-black uppercase tracking-[0.5em] text-orange-500 mb-6 block">
+            <i class="fas fa-bullhorn mr-2"></i> Live updates available
         </span>
-
-        <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
-            Hattrick Diagnostic Lab
-        </h1>
-
-        <p class="text-xl text-slate-500 leading-relaxed font-light max-w-2xl mx-auto mb-20">
-            Providing precision diagnostics and compassionate care. Our leadership combines hospital-grade expertise with operational excellence to deliver reliable results at your doorstep.
-        </p>
-
-        <div class="space-y-40">
+        <a href="eventsofhattrick.html" class="glass p-8 md:p-12 rounded-[4rem] event-card flex flex-col md:flex-row items-center gap-10 border-2 border-orange-100 pulse-border">
+            <div class="relative">
+                <div class="w-28 h-28 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center p-5 relative z-10">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" class="w-full h-full object-contain">
+                </div>
+                <div class="absolute inset-0 bg-orange-500 blur-2xl opacity-20 animate-pulse"></div>
+            </div>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="flex justify-center">
-                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Karthick.png"
-                         class="w-64 h-64 md:w-80 md:h-80 lg:w-[450px] lg:h-[450px] rounded-[3rem] border-[10px] border-white shadow-2xl object-cover">
-                </div>
-
-                <div class="text-center lg:text-left">
-                    <h2 class="text-5xl lg:text-7xl font-black mb-2 tracking-tighter text-slate-900">
-                        Karthick
-                    </h2>
-                    <span class="text-xs font-black uppercase tracking-[0.4em] mb-6 block text-orange-500">
-                        Co-Founder & Managing Director
-                    </span>
-                    <p class="text-xl text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
-                        Former KMC Hospital technician. Expert in customer-centric diagnostics and home collection services.
-                    </p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div class="flex justify-center lg:order-2">
-                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/eswar.png"
-                         class="w-64 h-64 md:w-80 md:h-80 lg:w-[450px] lg:h-[450px] rounded-[3rem] border-[10px] border-white shadow-2xl object-cover">
-                </div>
-
-                <div class="text-center lg:text-left lg:order-1">
-                    <h2 class="text-5xl lg:text-7xl font-black mb-2 tracking-tighter text-slate-900">
-                        Eswar
-                    </h2>
-                    <span class="text-xs font-black uppercase tracking-[0.4em] mb-6 block text-orange-500">
-                        Co-Founder & Accountant
-                    </span>
-                    <p class="text-xl text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
-                        Managing the financial backbone and operational precision of Hattrick Lab.
-                    </p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="max-w-4xl mx-auto px-4 mt-32">
-        <h3 class="text-center text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-10">Latest Engagements</h3>
-        <a href="eventsofhattrick.html" class="glass p-10 rounded-[3rem] event-card flex flex-col md:flex-row items-center gap-8 border-l-[12px] border-orange-500">
-            <div class="w-24 h-24 bg-white rounded-[2rem] shadow-xl flex items-center justify-center p-4 border border-slate-50">
-                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" class="w-full h-full object-contain">
-            </div>
             <div class="text-center md:text-left flex-1">
-                <h4 class="text-3xl font-black tracking-tight mb-2">Events of Hattrick</h4>
-                <p class="text-slate-500 font-light">Explore our upcoming health camps, live fitness challenges, and archived community achievements.</p>
+                <div class="inline-block bg-orange-500 text-white text-[8px] px-3 py-1 rounded-full font-black uppercase tracking-widest mb-3">Community Hub</div>
+                <h4 class="text-4xl font-black tracking-tighter mb-3 text-slate-900">Events of Hattrick</h4>
+                <p class="text-slate-500 font-light text-lg leading-relaxed">Experience our latest health initiatives, fitness competitions, and live results. Stay healthy, stay engaged.</p>
             </div>
-            <div class="text-orange-500">
-                <i class="fas fa-arrow-right text-2xl"></i>
+            
+            <div class="bg-slate-900 w-16 h-16 rounded-full flex items-center justify-center text-white hover:bg-orange-500 transition-colors shadow-xl group">
+                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </div>
         </a>
     </div>
 
+    <div class="text-center mb-32 reveal">
+        <div class="w-32 h-32 mx-auto mb-10 bg-white p-2 rounded-[3rem] shadow-2xl border border-slate-50 flex items-center justify-center">
+             <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" class="w-full h-full object-contain">
+        </div>
+        <span class="text-[11px] font-black uppercase tracking-[0.6em] text-slate-400 mb-6 block">Chennai's No.1 Patient-Centric Lab</span>
+        <h1 class="text-6xl md:text-8xl font-black mb-8 tracking-tighter text-slate-900">Hattrick Diagnostic Lab</h1>
+        <p class="text-2xl text-slate-400 font-light max-w-3xl mx-auto leading-relaxed">
+            Revolutionizing healthcare in Chennai through hospital-grade diagnostics delivered with a personal touch.
+        </p>
+    </div>
+
+    <div class="space-y-48 px-4">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center reveal">
+            <div class="relative group">
+                <div class="absolute -inset-4 bg-orange-500/5 rounded-[4rem] blur-xl group-hover:opacity-100 transition duration-1000 opacity-0"></div>
+                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Karthick.png"
+                     class="relative w-full aspect-square md:w-[500px] md:h-[500px] mx-auto rounded-[3.5rem] border-8 border-white shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] object-cover grayscale-[20%] hover:grayscale-0 transition duration-500">
+            </div>
+            <div class="text-center lg:text-left">
+                <h2 class="text-6xl lg:text-8xl font-black mb-4 tracking-tighter text-slate-900">Karthick</h2>
+                <div class="h-1.5 w-20 bg-orange-500 mb-8 mx-auto lg:mx-0 rounded-full"></div>
+                <span class="text-sm font-black uppercase tracking-[0.4em] mb-6 block text-orange-500">Co-Founder & Managing Director</span>
+                <p class="text-xl text-slate-500 leading-relaxed font-light">
+                    Bringing hospital-level precision to your home. Karthick's background at KMC Hospital ensures every patient receives technical excellence combined with genuine care.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center reveal">
+            <div class="lg:order-2 relative group">
+                <div class="absolute -inset-4 bg-orange-500/5 rounded-[4rem] blur-xl group-hover:opacity-100 transition duration-1000 opacity-0"></div>
+                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/eswar.png"
+                     class="relative w-full aspect-square md:w-[500px] md:h-[500px] mx-auto rounded-[3.5rem] border-8 border-white shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] object-cover grayscale-[20%] hover:grayscale-0 transition duration-500">
+            </div>
+            <div class="text-center lg:text-left lg:order-1">
+                <h2 class="text-6xl lg:text-8xl font-black mb-4 tracking-tighter text-slate-900">Eswar</h2>
+                <div class="h-1.5 w-20 bg-orange-500 mb-8 mx-auto lg:mx-0 rounded-full"></div>
+                <span class="text-sm font-black uppercase tracking-[0.4em] mb-6 block text-orange-500">Co-Founder & Accountant</span>
+                <p class="text-xl text-slate-500 leading-relaxed font-light">
+                    The strategic mind ensuring operational perfection. Eswar manages the complex logistics that make Hattrick Lab Chennai's most reliable diagnostic partner.
+                </p>
+            </div>
+        </div>
+
+    </div>
 </main>
+
+<script>
+    // Creative Reveal on Scroll
+    const observerOptions = { threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 
 </body>
 </html>

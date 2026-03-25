@@ -1,97 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IKASS Paper Products</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IKASS Paper Products</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
 
-:root { --accent: #34d399; }
+        /* IKASS FORMAL STYLE VARIABLES */
+        :root {
+            --accent: #10b981; /* Emerald Green for Paper Products */
+        }
 
-body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: #ffffff;
-    color: #1e293b;
-}
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #ffffff;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
 
-.glass {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
-}
+        .glass {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+        }
 
-.bg-glow {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1000px;
-    height: 1000px;
-    background: var(--accent);
-    filter: blur(200px);
-    opacity: 0.15;
-    z-index: -1;
-}
-</style>
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: scale(1.02);
+        }
+
+        .feature-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 1000px;
+            background: var(--accent);
+            filter: blur(200px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        /* Visibility fix for the Center Logo Box */
+        .logo-box-formal {
+            background: white;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="bg-glow"></div>
+    <div class="bg-glow"></div>
 
-<div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
-    <a href="https://ikass.in/" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
-        <i class="fas fa-home"></i> Home
-    </a>
-</div>
-
-<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
-    <div class="flex items-center gap-3">
-        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
-        <div class="text-3xl font-black tracking-tighter">
-            IKASS<span style="color:#34d399;">.in</span>
-        </div>
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+        <a href="https://ikass.in" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
+            <i class="fas fa-home"></i> Home
+        </a>
     </div>
-</header>
 
-<main class="max-w-6xl mx-auto py-10">
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center px-4">
-
-        <div class="flex justify-center">
-            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Vishal.png" 
-                 class="w-64 h-64 md:w-[480px] md:h-[480px] rounded-[3rem] border-[10px] border-white shadow-2xl object-cover">
+    <header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
+            <div class="text-3xl font-black tracking-tighter">
+                IKASS<span style="color: var(--accent);">.in</span>
+            </div>
         </div>
+    </header>
 
-        <div class="text-center md:text-left">
+    <main class="max-w-7xl mx-auto pb-20">
+
+        <div class="text-center mb-24 max-w-4xl mx-auto px-4">
+
+            <div class="w-28 h-28 mx-auto mb-8 logo-box-formal p-6 rounded-[2.5rem] flex items-center justify-center">
+                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" alt="IKASS Logo" class="w-full h-full object-contain">
+            </div>
+
             <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
-                CEO · Managed by Vishal
+                Sustainable Packaging Solutions
             </span>
 
-            <h1 class="text-4xl sm:text-5xl lg:text-7xl font-black mb-6 tracking-tighter">
+            <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
                 IKASS Paper Products
             </h1>
 
-            <p class="text-lg md:text-xl text-slate-500 max-w-lg mb-8 leading-relaxed font-light">
-                A dynamic young leader balancing college and career. As CEO, he manages inventory, accounts, and delivery for the paper division.
+            <div class="flex justify-center mb-10">
+                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Vishal.png"
+                     class="w-64 h-64 md:w-80 md:h-80 object-cover rounded-[3rem] border-[10px] border-white shadow-2xl">
+            </div>
+
+            <h3 class="text-4xl font-black mb-2 tracking-tight">Vishal</h3>
+            <span class="text-xs font-black uppercase tracking-[0.4em] text-slate-400 mb-6 block">
+                CEO & Managing Director
+            </span>
+
+            <p class="text-xl text-slate-500 leading-relaxed font-light max-w-xl mx-auto">
+                Leading the way in inventory management and delivery operations. We provide high-quality sustainable packaging solutions for businesses across the region.
             </p>
 
-            <button class="bg-[#34d399] text-white px-10 py-4 rounded-full font-bold shadow-xl hover:scale-105 transition">
-                Explore Now
-            </button>
         </div>
 
-    </div>
+        <hr class="border-slate-100 mb-20">
 
-</main>
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-black">
+                Our Core Strengths
+            </h2>
+            <div class="h-1 w-20 mx-auto mt-4 rounded-full bg-emerald-500"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="https://via.placeholder.com/600x400?text=Eco+Paper" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Eco-Friendly Materials</h4>
+                <p class="text-slate-500 text-sm">Sustainably sourced paper products reducing environmental impact.</p>
+            </div>
+
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="https://via.placeholder.com/600x400?text=Bulk+Supply" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Bulk Supply Efficiency</h4>
+                <p class="text-slate-500 text-sm">Reliable large-scale supply for businesses and institutions.</p>
+            </div>
+
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="https://via.placeholder.com/600x400?text=Packaging" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Custom Packaging</h4>
+                <p class="text-slate-500 text-sm">Flexible packaging solutions tailored to your needs.</p>
+            </div>
+
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="https://via.placeholder.com/600x400?text=Quality" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Premium Quality</h4>
+                <p class="text-slate-500 text-sm">High durability and finishing in all paper products.</p>
+            </div>
+
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="https://via.placeholder.com/600x400?text=Fast+Delivery" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Fast Delivery</h4>
+                <p class="text-slate-500 text-sm">Efficient logistics ensuring timely product delivery.</p>
+            </div>
+
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="https://via.placeholder.com/600x400?text=Affordable" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Cost Effective</h4>
+                <p class="text-slate-500 text-sm">Affordable pricing without compromising quality.</p>
+            </div>
+
+        </div>
+
+    </main>
 
 </body>
 </html>

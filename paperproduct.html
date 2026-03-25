@@ -60,7 +60,6 @@
             z-index: -1;
         }
 
-        /* Visibility fix for the Center Logo Box */
         .logo-box-formal {
             background: white;
             border: 1px solid rgba(0,0,0,0.05);
@@ -74,7 +73,7 @@
     <div class="bg-glow"></div>
 
     <div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
-        <a href="https://ikass.in" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
+        <a href="index.html" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
             <i class="fas fa-home"></i> Home
         </a>
     </div>
@@ -90,8 +89,7 @@
 
     <main class="max-w-7xl mx-auto pb-20">
 
-        <div class="text-center mb-24 max-w-4xl mx-auto px-4">
-
+        <div class="text-center mb-16 max-w-4xl mx-auto px-4">
             <div class="w-28 h-28 mx-auto mb-8 logo-box-formal p-6 rounded-[2.5rem] flex items-center justify-center">
                 <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" alt="IKASS Logo" class="w-full h-full object-contain">
             </div>
@@ -103,20 +101,27 @@
             <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
                 IKASS Paper Products
             </h1>
+        </div>
 
-            <div class="flex justify-center mb-10">
-                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Vishal.png"
-                     class="w-64 h-64 md:w-80 md:h-80 object-cover rounded-[3rem] border-[10px] border-white shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24 px-4">
+            
+            <div class="flex justify-center">
+                <div class="w-64 h-64 md:w-80 md:h-80 lg:w-[420px] lg:h-[420px] rounded-[3rem] border-[10px] border-white shadow-2xl overflow-hidden">
+                    <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Vishal.png" class="w-full h-full object-cover">
+                </div>
             </div>
 
-            <h3 class="text-4xl font-black mb-2 tracking-tight">Vishal</h3>
-            <span class="text-xs font-black uppercase tracking-[0.4em] text-slate-400 mb-6 block">
-                CEO & Managing Director
-            </span>
+            <div class="text-center lg:text-left">
+                <h1 class="text-4xl lg:text-6xl font-black mb-2 tracking-tight">Vishal</h1>
+                
+                <span class="text-xs font-black uppercase tracking-[0.4em] text-emerald-500 mb-6 block">
+                    CEO & Managing Director
+                </span>
 
-            <p class="text-xl text-slate-500 leading-relaxed font-light max-w-xl mx-auto">
-                Leading the way in inventory management and delivery operations. We provide high-quality sustainable packaging solutions for businesses across the region.
-            </p>
+                <p class="text-xl text-slate-500 leading-relaxed font-light max-w-xl mx-auto lg:mx-0">
+                    Leading the way in inventory management and delivery operations. We provide high-quality sustainable packaging solutions for businesses across the region.
+                </p>
+            </div>
 
         </div>
 
@@ -130,43 +135,36 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-
             <div class="glass p-6 rounded-[2.5rem] feature-card">
                 <img src="https://via.placeholder.com/600x400?text=Eco+Paper" class="feature-img">
                 <h4 class="text-xl font-black mb-3">Eco-Friendly Materials</h4>
                 <p class="text-slate-500 text-sm">Sustainably sourced paper products reducing environmental impact.</p>
             </div>
-
             <div class="glass p-6 rounded-[2.5rem] feature-card">
                 <img src="https://via.placeholder.com/600x400?text=Bulk+Supply" class="feature-img">
                 <h4 class="text-xl font-black mb-3">Bulk Supply Efficiency</h4>
                 <p class="text-slate-500 text-sm">Reliable large-scale supply for businesses and institutions.</p>
             </div>
-
             <div class="glass p-6 rounded-[2.5rem] feature-card">
                 <img src="https://via.placeholder.com/600x400?text=Packaging" class="feature-img">
                 <h4 class="text-xl font-black mb-3">Custom Packaging</h4>
                 <p class="text-slate-500 text-sm">Flexible packaging solutions tailored to your needs.</p>
             </div>
-
             <div class="glass p-6 rounded-[2.5rem] feature-card">
                 <img src="https://via.placeholder.com/600x400?text=Quality" class="feature-img">
                 <h4 class="text-xl font-black mb-3">Premium Quality</h4>
                 <p class="text-slate-500 text-sm">High durability and finishing in all paper products.</p>
             </div>
-
             <div class="glass p-6 rounded-[2.5rem] feature-card">
                 <img src="https://via.placeholder.com/600x400?text=Fast+Delivery" class="feature-img">
                 <h4 class="text-xl font-black mb-3">Fast Delivery</h4>
                 <p class="text-slate-500 text-sm">Efficient logistics ensuring timely product delivery.</p>
             </div>
-
             <div class="glass p-6 rounded-[2.5rem] feature-card">
                 <img src="https://via.placeholder.com/600x400?text=Affordable" class="feature-img">
                 <h4 class="text-xl font-black mb-3">Cost Effective</h4>
                 <p class="text-slate-500 text-sm">Affordable pricing without compromising quality.</p>
             </div>
-
         </div>
 
     </main>

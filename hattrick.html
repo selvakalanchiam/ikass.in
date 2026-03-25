@@ -47,6 +47,14 @@ body {
     border: 1px solid rgba(0,0,0,0.05);
     box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
 }
+
+.event-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.event-card:hover {
+    transform: translateY(-10px);
+    background: white;
+}
 </style>
 </head>
 
@@ -54,24 +62,9 @@ body {
 
 <div class="bg-glow"></div>
 
-<div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
-    <a href="https://ikass.in" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
-        <i class="fas fa-home"></i> Home
-    </a>
-</div>
+<main class="max-w-7xl mx-auto pb-32">
 
-<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
-    <div class="flex items-center gap-3">
-        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
-        <div class="text-3xl font-black tracking-tighter">
-            IKASS<span style="color:var(--accent);">.in</span>
-        </div>
-    </div>
-</header>
-
-<main class="max-w-7xl mx-auto pb-20">
-
-    <div class="text-center mb-24 max-w-4xl mx-auto px-4">
+    <div class="text-center mb-24 max-w-4xl mx-auto px-4 pt-20">
         <div class="w-28 h-28 mx-auto mb-8 logo-box-formal p-1 rounded-[2.5rem] flex items-center justify-center">
             <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" alt="IKASS Logo" class="w-full h-full object-contain">
         </div>
@@ -129,6 +122,22 @@ body {
             </div>
 
         </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 mt-32">
+        <h3 class="text-center text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-10">Latest Engagements</h3>
+        <a href="eventsofhattrick.html" class="glass p-10 rounded-[3rem] event-card flex flex-col md:flex-row items-center gap-8 border-l-[12px] border-orange-500">
+            <div class="w-24 h-24 bg-white rounded-[2rem] shadow-xl flex items-center justify-center p-4 border border-slate-50">
+                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" class="w-full h-full object-contain">
+            </div>
+            <div class="text-center md:text-left flex-1">
+                <h4 class="text-3xl font-black tracking-tight mb-2">Events of Hattrick</h4>
+                <p class="text-slate-500 font-light">Explore our upcoming health camps, live fitness challenges, and archived community achievements.</p>
+            </div>
+            <div class="text-orange-500">
+                <i class="fas fa-arrow-right text-2xl"></i>
+            </div>
+        </a>
     </div>
 
 </main>

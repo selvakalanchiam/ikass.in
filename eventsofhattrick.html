@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Events of Hattrick</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+
+:root { --accent: #f97316; --live: #ef4444; }
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #ffffff;
+    color: #1e293b;
+    overflow-x: hidden;
+}
+
+.glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+}
+
+/* LIVE HERO ANIMATION */
+.live-glow {
+    position: relative;
+    border: 2px solid #ef4444;
+    transition: all 0.4s ease;
+}
+.live-glow::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 3.5rem;
+    background: #ef4444;
+    z-index: -1;
+    opacity: 0.2;
+    animation: pulse-glow 2s infinite;
+}
+@keyframes pulse-glow {
+    0% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.03); opacity: 0.4; }
+    100% { transform: scale(1); opacity: 0.2; }
+}
+
+/* UPCOMING: EXPANDABLE DESCRIPTION */
+.event-card { cursor: pointer; transition: all 0.3s ease; }
+.description-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+}
+.event-card.active .description-content {
+    max-height: 300px;
+    margin-top: 1.5rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 1.5rem;
+}
+.event-card.active .chevron-icon { transform: rotate(180deg); }
+
+/* MODAL FOR ARCHIVED EVENTS */
+#archiveModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(10px);
+}
+</style>
+</head>
+
+<body>
+<!-- HOME BUTTON (TOP RIGHT) -->
+<div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+    <a href="https://ikass.in/hattrick.html" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
+        <i class="fas fa-home"></i> Home
+    </a>
+</div>
+
+<main class="max-w-4xl mx-auto px-4 pb-32">
+
+    <section class="mb-24 mt-10">
+        <div class="text-center mb-6">
+            <span class="bg-red-500 text-white px-4 py-1 rounded-full text-[10px] font-black tracking-[0.3em] uppercase animate-pulse">ON LIVE</span>
+        </div>
+        <a href="liveupdate.html" class="live-glow glass p-12 md:p-16 rounded-[3.5rem] text-center block bg-white/90 hover:scale-[1.02]">
+            <div class="flex items-center justify-center gap-2 text-red-500 text-xs font-black tracking-widest uppercase mb-4">
+                <i class="fas fa-satellite-dish"></i> Live Stream & Results
+            </div>
+            <h1 class="text-5xl md:text-7xl font-black tracking-tighter text-slate-900 leading-none mb-6">
+                Hattrick Fitness Challenge
+            </h1>
+            <p class="text-slate-400 font-medium">Click to enter live dashboard <i class="fas fa-arrow-right ml-2"></i></p>
+        </a>
+    </section>
+
+    <section class="mb-20">
+        <h2 class="text-xs font-black uppercase tracking-[0.5em] text-orange-500 mb-8 flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span> Upcoming
+        </h2>
+        <div class="space-y-6">
+            <div class="glass p-8 rounded-[2.5rem] event-card border-l-[12px] border-orange-500" onclick="this.classList.toggle('active')">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-4 text-slate-400 text-xs font-black uppercase tracking-widest mb-3">
+                            <span><i class="far fa-calendar-alt"></i> March 28, 2026</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Chennai HQ</span>
+                        </div>
+                        <h3 class="text-3xl font-black tracking-tight text-slate-900">Cardiac Screening Camp</h3>
+                    </div>
+                    <i class="fas fa-chevron-down text-slate-300 transition-transform chevron-icon"></i>
+                </div>
+                <div class="description-content">
+                    <p class="text-slate-500 leading-relaxed text-lg">
+                        Providing comprehensive ECG and Blood Pressure checks. This is part of our monthly health awareness drive.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="text-xs font-black uppercase tracking-[0.5em] text-slate-400 mb-8 flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-slate-300"></span> Archived
+        </h2>
+        <div class="space-y-6">
+            <div class="glass p-8 rounded-[2.5rem] event-card border-l-[12px] border-slate-300" onclick="openArchiveModal('Annual Wellness Expo', 'Feb 15, 2026', 'A massive success reaching over 500 participants with live testing demonstrations.')">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center gap-4 text-slate-400 text-xs font-black uppercase tracking-widest mb-3">
+                            <span><i class="far fa-calendar-alt"></i> Feb 15, 2026</span>
+                            <span><i class="fas fa-map-marker-alt"></i> Tambaram</span>
+                        </div>
+                        <h3 class="text-3xl font-black tracking-tight text-slate-400">Annual Wellness Expo</h3>
+                    </div>
+                    <i class="fas fa-external-link-alt text-slate-300 text-sm mt-2"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<div id="archiveModal" onclick="closeArchiveModal()">
+    <div class="glass max-w-xl w-full mx-4 p-10 rounded-[3.5rem] bg-white relative text-center" onclick="event.stopPropagation()">
+        <button onclick="closeArchiveModal()" class="absolute top-6 right-6 text-slate-400 hover:text-red-500 text-2xl"><i class="fas fa-times"></i></button>
+        <span class="text-[10px] font-black tracking-[0.3em] text-slate-400 uppercase mb-4 block">Event Archive</span>
+        <h2 id="modalTitle" class="text-4xl font-black mb-4">Event Name</h2>
+        <p id="modalDate" class="text-orange-500 font-bold mb-8 italic">Date Info</p>
+        <div class="p-8 rounded-3xl bg-slate-50 border border-slate-100 text-left">
+            <p id="modalDesc" class="text-slate-600 leading-relaxed text-lg font-light">Description goes here...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openArchiveModal(title, date, desc) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalDate').innerText = date;
+        document.getElementById('modalDesc').innerText = desc;
+        document.getElementById('archiveModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeArchiveModal() {
+        document.getElementById('archiveModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Updates | Hattrick Lab Events</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+
+:root { --live: #ef4444; --accent: #f97316; }
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #0f172a; /* Dark theme for "Live" feel */
+    color: #f8fafc;
+    overflow-x: hidden;
+}
+
+.glass-dark {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.live-dot {
+    width: 12px;
+    height: 12px;
+    background: var(--live);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 15px var(--live);
+    animation: pulse-live 1.5s infinite;
+}
+
+@keyframes pulse-live {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.winner-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+}
+
+.winner-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-5px);
+}
+
+/* Scrolling Ticker */
+.ticker-wrap {
+    width: 100%;
+    overflow: hidden;
+    background: rgba(239, 68, 68, 0.1);
+    border-top: 1px solid rgba(239, 68, 68, 0.2);
+    border-bottom: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 10px 0;
+}
+
+.ticker-move {
+    display: flex;
+    width: fit-content;
+    animation: ticker 20s linear infinite;
+}
+
+@keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+</style>
+</head>
+
+<body class="pb-20">
+
+<div class="ticker-wrap mb-10">
+    <div class="ticker-move text-xs font-black uppercase tracking-[0.3em] text-red-500">
+        <span class="px-10">LIVE UPDATES IN PROGRESS</span>
+        <span class="px-10">NEXT ROUND STARTING IN 05:00</span>
+        <span class="px-10">HATTRICK LAB FITNESS CHALLENGE 2026</span>
+        <span class="px-10">LIVE UPDATES IN PROGRESS</span>
+        <span class="px-10">NEXT ROUND STARTING IN 05:00</span>
+        <span class="px-10">HATTRICK LAB FITNESS CHALLENGE 2026</span>
+    </div>
+</div>
+
+<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" class="w-10 h-10 invert">
+        <div class="text-3xl font-black tracking-tighter">
+            HATTRICK<span class="text-red-500">.LIVE</span>
+        </div>
+    </div>
+    <a href="https://ikass.in/eventsofhattrick.html" class="glass-dark px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-white hover:text-black transition">Exit Live</a>
+</header>
+
+<main class="max-w-5xl mx-auto px-4">
+
+    <div class="text-center mb-16">
+        <div class="flex items-center justify-center gap-3 mb-6">
+            <span class="live-dot"></span>
+            <span class="text-xs font-black uppercase tracking-[0.5em] text-red-500">Broadcasting Now</span>
+        </div>
+        <h1 class="text-5xl md:text-8xl font-black tracking-tighter mb-4">Current Standings</h1>
+        <p class="text-slate-400 text-lg">Hattrick Free Health Checkup Campaign @ Chetpat Park - Egmore</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        
+        <div class="winner-card p-8 rounded-[2.5rem] mt-10 order-2 md:order-1">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-slate-400/20 rounded-2xl flex items-center justify-center text-slate-400">
+                    <i class="fas fa-medal text-2xl"></i>
+                </div>
+                <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Silver Membership Winner</h4>
+                <p class="text-2xl font-black mb-4">Waiting...</p>
+                <div class="h-1 w-12 bg-slate-400/30 mx-auto rounded-full"></div>
+            </div>
+        </div>
+
+        <div class="winner-card p-10 rounded-[3rem] border-orange-500/50 bg-orange-500/5 order-1 md:order-2 ring-4 ring-orange-500/10">
+            <div class="text-center">
+                <div class="w-20 h-20 mx-auto mb-6 bg-orange-500 rounded-3xl flex items-center justify-center text-white shadow-[0_0_30px_rgba(249,115,22,0.4)]">
+                    <i class="fas fa-trophy text-4xl"></i>
+                </div>
+                <h4 class="text-xs font-black uppercase tracking-widest text-orange-500 mb-2">Gold Membership Winner</h4>
+                <p class="text-4xl font-black mb-6">Waiting to Update...</p>
+                <div class="h-1.5 w-20 bg-orange-500 mx-auto rounded-full"></div>
+            </div>
+        </div>
+
+        <div class="winner-card p-8 rounded-[2.5rem] mt-20 order-3">
+            <div class="text-center">
+                <div class="w-16 h-16 mx-auto mb-4 bg-orange-900/20 rounded-2xl flex items-center justify-center text-orange-900">
+                    <i class="fas fa-award text-2xl"></i>
+                </div>
+                <h4 class="text-[10px] font-black uppercase tracking-widest text-orange-900 mb-2">3rd Runner Up</h4>
+                <p class="text-2xl font-black mb-4">Waiting...</p>
+                <div class="h-1 w-12 bg-orange-900/30 mx-auto rounded-full"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="glass-dark p-8 rounded-[3rem]">
+        <h3 class="text-xl font-black mb-8 flex items-center gap-3">
+            <i class="fas fa-stream text-red-500"></i> Event Timeline
+        </h3>
+        
+        <div class="space-y-8">
+            <div class="flex gap-6 border-l-2 border-slate-700 pl-6 relative">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-red-500 ring-4 ring-slate-900"></div>
+                <div>
+                    <span class="text-[10px] font-black text-red-500 block mb-1">LIVE.</span>
+                    <p class="font-bold text-lg">We are now Seleting the 150 Participatients</p>
+                </div>
+            </div>
+
+            <div class="flex gap-6 border-l-2 border-slate-700 pl-6 relative">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-700"></div>
+                <div>
+                    <span class="text-[10px] font-black text-slate-500 block mb-1">01:00 PM</span>
+                    <p class="text-slate-400">Nealy 25 Peoples are participated</p>
+                </div>
+            </div>
+
+            <div class="flex gap-6 border-l-2 border-slate-700 pl-6 relative">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-700"></div>
+                <div>
+                    <span class="text-[10px] font-black text-slate-500 block mb-1">06:30 AM to 10:00am </span>
+                    <p class="text-slate-400">We are in Chetpat park @ egmore </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+</body>
+</html>

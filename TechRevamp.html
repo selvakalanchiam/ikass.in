@@ -1,93 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IKASS TechRevamp</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IKASS TechRevamp | Industrial Standard Diagnostics</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
 
-body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: #ffffff;
-    color: #1e293b;
-    overflow-x: hidden;
-}
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #ffffff;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
 
-.glass {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
-}
+        .glass {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+        }
 
-.feature-card {
-    transition: all 0.3s ease;
-}
-.feature-card:hover {
-    transform: scale(1.02);
-}
+        .feature-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: #166534;
+        }
 
-.feature-img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 1.5rem;
-    margin-bottom: 1.5rem;
-}
+        .feature-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
 
-.bg-glow {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1000px;
-    height: 1000px;
-    background: #166534;
-    filter: blur(200px);
-    opacity: 0.15;
-    z-index: -1;
-}
-</style>
+        .bg-glow {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1000px;
+            height: 1000px;
+            background: #166534;
+            filter: blur(200px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+
+        .accent-line {
+            height: 4px;
+            width: 80px;
+            background: #166534;
+            margin: 1rem auto;
+            border-radius: 2px;
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="bg-glow"></div>
 
-<!-- TOP RIGHT HOME BUTTON -->
+<!-- NAVIGATION -->
 <div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
     <a href="https://ikass.in" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
         <i class="fas fa-home"></i> Home
     </a>
 </div>
 
-<!-- HEADER (UNCHANGED) -->
 <header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
     <div class="flex items-center gap-3">
-        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
+        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10" alt="IKASS Logo">
         <div class="text-3xl font-black tracking-tighter">
             IKASS<span style="color:#166534;">.in</span>
         </div>
     </div>
 </header>
 
-<!-- MAIN -->
-<main class="max-w-7xl mx-auto pb-20">
+<!-- HERO SECTION -->
+<main class="max-w-7xl mx-auto pb-20 px-4">
 
-    <!-- TOP SECTION -->
-    <div class="text-center mb-24 max-w-4xl mx-auto px-4">
-        <div class="w-24 h-24 mx-auto mb-8 bg-white p-1 rounded-3xl shadow-xl">
-            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+    <div class="text-center mb-24 max-w-4xl mx-auto pt-12">
+        <div class="w-24 h-24 mx-auto mb-8 bg-white p-1 rounded-3xl shadow-xl overflow-hidden">
+            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" alt="IKASS Logo large">
         </div>
 
-        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
+        <span class="text-[11px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
             Industrial Standard Diagnostics
         </span>
 
@@ -100,90 +108,52 @@ body {
         </p>
     </div>
 
-    <!-- HEADING -->
+    <!-- SERVICES SECTION -->
     <div class="text-center mb-16">
         <h2 class="text-3xl md:text-5xl font-black">
             What Makes Our Mobile Service the Best
         </h2>
-        <div class="h-1 w-20 mx-auto mt-4 rounded-full bg-green-700"></div>
+        <div class="accent-line"></div>
     </div>
 
     <!-- FEATURES GRID -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
 
-        <!-- 1 -->
+        <!-- 1: ESD Safety -->
         <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=ESD+Protection" class="feature-img">
-            <h4 class="text-xl font-black mb-3">ESD Safety First</h4>
-            <p class="text-slate-500 text-sm">We always use anti-static protection before touching your motherboard.</p>
+            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/ESD.png" alt="ESD Protection" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">ESD Safety First</h4>
+            <p class="text-slate-500">Professional anti-static protocols ensure your motherboard remains safe from invisible electrical damage.</p>
         </div>
 
-        <!-- 2 -->
+        <!-- 2: Clean Environment -->
         <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Clean+Environment" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Clean & Professional Handling</h4>
-            <p class="text-slate-500 text-sm">Handled in a dust-free environment.</p>
+            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Clean.png" alt="Clean Environment" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">Clean Handling</h4>
+            <p class="text-slate-500">Every device is handled in a dust-free, organized environment to maintain industrial-grade cleanliness.</p>
         </div>
 
-        <!-- 3 -->
+        <!-- 3: Doorstep Service -->
         <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Diagnostic+Tools" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Transparent Diagnosis</h4>
-            <p class="text-slate-500 text-sm">We clearly explain the issue before repair.</p>
+            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Doorstep.png" alt="Doorstep Service" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">Doorstep Service</h4>
+            <p class="text-slate-500">We bring the lab to you. Convenient at-home repairs without compromising on technical quality.</p>
         </div>
 
-        <!-- 4 -->
+        <!-- 4: Data Safety -->
         <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Quality+Testing" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Accurate Testing</h4>
-            <p class="text-slate-500 text-sm">Devices tested before and after repair.</p>
-        </div>
-
-        <!-- 5 -->
-        <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Root+Cause" class="feature-img">
-            <h4 class="text-xl font-black mb-3">No Trial-and-Error Repairs</h4>
-            <p class="text-slate-500 text-sm">We fix only the real issue.</p>
-        </div>
-
-        <!-- 6 -->
-        <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Precision+Heat" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Safe Repair Techniques</h4>
-            <p class="text-slate-500 text-sm">Controlled heat and tools used.</p>
-        </div>
-
-        <!-- 7 -->
-        <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Client+Talk" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Clear Communication</h4>
-            <p class="text-slate-500 text-sm">Simple, honest explanations.</p>
-        </div>
-
-        <!-- 8 -->
-        <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Guarantee" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Service Assurance</h4>
-            <p class="text-slate-500 text-sm">Recheck without extra charges.</p>
-        </div>
-
-        <!-- 9 -->
-        <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Doorstep" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Doorstep Service</h4>
-            <p class="text-slate-500 text-sm">Convenient at-home service.</p>
-        </div>
-
-        <!-- 10 -->
-        <div class="glass p-6 rounded-[2.5rem] feature-card">
-            <img src="https://via.placeholder.com/600x400?text=Data+Privacy" class="feature-img">
-            <h4 class="text-xl font-black mb-3">Data Safety</h4>
-            <p class="text-slate-500 text-sm">Your data remains secure.</p>
+            <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Datapro.png" alt="Data Privacy" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">Data Safety</h4>
+            <p class="text-slate-500">Your privacy is our priority. We implement strict data protection protocols during every repair phase.</p>
         </div>
 
     </div>
 
 </main>
+
+<footer class="text-center py-12 text-slate-400 text-sm border-t border-slate-100">
+    &copy; 2026 IKASS TechRevamp. All rights reserved.
+</footer>
 
 </body>
 </html>

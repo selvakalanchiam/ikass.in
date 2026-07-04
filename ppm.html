@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kadai Kanakku</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --paper: #F6F3EC;
+  --ink: #111B11;
+  --ledger-line: #E2DAC5;
+  --green-deep: #1E351E;
+  --green-mid: #4A6B4A;
+  --green-light: #E8EFE8;
+  --rust: #C24626;
+  --rust-light: #FDF1EE;
+  --cash: #2A4D2A;
+  --digital: #1A446C;
+  --warn: #D97706;
+  --warn-light: #FEF3C7;
+  --card: #FFFFFF;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: -0.1px;
+}
+
+/* Premium Header with Blur Effect */
+.topbar {
+  background: rgba(30, 53, 30, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  padding: 18px 20px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.topbar h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.topbar .sub {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* Modern Pill-shaped Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.tab.active {
+  background: #ffffff;
+  color: var(--green-deep);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Clean Main Container Layout */
+.content {
+  padding: 20px 16px;
+  max-width: 540px;
+  margin: 0 auto;
+  padding-bottom: 80px;
+}
+
+.tabpanel { display: none; }
+.tabpanel.active { display: block; animation: fadeIn 0.3s ease; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Sleek Elevated Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--ledger-line);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px -4px rgba(27, 38, 27, 0.04);
+}
+
+.card h2 {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--green-deep);
+  font-family: 'Playfair Display', Georgia, serif;
+  letter-spacing: -0.2px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4A5568;
+  margin: 14px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Beautiful Minimal Form Controls */
+input, select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--ledger-line);
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  background: #FCFBF9;
+  color: var(--ink);
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+input:focus, select:focus {
+  outline:none;
+  border-color: var(--green-mid);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px var(--green-light);
+}
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Micro-interactive Buttons */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 16px;
+  background: var(--green-deep);
+  color: #fff;
+  font-family: inherit;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(30, 53, 30, 0.15);
+}
+
+.btn:hover { filter: brightness(1.1); }
+.btn:active { transform: scale(.98); }
+.btn:disabled { opacity: .5; pointer-events: none; }
+
+.btn.secondary { background: var(--rust); box-shadow: 0 4px 12px rgba(194, 70, 38, 0.15); }
+.btn.warn { background: var(--warn); box-shadow: 0 4px 12px rgba(217, 119, 6, 0.15); }
+.btn.small { padding: 8px 14px; font-size: 13px; margin-top: 0; width: auto; border-radius: var(--radius-sm); }
+.btn.charge-in { background: var(--green-deep); font-size: 16px; padding: 16px; font-weight: 700; }
+.btn.charge-out { background: var(--rust); font-size: 16px; padding: 16px; font-weight: 700; }
+
+/* Elegant Toast Alerts */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--green-deep);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px -5px rgba(0,0,0,.25);
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 50;
+  pointer-events: none;
+  max-width: 90%;
+  text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--rust); }
+
+/* Grid Dashboard Stats */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat {
+  background: #fff;
+  border: 1px solid var(--ledger-line);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 4px 12px -4px rgba(27, 38, 27, 0.03);
+  transition: var(--transition);
+}
+.stat:hover { transform: translateY(-2px); box-shadow: 0 6px 16px -2px rgba(27, 38, 27, 0.06); }
+.stat .label { font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.stat .value { font-size: 22px; font-weight: 800; margin-top: 6px; font-family: 'Playfair Display', Georgia, serif; }
+
+.stat.profit { background: var(--green-light); border-color: rgba(74, 107, 74, 0.2); }
+.stat.profit .value { color: var(--green-deep); }
+.stat.loss { background: var(--rust-light); border-color: rgba(194, 70, 38, 0.15); }
+.stat.loss .value { color: var(--rust); }
+.stat.cash .value { color: var(--cash); }
+.stat.digital .value { color: var(--digital); }
+
+/* Ledger Rows Configuration */
+.kadan-item, .task-item, .time-item {
+  border: 1px solid var(--ledger-line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  transition: var(--transition);
+}
+.kadan-item:hover { border-color: var(--green-mid); }
+.kadan-item.cleared { opacity: .6; background: #FAF9F5; }
+
+.kadan-top, .time-top { display: flex; justify-content: space-between; align-items: center; }
+.kadan-name { font-weight: 700; font-size: 15px; color: var(--ink); }
+
+.kadan-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--rust-light);
+  color: var(--rust);
+}
+.kadan-badge.cleared { background: var(--green-light); color: var(--green-deep); }
+
+.kadan-amounts, .time-amounts { display: flex; gap: 16px; margin: 10px 0; font-size: 13px; color: #4A5568; flex-wrap: wrap; }
+.kadan-amounts b, .time-amounts b { color: var(--ink); font-size: 14.5px; }
+
+.pay-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+.pay-row input { flex: 1; min-width: 100px; padding: 10px; font-size: 14px;}
+.pay-row select { flex: 0 0 100px; padding: 10px; font-size: 14px;}
+
+.empty { text-align: center; color: #718096; font-size: 13.5px; padding: 32px 12px; }
+
+/* Beautiful Entry Rows */
+.entry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed var(--ledger-line);
+  font-size: 14px;
+}
+.entry-row:last-child { border-bottom: none; }
+.entry-row .meta { color: #718096; font-size: 12px; }
+.meta { color: #718096; font-size: 11.5px; }
+.pin-screen{text-align:center;padding:30px 16px;}
+.pin-screen .pin-icon{font-size:40px;margin-bottom:10px;}
+.pin-dots{display:flex;gap:12px;justify-content:center;margin:18px 0;}
+.pin-dots .dot{
+  width:16px;height:16px;border-radius:50%;border:2px solid var(--ledger-line);
+  background:#fff;transition:all .15s;
+}
+.pin-dots .dot.filled{background:var(--green-deep);border-color:var(--green-deep);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:260px;margin:20px auto 0;}
+.pin-key{
+  padding:16px 0;border-radius:10px;border:1px solid var(--ledger-line);
+  background:#fff;font-size:18px;font-weight:700;color:var(--ink);cursor:pointer;
+}
+.pin-key:active{background:#F0EBDD;}
+.pin-key.wide{font-size:13px;color:var(--rust);}
+.sub-tabs{
+  display:flex;gap:5px;margin-bottom:14px;
+  background:rgba(0,0,0,.04);border-radius:10px;padding:4px;
+}
+.sub-tab{
+  flex:1;text-align:center;padding:8px 4px;border-radius:7px;
+  font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;
+  background:transparent;color:#888;border:none;font-family:inherit;
+  transition:all .15s;
+}
+.sub-tab.active{background:#fff;color:var(--green-deep);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.subpanel{display:none;}
+.subpanel.active{display:block;}
+
+.amt.credit { color: var(--green-deep); font-weight: 700; }
+.amt.debit { color: var(--rust); font-weight: 700; }
+.del-btn { background: none; border: none; color: #CBD5E1; font-size: 18px; cursor: pointer; padding: 0 6px; transition: var(--transition); }
+.del-btn:hover { color: var(--rust); }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 22px 0 10px;
+}
+
+/* Modern Multi-Toggle Switches */
+.toggle-group { display: flex; gap: 6px; margin-top: 8px; background: #EFECE3; padding: 4px; border-radius: var(--radius-md); }
+.toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #64748B;
+  transition: var(--transition);
+}
+.toggle-btn.active {
+  background: var(--card);
+  color: var(--green-deep);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Status Banners */
+.status-banner { border-radius: var(--radius-lg); padding: 16px; margin-bottom: 16px; text-align: center; }
+.status-banner.on { background: var(--green-light); color: var(--green-deep); border: 1px solid rgba(74,107,74,0.15); }
+.status-banner.off { background: #EFECE3; color: #64748B; }
+.status-banner .time { font-size: 24px; font-weight: 800; font-family: 'Playfair Display', Georgia, serif; margin: 4px 0; }
+
+/* Warning Modals */
+.warning-card {
+  background: var(--warn-light);
+  border: 1px solid rgba(217,119,6,0.2);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 16px;
+  font-size: 13.5px;
+  color: #78350F;
+  line-height: 1.5;
+}
+.warning-card b { display: block; margin-bottom: 4px; font-size: 14.5px; color: var(--warn); }
+
+/* Task Checkboxes Layout */
+.task-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--ledger-line); }
+.task-row:last-child { border-bottom: none; }
+.task-row input[type=checkbox] {
+  width: 18px; height: 18px; flex: 0 0 18px;
+  accent-color: var(--green-deep); cursor: pointer;
+}
+.task-row .txt { flex: 1; font-size: 14.5px; color: var(--ink); }
+.task-row .txt.done { text-decoration: line-through; color: #94A3B8; }
+
+.day-heading { font-size: 12.5px; font-weight: 700; color: var(--green-mid); margin: 18px 0 8px; text-transform: uppercase; letter-spacing: 0.3px;}
+
+.filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.filter-bar select { flex: 1; min-width: 100px; }
+
+.totals-row { display: flex; gap: 10px; margin: 14px 0 4px; flex-wrap: wrap; font-size: 13px; }
+.totals-row .pill {
+  background: #fff;
+  border: 1px solid var(--ledger-line);
+  border-radius: 30px;
+  padding: 6px 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+.totals-row .pill.credit { color: var(--green-deep); background: var(--green-light); border-color: transparent;}
+.totals-row .pill.debit { color: var(--rust); background: var(--rust-light); border-color: transparent;}
+
+/* Dropdown Accordion Cards */
+.dealer-card {
+  background: #fff;
+  border: 1px solid var(--ledger-line);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.dealer-card:hover { border-color: var(--green-mid); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.dealer-card .dealer-head { display: flex; justify-content: space-between; align-items: center; }
+.dealer-card .dealer-name { font-weight: 700; font-size: 15.5px; }
+.dealer-card .dealer-stats { display: flex; gap: 16px; margin-top: 10px; font-size: 13px; color: #64748B; flex-wrap: wrap; }
+.dealer-card .dealer-stats b { color: var(--ink); font-size: 14px; }
+
+.dealer-detail { display: none; margin-top: 14px; border-top: 1px solid var(--ledger-line); padding-top: 12px; }
+.dealer-detail.open { display: block; animation: fadeIn 0.2s ease; }
+.dealer-detail .day-heading { margin-top: 12px; }
+
+.chevron { font-size: 12px; color: #94A3B8; transition: var(--transition); }
+.chevron.open { transform: rotate(180deg); color: var(--green-deep); }
+
+.sync-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: #6E8F5C; }
+.sync-dot.off { background: var(--warn); }
+
+/* ===== Premium UI Override ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+:root{
+ --paper:#f4f6f8!important;
+ --card:#ffffff!important;
+ --ledger-line:#e7eaee!important;
+ --green-deep:#1f4f46!important;
+ --green-mid:#2f7d70!important;
+ --ink:#17212b!important;
+ --radius-lg:22px!important;
+ --radius-md:16px!important;
+}
+body{
+ font-family:'Inter',sans-serif!important;
+ background:linear-gradient(180deg,#f7f9fb,#eef2f6)!important;
+}
+.topbar{
+ background:rgba(255,255,255,.88)!important;
+ color:#17212b!important;
+ backdrop-filter:blur(18px)!important;
+ box-shadow:0 8px 30px rgba(0,0,0,.06)!important;
+ border-bottom:1px solid #e8edf2!important;
+}
+.topbar h1{color:#173d37!important;font-family:Inter,sans-serif!important;font-weight:800!important;}
+.topbar .sub{color:#667085!important;}
+.tabs{gap:10px!important;}
+.tab{
+ background:#f2f4f7!important;
+ color:#667085!important;
+ border:none!important;
+ border-radius:14px!important;
+}
+.tab.active{
+ background:#1f4f46!important;
+ color:#fff!important;
+}
+.card{
+ border:none!important;
+ border-radius:22px!important;
+ box-shadow:0 10px 35px rgba(15,23,42,.07)!important;
+}
+input,select{
+ background:#f8fafc!important;
+ border:1px solid #dbe3ea!important;
+ border-radius:14px!important;
+}
+input:focus,select:focus{
+ box-shadow:0 0 0 4px rgba(31,79,70,.12)!important;
+ border-color:#1f4f46!important;
+}
+.btn{
+ border-radius:14px!important;
+ box-shadow:0 8px 20px rgba(31,79,70,.18)!important;
+ transition:.22s ease!important;
+}
+.btn:hover{transform:translateY(-2px);}
+.stat{
+ border:none!important;
+ border-radius:20px!important;
+ box-shadow:0 8px 25px rgba(0,0,0,.05)!important;
+}
+.kadan-item,.dealer-card,.time-item{
+ border:none!important;
+ border-radius:18px!important;
+ box-shadow:0 6px 18px rgba(0,0,0,.04)!important;
+}
+.entry-row{padding:14px 2px!important;}
+
+#splash-screen{
+  position:fixed;inset:0;z-index:999;
+  background:radial-gradient(circle at 50% 35%, #2d4a2d 0%, #142414 55%, #0a140a 100%);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  animation:splashExit 0.6s cubic-bezier(.4,0,.2,1) forwards;
+  animation-delay:1.6s;
+}
+.splash-glow{
+  position:absolute;width:480px;height:480px;border-radius:50%;
+  background:radial-gradient(circle, rgba(110,180,110,0.25) 0%, rgba(110,180,110,0) 70%);
+  animation:glowPulse 2.4s ease-in-out infinite;
+}
+.splash-content{position:relative;text-align:center;z-index:1;}
+.splash-icon{
+  font-size:52px;margin-bottom:14px;
+  animation:iconPop 0.7s cubic-bezier(.34,1.56,.64,1) both;
+  filter:drop-shadow(0 8px 20px rgba(0,0,0,.4));
+}
+.splash-text{
+  color:#fff;font-family:'Playfair Display',Georgia,serif;
+  font-size:32px;font-weight:700;letter-spacing:-0.3px;
+  opacity:0;
+  animation:textRise 0.6s ease 0.25s both;
+  text-shadow:0 2px 20px rgba(120,200,120,.3);
+}
+.splash-sub{
+  color:rgba(255,255,255,.65);font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:12px;font-weight:600;letter-spacing:2.5px;margin-top:8px;
+  opacity:0;
+  animation:textRise 0.6s ease 0.5s both;
+}
+.splash-dots{
+  display:flex;gap:6px;justify-content:center;margin-top:22px;
+  opacity:0;animation:textRise 0.5s ease 0.75s both;
+}
+.splash-dots span{
+  width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);
+  animation:dotBounce 1.2s ease-in-out infinite;
+}
+.splash-dots span:nth-child(2){animation-delay:0.15s;}
+.splash-dots span:nth-child(3){animation-delay:0.3s;}
+
+@keyframes glowPulse{
+  0%,100%{transform:scale(1);opacity:.7;}
+  50%{transform:scale(1.15);opacity:1;}
+}
+@keyframes iconPop{
+  from{opacity:0;transform:scale(.3) rotate(-8deg);}
+  to{opacity:1;transform:scale(1) rotate(0deg);}
+}
+@keyframes textRise{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes dotBounce{
+  0%,100%{transform:translateY(0);opacity:.5;}
+  50%{transform:translateY(-6px);opacity:1;}
+}
+@keyframes splashExit{
+  to{opacity:0;visibility:hidden;transform:scale(1.04);}
+}
+</style>
+</head>
+<body>
+
+<div id="splash-screen">
+  <div class="splash-glow"></div>
+  <div class="splash-content">
+    <div class="splash-icon">📒</div>
+    <div class="splash-text">Hi Vishal!</div>
+    <div class="splash-sub">THE CEO OF IKASS</div>
+    <div class="splash-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<div class="topbar">
+  <h1>📒 Kadai Kanakku</h1>
+  <div class="sub"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">Connecting...</span></div>
+  <div class="sub" style="margin-top:4px;font-weight:700;">Welcome, Vishal 👋</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="dash">🏠 Dashboard</button>
+    <button class="tab" data-tab="entry">➕ Entry</button>
+    <button class="tab" data-tab="kadan">⏳ Kadan</button>
+    <button class="tab" data-tab="accounts">📊 Accounts</button>
+    <button class="tab" data-tab="data">📂 Data</button>
+    <button class="tab" data-tab="settings">⚙️ Settings</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- WORKER DASHBOARD -->
+  <div class="tabpanel active" id="panel-dash">
+    <div id="dash-warning"></div>
+
+    <div class="card">
+      <h2>⏱️ Work Status</h2>
+      <div id="status-banner"></div>
+      <button class="btn" id="btn-charge-toggle">Loading...</button>
+    </div>
+
+    <div class="card">
+      <h2>✅ Today's Tasks</h2>
+      <div class="pay-row" style="margin-top:0;">
+        <input type="text" id="dash-task-input" placeholder="New task...">
+        <button class="btn small" id="dash-task-add">Add</button>
+      </div>
+      <div id="dash-today-tasks" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="section-label">Quick Stats (Today)</div>
+    <div class="stat-grid">
+      <div class="stat profit"><div class="label">Today Earnings</div><div class="value" id="dash-today-earn">₹0</div></div>
+      <div class="stat loss"><div class="label">Total Pending Kadan</div><div class="value" id="dash-pending">₹0</div></div>
+    </div>
+
+    <div class="section-label">💰 This Month's Salary</div>
+    <div class="card">
+      <div class="stat-grid">
+        <div class="stat"><div class="label">Hours This Month</div><div class="value" id="sal-hours">0h</div></div>
+        <div class="stat profit"><div class="label">Salary Earned</div><div class="value" id="sal-due">₹0</div></div>
+      </div>
+      <div style="font-size:11px;color:#999;margin-top:10px;text-align:center;">Rate: ₹52/hour · Auto-calculated from Time Log</div>
+    </div>
+  </div>
+
+  <!-- ENTRY -->
+  <div class="tabpanel" id="panel-entry">
+    <div class="card">
+      <h2>📝 New Entry</h2>
+      <label>Date</label>
+      <input type="date" id="f-date">
+
+      <div id="dealer-wrap">
+        <label>Dealer Name</label>
+        <input type="text" id="f-dealer" placeholder="e.g. Manoj, SKP Chat..." list="dealer-suggestions">
+        <datalist id="dealer-suggestions"></datalist>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Category</label>
+          <select id="f-category">
+            <option value="Sell">Sell (Earnings)</option>
+            <option value="Investment">Investment</option>
+            <option value="Expense">Expense</option>
+            <option value="Salary">Salary (to worker)</option>
+            <option value="Transfer">Transfer (Cash ↔ Digital)</option>
+            <option value="Personal">Personal Withdrawal</option>
+          </select>
+        </div>
+        <div id="mode-wrap">
+          <label>Mode</label>
+          <select id="f-mode">
+            <option value="Cash">Cash</option>
+            <option value="Digital">Digital</option>
+          </select>
+        </div>
+        <div id="direction-wrap" style="display:none;">
+          <label>Direction</label>
+          <select id="f-direction">
+            <option value="CashToDigital">Cash → Digital</option>
+            <option value="DigitalToCash">Digital → Cash</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="payment-type-wrap" style="display:none;">
+        <label>Payment Type</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn active" id="toggle-full">Full Payment</button>
+          <button type="button" class="toggle-btn" id="toggle-partial">Partial (Kadan)</button>
+        </div>
+      </div>
+
+      <div id="full-amount-wrap">
+        <label>Amount (₹)</label>
+        <input type="number" id="f-amount" placeholder="0">
+      </div>
+
+      <div id="partial-amount-wrap" style="display:none;">
+        <label>Total Sale Amount (₹)</label>
+        <input type="number" id="f-total-amount" placeholder="0">
+        <label>Amount Paid Now (₹)</label>
+        <input type="number" id="f-paid-now" placeholder="0">
+      </div>
+
+      <button class="btn" id="btn-save-entry">Save Entry</button>
+    </div>
+
+    <div class="card">
+      <h2>📋 Recent Entries</h2>
+      <div id="entry-list"></div>
+    </div>
+  </div>
+
+  <!-- DATA (Records + Time Log + Dealers + Tasks combined) -->
+  <div class="tabpanel" id="panel-data">
+
+    <!-- Sub-tab bar -->
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-sub="records">📋 Records</button>
+      <button class="sub-tab" data-sub="timelog">⏱️ Time Log</button>
+      <button class="sub-tab" data-sub="dealers">👤 Dealers</button>
+      <button class="sub-tab" data-sub="tasks">✅ Tasks</button>
+    </div>
+
+    <!-- RECORDS sub-page -->
+    <div class="subpanel active" id="sub-records">
+      <div class="card">
+        <div class="filter-bar">
+          <select id="rec-filter-type">
+            <option value="all">All Time</option>
+            <option value="month">Specific Month</option>
+            <option value="year">Specific Year</option>
+          </select>
+          <select id="rec-filter-month" style="display:none;"></select>
+          <select id="rec-filter-year" style="display:none;"></select>
+        </div>
+        <div class="totals-row" style="margin-top:10px;">
+          <span class="pill credit" id="rec-total-credit">Earnings: ₹0</span>
+          <span class="pill debit" id="rec-total-debit">Spent: ₹0</span>
+        </div>
+        <div id="records-list" style="margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <!-- TIME LOG sub-page -->
+    <div class="subpanel" id="sub-timelog">
+      <div class="card">
+        <div class="filter-bar">
+          <select id="time-filter-type">
+            <option value="all">All Time</option>
+            <option value="month">Specific Month</option>
+            <option value="year">Specific Year</option>
+          </select>
+          <select id="time-filter-month" style="display:none;"></select>
+          <select id="time-filter-year" style="display:none;"></select>
+        </div>
+        <div class="kadan-amounts" style="margin-top:10px;font-size:13px;">
+          <span>Total: <b id="time-filtered-total">0 min</b></span>
+          <span>Salary: <b id="time-filtered-salary" style="color:var(--green-deep);">₹0</b></span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>🖊️ Add Manual Entry</h2>
+        <div class="row2">
+          <div><label>Date In</label><input type="date" id="t-date-in"></div>
+          <div><label>Time In</label><input type="time" id="t-time-in"></div>
+        </div>
+        <div class="row2">
+          <div><label>Date Out</label><input type="date" id="t-date-out"></div>
+          <div><label>Time Out</label><input type="time" id="t-time-out"></div>
+        </div>
+        <button class="btn" id="btn-save-manual-time">Save Time Entry</button>
+      </div>
+      <div id="time-list"></div>
+    </div>
+
+    <!-- DEALERS sub-page -->
+    <div class="subpanel" id="sub-dealers">
+      <div class="card">
+        <input type="text" id="dealer-search" placeholder="Search dealer name...">
+      </div>
+      <div id="dealers-list"></div>
+    </div>
+
+    <!-- TASKS sub-page -->
+    <div class="subpanel" id="sub-tasks">
+      <div class="card">
+        <h2>➕ Add Task</h2>
+        <label>Date</label>
+        <input type="date" id="task-date">
+        <label>Task</label>
+        <input type="text" id="task-text" placeholder="What needs to be done?">
+        <button class="btn" id="btn-save-task">Add Task</button>
+      </div>
+      <div id="task-history"></div>
+    </div>
+
+  </div>
+
+  <!-- KADAN -->
+  <div class="tabpanel" id="panel-kadan">
+    <div class="card">
+      <h2>➕ Add New Kadan</h2>
+      <label>Dealer Name</label>
+      <input type="text" id="k-dealer" placeholder="Who do you owe / who owes you?" list="dealer-suggestions">
+      <label>Total Amount (₹)</label>
+      <input type="number" id="k-amount" placeholder="0">
+      <button class="btn secondary" id="btn-save-kadan">Add Kadan</button>
+    </div>
+
+    <div class="section-label" id="pending-label">Pending</div>
+    <div id="pending-list"></div>
+
+    <div class="section-label" id="cleared-label" style="display:none;">Cleared</div>
+    <div id="cleared-list"></div>
+  </div>
+
+  <!-- SETTINGS (PIN protected) -->
+  <div class="tabpanel" id="panel-settings">
+    <div class="card" id="settings-locked-view">
+      <div class="pin-screen">
+        <div class="pin-icon">🔒</div>
+        <h2 style="margin-bottom:4px;">Admin Access Only</h2>
+        <div style="font-size:12px;color:#888;">Enter 4-digit PIN to continue</div>
+        <div class="pin-dots" id="pin-dots">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <div id="pin-error" style="color:var(--rust);font-size:12px;height:16px;"></div>
+        <div class="pin-pad">
+          <button class="pin-key" onclick="pinPress('1')">1</button>
+          <button class="pin-key" onclick="pinPress('2')">2</button>
+          <button class="pin-key" onclick="pinPress('3')">3</button>
+          <button class="pin-key" onclick="pinPress('4')">4</button>
+          <button class="pin-key" onclick="pinPress('5')">5</button>
+          <button class="pin-key" onclick="pinPress('6')">6</button>
+          <button class="pin-key" onclick="pinPress('7')">7</button>
+          <button class="pin-key" onclick="pinPress('8')">8</button>
+          <button class="pin-key" onclick="pinPress('9')">9</button>
+          <button class="pin-key wide" onclick="pinClear()">Clear</button>
+          <button class="pin-key" onclick="pinPress('0')">0</button>
+          <button class="pin-key wide" onclick="pinBackspace()">⌫</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-unlocked-view" style="display:none;">
+      <div class="card">
+        <h2>💰 Salary Settings</h2>
+        <label>Current Hourly Rate (₹)</label>
+        <div class="pay-row" style="margin-top:0;">
+          <input type="number" id="settings-rate-input" placeholder="52">
+          <button class="btn small" id="btn-save-rate">Update Rate</button>
+        </div>
+        <div style="font-size:11px;color:#999;margin-top:8px;">This only affects future Time Log sessions — already-logged sessions keep the rate that was active when they were recorded.</div>
+      </div>
+
+      <div class="card">
+        <h2>🔑 Change Admin PIN</h2>
+        <label>New 4-digit PIN</label>
+        <input type="password" id="settings-new-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+        <button class="btn secondary" id="btn-save-pin">Update PIN</button>
+      </div>
+
+      <button class="btn" style="background:#888;" onclick="lockSettings()">🔒 Lock Settings</button>
+    </div>
+  </div>
+
+  <!-- ACCOUNTS / FINANCIAL DASHBOARD -->
+  <div class="tabpanel" id="panel-accounts">
+    <div class="card">
+      <h2>📅 Filter Period</h2>
+      <div class="filter-bar">
+        <select id="acc-filter-type">
+          <option value="all">All Time</option>
+          <option value="month">Specific Month</option>
+          <option value="year">Specific Year</option>
+        </select>
+        <select id="acc-filter-month" style="display:none;"></select>
+        <select id="acc-filter-year" style="display:none;"></select>
+      </div>
+    </div>
+
+    <div class="section-label">Profit & Loss</div>
+    <div class="stat-grid">
+      <div class="stat"><div class="label">Investment</div><div class="value" id="acc-investment">₹0</div></div>
+      <div class="stat"><div class="label">Earnings</div><div class="value" id="acc-earnings">₹0</div></div>
+      <div class="stat"><div class="label">Expenses</div><div class="value" id="acc-expenses">₹0</div></div>
+      <div class="stat"><div class="label">Salary Paid</div><div class="value" id="acc-salary">₹0</div></div>
+      <div class="stat" id="acc-profit-card"><div class="label" id="acc-profit-label">Profit</div><div class="value" id="acc-profit">₹0</div></div>
+      <div class="stat"><div class="label">Owner Withdrawals</div><div class="value" id="acc-personal">₹0</div></div>
+    </div>
+
+    <div class="section-label">Cash vs Digital</div>
+    <div class="stat-grid">
+      <div class="stat cash"><div class="label">Cash Balance (All Time)</div><div class="value" id="acc-cash">₹0</div></div>
+      <div class="stat digital"><div class="label">Digital Balance (All Time)</div><div class="value" id="acc-digital">₹0</div></div>
+    </div>
+
+    <div class="section-label">Kadan Overview</div>
+    <div class="card">
+      <div class="kadan-amounts" style="margin:0;font-size:14px;">
+        <span>Total Pending: <b style="color:var(--rust);font-size:18px;" id="acc-pending">₹0</b></span>
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:6px;" id="acc-pending-count">0 dealers pending</div>
+    </div>
+
+    <div class="section-label">Total Hours Worked</div>
+    <div class="card">
+      <div class="kadan-amounts" style="margin:0;font-size:14px;">
+        <span>All time: <b id="acc-total-hours" style="font-size:18px;">0h 0m</b></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Supabase setup ----------
+const SUPABASE_URL = 'https://grnjlnrjviagslasqmhq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdybmpsbnJqdmlhZ3NsYXNxbWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMjc3MzQsImV4cCI6MjA5NzkwMzczNH0.i9PxQim9ZnUxN9ANSFgCfIE7gQ6uWm6bN1S6RB53P6M';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let entries = [];
+let kadans = [];
+let timelogs = [];
+let tasks = [];
+let activeSession = null; // {date, in_datetime, is_active}
+let currentHourlyRate = 52; // fallback until fetched
+let adminPin = '1234'; // fallback until fetched
+let settingsUnlocked = false;
+let pinEntry = '';
+
+function setSyncStatus(ok, text){
+  document.getElementById('sync-dot').className = 'sync-dot' + (ok ? '' : ' off');
+  document.getElementById('sync-text').textContent = text;
+}
+
+async function withSync(fn){
+  try{
+    await fn();
+    setSyncStatus(true, 'Synced');
+  }catch(err){
+    console.error(err);
+    setSyncStatus(false, 'Connection issue');
+    showToast('⚠️ Could not save — check internet', true);
+    throw err;
+  }
+}
+
+// ---------- Helpers ----------
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function todayStr(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function nowTimeStr(){ const d=new Date(); return d.toTimeString().slice(0,5); }
+function money(n){
+  n = Number(n)||0;
+  const neg = n<0; n = Math.abs(n);
+  const s = n.toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2});
+  return (neg?'-':'') + '₹' + s;
+}
+function showToast(msg, isError){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  setTimeout(()=>{ t.classList.remove('show'); }, 2200);
+}
+function escapeHtml(str){
+  const div = document.createElement('div'); div.textContent = str; return div.innerHTML;
+}
+function fmtMinutes(min){
+  min = Math.round(min);
+  const h = Math.floor(min/60), m = min%60;
+  if(h===0) return m+' min';
+  return h+'h '+m+'m';
+}
+function formatDateTime(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+// ---------- Tabs ----------
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    renderAll();
+  });
+});
+
+// =================== FETCH FROM SUPABASE ===================
+async function fetchEntries(){
+  const {data, error} = await sb.from('entries').select('*').order('date', {ascending:false}).order('created_at', {ascending:false});
+  if(error) throw error;
+  entries = data || [];
+}
+async function fetchKadans(){
+  const {data, error} = await sb.from('kadans').select('*').order('date', {ascending:false}).order('created_at', {ascending:false});
+  if(error) throw error;
+  kadans = data || [];
+}
+async function fetchTimelogs(){
+  const {data, error} = await sb.from('timelogs').select('*').order('date', {ascending:false}).order('created_at', {ascending:false});
+  if(error) throw error;
+  timelogs = data || [];
+}
+async function fetchTasks(){
+  const {data, error} = await sb.from('tasks').select('*').order('date', {ascending:false}).order('created_at', {ascending:false});
+  if(error) throw error;
+  tasks = data || [];
+}
+async function fetchActiveSession(){
+  const {data, error} = await sb.from('active_session').select('*').eq('id', 1).single();
+  if(error) throw error;
+  activeSession = data;
+}
+async function fetchSettings(){
+  const {data, error} = await sb.from('settings').select('*').eq('id', 1).single();
+  if(error) throw error;
+  currentHourlyRate = Number(data.hourly_rate);
+  adminPin = data.admin_pin || '1234';
+}
+
+async function loadAll(){
+  setSyncStatus(true, 'Loading...');
+  await withSync(async ()=>{
+    await Promise.all([fetchEntries(), fetchKadans(), fetchTimelogs(), fetchTasks(), fetchActiveSession(), fetchSettings()]);
+  });
+  renderAll();
+}
+
+// =================== ENTRY TAB ===================
+document.getElementById('f-date').value = todayStr();
+
+function updateCategoryUI(){
+  const cat = document.getElementById('f-category').value;
+  document.getElementById('payment-type-wrap').style.display = cat==='Sell' ? 'block' : 'none';
+  if(cat!=='Sell'){
+    document.getElementById('full-amount-wrap').style.display='block';
+    document.getElementById('partial-amount-wrap').style.display='none';
+    document.getElementById('toggle-full').classList.add('active');
+    document.getElementById('toggle-partial').classList.remove('active');
+  }
+  const isTransfer = cat==='Transfer';
+  const isPersonal = cat==='Personal';
+  document.getElementById('dealer-wrap').style.display = (isTransfer || isPersonal) ? 'none' : 'block';
+  document.getElementById('mode-wrap').style.display = isTransfer ? 'none' : 'block';
+  document.getElementById('direction-wrap').style.display = isTransfer ? 'block' : 'none';
+}
+document.getElementById('f-category').addEventListener('change', updateCategoryUI);
+
+document.getElementById('toggle-full').addEventListener('click', ()=>{
+  document.getElementById('toggle-full').classList.add('active');
+  document.getElementById('toggle-partial').classList.remove('active');
+  document.getElementById('full-amount-wrap').style.display='block';
+  document.getElementById('partial-amount-wrap').style.display='none';
+});
+document.getElementById('toggle-partial').addEventListener('click', ()=>{
+  document.getElementById('toggle-partial').classList.add('active');
+  document.getElementById('toggle-full').classList.remove('active');
+  document.getElementById('full-amount-wrap').style.display='none';
+  document.getElementById('partial-amount-wrap').style.display='block';
+});
+
+document.getElementById('btn-save-entry').addEventListener('click', async ()=>{
+  const category = document.getElementById('f-category').value;
+  const date = document.getElementById('f-date').value || todayStr();
+  const isTransfer = category==='Transfer';
+  const isPersonal = category==='Personal';
+  const dealer = (isTransfer || isPersonal) ? 'Self' : document.getElementById('f-dealer').value.trim();
+  const mode = document.getElementById('f-mode').value;
+  const isPartial = category==='Sell' && document.getElementById('toggle-partial').classList.contains('active');
+
+  if(!isTransfer && !isPersonal && !dealer){ showToast('Please enter dealer name', true); return; }
+
+  if(isTransfer){
+    const amount = Number(document.getElementById('f-amount').value);
+    if(!amount || amount<=0){ showToast('Please enter amount', true); return; }
+    const direction = document.getElementById('f-direction').value;
+    const fromMode = direction==='CashToDigital' ? 'Cash' : 'Digital';
+    const toMode = direction==='CashToDigital' ? 'Digital' : 'Cash';
+    await withSync(async ()=>{
+      const {error:e1} = await sb.from('entries').insert({date, dealer:'Self', category:'Transfer', mode:fromMode, amount, type:'debit', note:'Transfer to '+toMode});
+      if(e1) throw e1;
+      const {error:e2} = await sb.from('entries').insert({date, dealer:'Self', category:'Transfer', mode:toMode, amount, type:'credit', note:'Transfer from '+fromMode});
+      if(e2) throw e2;
+      await fetchEntries();
+    });
+    document.getElementById('f-amount').value='';
+    showToast('✅ Transfer recorded!');
+  } else if(isPartial){
+    const total = Number(document.getElementById('f-total-amount').value);
+    const paidNow = Number(document.getElementById('f-paid-now').value);
+    if(!total || total<=0 || !paidNow || paidNow<=0 || paidNow>total){
+      showToast('Check total & paid amount', true); return;
+    }
+    const remaining = total - paidNow;
+    await withSync(async ()=>{
+      const {error:e1} = await sb.from('entries').insert({date, dealer, category:'Sell', mode, amount:paidNow, type:'credit', note:'Partial payment'});
+      if(e1) throw e1;
+      const {error:e2} = await sb.from('kadans').insert({dealer, total_amount:remaining, paid_amount:0, date, status:'Pending', payments:[], source:'sale'});
+      if(e2) throw e2;
+      await Promise.all([fetchEntries(), fetchKadans()]);
+    });
+    document.getElementById('f-total-amount').value='';
+    document.getElementById('f-paid-now').value='';
+    showToast('✅ Saved! Remaining amount added to Kadan.');
+  } else {
+    const amount = Number(document.getElementById('f-amount').value);
+    if(!amount || amount<=0){ showToast('Please enter amount', true); return; }
+    const typeMap = {Sell:'credit', Investment:'debit', Expense:'debit', Salary:'debit', Personal:'debit'};
+    await withSync(async ()=>{
+      const {error} = await sb.from('entries').insert({date, dealer, category, mode, amount, type:typeMap[category]});
+      if(error) throw error;
+      await fetchEntries();
+    });
+    document.getElementById('f-amount').value='';
+    showToast('✅ Entry saved!');
+  }
+  document.getElementById('f-dealer').value='';
+  renderAll();
+});
+
+function renderEntries(){
+  const wrap = document.getElementById('entry-list');
+  if(entries.length===0){ wrap.innerHTML = '<div class="empty">No entries yet.</div>'; return; }
+  wrap.innerHTML = entries.slice(0,30).map(e=>`
+    <div class="entry-row">
+      <div>
+        <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+e.note+')':''}</div>
+        <div class="meta">${e.date} · ${e.mode}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="amt ${e.type}">${e.type==='credit'?'+':'-'}${money(e.amount)}</span>
+        <button class="del-btn" onclick="deleteEntry('${e.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+async function deleteEntry(id){
+  if(!confirm('Delete this entry? This cannot be undone.')) return;
+  const entry = entries.find(e=>e.id===id);
+  await withSync(async ()=>{
+    if(entry && entry.kadan_id){
+      const k = kadans.find(x=>x.id===entry.kadan_id);
+      if(k){
+        const remainingPayments = (k.payments||[]).filter(p=>p.entryId!==id);
+        const newPaid = remainingPayments.reduce((s,p)=>s+Number(p.amount),0);
+        const newStatus = newPaid >= k.total_amount ? 'Cleared' : 'Pending';
+        const {error:eK} = await sb.from('kadans').update({paid_amount:newPaid, status:newStatus, payments:remainingPayments}).eq('id', k.id);
+        if(eK) throw eK;
+      }
+    }
+    const {error} = await sb.from('entries').delete().eq('id', id);
+    if(error) throw error;
+    await Promise.all([fetchEntries(), fetchKadans()]);
+  });
+  showToast('🗑️ Entry deleted' + (entry && entry.kadan_id ? ' — Kadan updated back to Pending' : ''));
+  renderAll();
+}
+
+// =================== KADAN TAB ===================
+document.getElementById('btn-save-kadan').addEventListener('click', async ()=>{
+  const dealer = document.getElementById('k-dealer').value.trim();
+  const amount = Number(document.getElementById('k-amount').value);
+  if(!dealer || !amount || amount<=0){ showToast('Please enter dealer & amount', true); return; }
+  await withSync(async ()=>{
+    const {error} = await sb.from('kadans').insert({dealer, total_amount:amount, paid_amount:0, date:todayStr(), status:'Pending', payments:[], source:'manual'});
+    if(error) throw error;
+    await fetchKadans();
+  });
+  document.getElementById('k-dealer').value=''; document.getElementById('k-amount').value='';
+  showToast('✅ Kadan added!');
+  renderAll();
+});
+
+async function addPayment(id){
+  const dateInput = document.getElementById('pay-date-'+id);
+  const amtInput = document.getElementById('pay-'+id);
+  const modeInput = document.getElementById('pay-mode-'+id);
+  const val = Number(amtInput.value);
+  const mode = modeInput.value;
+  const payDate = dateInput.value || todayStr();
+  if(!val || val<=0){ showToast('Please enter amount', true); return; }
+  const k = kadans.find(x=>x.id===id);
+  if(!k) return;
+  const newPaid = Number(k.paid_amount) + val;
+  const newStatus = newPaid >= k.total_amount ? 'Cleared' : 'Pending';
+
+  await withSync(async ()=>{
+    let entryId = null;
+    if(k.source==='sale'){
+      const {data, error:e2} = await sb.from('entries')
+        .insert({date:payDate, dealer:k.dealer, category:'Sell', mode, amount:val, type:'credit', note:'Kadan payment', kadan_id:k.id})
+        .select().single();
+      if(e2) throw e2;
+      entryId = data.id;
+    }
+    const newPayments = [...(k.payments||[]), {date:payDate, amount:val, entryId}];
+    const {error:e1} = await sb.from('kadans').update({paid_amount:newPaid, status:newStatus, payments:newPayments}).eq('id', id);
+    if(e1) throw e1;
+    await Promise.all([fetchKadans(), fetchEntries()]);
+  });
+  showToast(newStatus==='Cleared' ? '🎉 Fully cleared!' : '✅ Payment added!');
+  renderAll();
+}
+async function deleteKadan(id){
+  if(!confirm('Delete this kadan record? This cannot be undone.')) return;
+  await withSync(async ()=>{
+    const {error} = await sb.from('kadans').delete().eq('id', id);
+    if(error) throw error;
+    await fetchKadans();
+  });
+  renderAll();
+}
+
+function renderKadans(){
+  const pending = kadans.filter(k=>k.status==='Pending');
+  const cleared = kadans.filter(k=>k.status==='Cleared');
+  document.getElementById('pending-label').textContent = 'Pending ('+pending.length+')';
+  const pendingWrap = document.getElementById('pending-list');
+  if(pending.length===0){
+    pendingWrap.innerHTML = '<div class="card"><div class="empty">No pending kadan 👍</div></div>';
+  } else {
+    pendingWrap.innerHTML = pending.map(k=>{
+      const remaining = k.total_amount - k.paid_amount;
+      return `
+      <div class="kadan-item">
+        <div class="kadan-top">
+          <span class="kadan-name">${escapeHtml(k.dealer)}</span>
+          <span class="kadan-badge">PENDING</span>
+        </div>
+        <div class="kadan-amounts">
+          <span>Total: <b>${money(k.total_amount)}</b></span>
+          <span>Paid: <b>${money(k.paid_amount)}</b></span>
+          <span>Remaining: <b style="color:var(--rust);">${money(remaining)}</b></span>
+        </div>
+        <div class="pay-row">
+          <input type="date" id="pay-date-${k.id}" value="${todayStr()}" style="flex:0 0 130px;">
+          <input type="number" id="pay-${k.id}" placeholder="Payment amount">
+          <select id="pay-mode-${k.id}"><option value="Cash">Cash</option><option value="Digital">Digital</option></select>
+          <button class="btn small" onclick="addPayment('${k.id}')">Add Payment</button>
+          <button class="del-btn" onclick="deleteKadan('${k.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  const clearedWrap = document.getElementById('cleared-list');
+  const clearedLabel = document.getElementById('cleared-label');
+  if(cleared.length===0){ clearedLabel.style.display='none'; clearedWrap.innerHTML=''; }
+  else {
+    clearedLabel.style.display='block';
+    clearedLabel.textContent = 'Cleared ('+cleared.length+')';
+    clearedWrap.innerHTML = cleared.map(k=>`
+      <div class="kadan-item cleared">
+        <div class="kadan-top">
+          <span class="kadan-name">${escapeHtml(k.dealer)}</span>
+          <span class="kadan-badge cleared">CLEARED ✓</span>
+        </div>
+        <div class="kadan-amounts"><span>Total: <b>${money(k.total_amount)}</b></span></div>
+      </div>
+    `).join('');
+  }
+}
+
+// =================== TIME LOG TAB ===================
+document.getElementById('t-date-in').value = todayStr();
+document.getElementById('t-date-out').value = todayStr();
+
+document.getElementById('btn-save-manual-time').addEventListener('click', async ()=>{
+  const dIn = document.getElementById('t-date-in').value;
+  const tIn = document.getElementById('t-time-in').value;
+  const dOut = document.getElementById('t-date-out').value;
+  const tOut = document.getElementById('t-time-out').value;
+  if(!dIn || !tIn || !dOut || !tOut){ showToast('Please fill date & time', true); return; }
+  const inDT = new Date(dIn+'T'+tIn);
+  const outDT = new Date(dOut+'T'+tOut);
+  const minutes = (outDT - inDT) / 60000;
+  if(minutes<=0){ showToast('Charge Out must be after Charge In', true); return; }
+  await withSync(async ()=>{
+    const {error} = await sb.from('timelogs').insert({date:dIn, in_time:tIn, out_date:dOut, out_time:tOut, minutes, manual:true, hourly_rate:currentHourlyRate});
+    if(error) throw error;
+    await fetchTimelogs();
+  });
+  showToast('✅ Time entry saved!');
+  renderAll();
+});
+
+function renderTimeLog(){
+  const filtered = timelogs.filter(t=>matchesPeriod(t.date, getFilter('time')));
+  const totalMinutes = filtered.reduce((s,t)=>s+Number(t.minutes),0);
+  const totalSalary = filtered.reduce((s,t)=>s+(Number(t.minutes)/60)*(Number(t.hourly_rate)||currentHourlyRate),0);
+  document.getElementById('time-filtered-total').textContent = fmtMinutes(totalMinutes);
+  document.getElementById('time-filtered-salary').textContent = money(totalSalary);
+
+  const wrap = document.getElementById('time-list');
+  if(filtered.length===0){ wrap.innerHTML = '<div class="card"><div class="empty">No sessions in this period.</div></div>'; return; }
+  wrap.innerHTML = filtered.slice(0,100).map(t=>{
+    const rate = Number(t.hourly_rate)||currentHourlyRate;
+    const sessionSalary = (Number(t.minutes)/60) * rate;
+    return `
+    <div class="time-item">
+      <div class="time-top">
+        <span class="kadan-name">${t.date}${t.out_date && t.out_date!==t.date ? ' → '+t.out_date : ''}</span>
+        <button class="del-btn" onclick="deleteTimelog('${t.id}')">✕</button>
+      </div>
+      <div class="time-amounts">
+        <span>In: <b>${t.in_time}</b></span>
+        <span>Out: <b>${t.out_time}</b></span>
+        <span>Total: <b style="color:var(--green-deep);">${fmtMinutes(t.minutes)}</b></span>
+        <span>Salary: <b style="color:var(--green-deep);">${money(sessionSalary)}</b> <span style="color:#aaa;font-weight:400;">(@₹${rate}/hr)</span></span>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+async function deleteTimelog(id){
+  if(!confirm('Delete this time session? This cannot be undone.')) return;
+  await withSync(async ()=>{
+    const {error} = await sb.from('timelogs').delete().eq('id', id);
+    if(error) throw error;
+    await fetchTimelogs();
+  });
+  renderAll();
+}
+
+// =================== TASKS TAB ===================
+document.getElementById('task-date').value = todayStr();
+
+document.getElementById('btn-save-task').addEventListener('click', async ()=>{
+  const date = document.getElementById('task-date').value || todayStr();
+  const text = document.getElementById('task-text').value.trim();
+  if(!text){ showToast('Please type a task', true); return; }
+  await withSync(async ()=>{
+    const {error} = await sb.from('tasks').insert({date, text, done:false});
+    if(error) throw error;
+    await fetchTasks();
+  });
+  document.getElementById('task-text').value='';
+  showToast('✅ Task added!');
+  renderAll();
+});
+
+async function toggleTask(id){
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  const newDone = !t.done;
+  const completedAt = newDone ? new Date().toISOString() : null;
+  await withSync(async ()=>{
+    const {error} = await sb.from('tasks').update({done:newDone, completed_at:completedAt}).eq('id', id);
+    if(error) throw error;
+    await fetchTasks();
+  });
+  renderAll();
+}
+async function deleteTask(id){
+  if(!confirm('Delete this task? This cannot be undone.')) return;
+  await withSync(async ()=>{
+    const {error} = await sb.from('tasks').delete().eq('id', id);
+    if(error) throw error;
+    await fetchTasks();
+  });
+  renderAll();
+}
+
+function renderTaskHistory(){
+  const wrap = document.getElementById('task-history');
+  if(tasks.length===0){ wrap.innerHTML = '<div class="card"><div class="empty">No tasks yet.</div></div>'; return; }
+  const byDate = {};
+  tasks.forEach(t=>{ (byDate[t.date] = byDate[t.date]||[]).push(t); });
+  const dates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  wrap.innerHTML = dates.map(d=>`
+    <div class="day-heading">${d}</div>
+    <div class="card" style="padding:6px 16px;">
+      ${byDate[d].map(t=>`
+        <div class="task-row">
+          <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')">
+          <div style="flex:1;">
+            <span class="txt ${t.done?'done':''}">${escapeHtml(t.text)}</span>
+            ${t.done && t.completed_at ? `<div class="meta" style="margin-top:2px;">✅ Completed: ${formatDateTime(t.completed_at)}</div>` : ''}
+          </div>
+          <button class="del-btn" onclick="deleteTask('${t.id}')">✕</button>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function renderDashTasks(){
+  const today = todayStr();
+  const wrap = document.getElementById('dash-today-tasks');
+  // Show ALL tasks that are not yet done, regardless of when they were added.
+  // Sort oldest pending first so nothing gets buried/forgotten.
+  const pendingTasks = tasks.filter(t=>!t.done).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(pendingTasks.length===0){ wrap.innerHTML = '<div class="empty">No pending tasks 👍</div>'; return; }
+  wrap.innerHTML = pendingTasks.map(t=>`
+    <div class="task-row">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')">
+      <div style="flex:1;">
+        <span class="txt ${t.done?'done':''}">${escapeHtml(t.text)}</span>
+        <div class="meta" style="margin-top:2px;">${t.date===today ? 'Today' : 'Added: '+t.date}</div>
+      </div>
+      <button class="del-btn" onclick="deleteTask('${t.id}')">✕</button>
+    </div>
+  `).join('');
+}
+document.getElementById('dash-task-add').addEventListener('click', async ()=>{
+  const text = document.getElementById('dash-task-input').value.trim();
+  if(!text){ showToast('Please type a task', true); return; }
+  await withSync(async ()=>{
+    const {error} = await sb.from('tasks').insert({date:todayStr(), text, done:false});
+    if(error) throw error;
+    await fetchTasks();
+  });
+  document.getElementById('dash-task-input').value='';
+  renderAll();
+});
+
+// =================== DASHBOARD: Charge In/Out ===================
+function renderStatus(){
+  const banner = document.getElementById('status-banner');
+  const btn = document.getElementById('btn-charge-toggle');
+  const warnWrap = document.getElementById('dash-warning');
+
+  if(activeSession && activeSession.is_active){
+    const inDT = new Date(activeSession.in_datetime);
+    banner.className = 'status-banner on';
+    banner.innerHTML = `<div>Charge In since</div><div class="time">${inDT.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`;
+    btn.className = 'btn charge-out';
+    btn.textContent = '🔴 Charge Out';
+
+    const today = todayStr();
+    if(activeSession.date !== today){
+      warnWrap.innerHTML = `
+        <div class="warning-card">
+          <b>⚠️ Forgot to Charge Out?</b>
+          You charged in on ${activeSession.date} and haven't charged out yet. Enter the correct Charge Out time:
+          <div class="row2" style="margin-top:10px;">
+            <input type="date" id="fix-date-out" value="${today}">
+            <input type="time" id="fix-time-out" value="${nowTimeStr()}">
+          </div>
+          <button class="btn warn" onclick="fixActiveSession()">Save & Close Session</button>
+        </div>`;
+    } else {
+      warnWrap.innerHTML = '';
+    }
+  } else {
+    banner.className = 'status-banner off';
+    banner.innerHTML = `<div>Status</div><div class="time">OFF</div>`;
+    btn.className = 'btn charge-in';
+    btn.textContent = '🟢 Charge In';
+    warnWrap.innerHTML = '';
+  }
+}
+
+document.getElementById('btn-charge-toggle').addEventListener('click', async ()=>{
+  if(activeSession && activeSession.is_active){
+    const outDT = new Date();
+    const inDT = new Date(activeSession.in_datetime);
+    const minutes = (outDT - inDT) / 60000;
+    await withSync(async ()=>{
+      const {error:e1} = await sb.from('timelogs').insert({
+        date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
+        out_date:todayStr(), out_time:outDT.toTimeString().slice(0,5), minutes, manual:false, hourly_rate:currentHourlyRate
+      });
+      if(e1) throw e1;
+      const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
+      if(e2) throw e2;
+      await Promise.all([fetchTimelogs(), fetchActiveSession()]);
+    });
+    showToast('✅ Charge Out done! '+fmtMinutes(minutes)+' recorded.');
+  } else {
+    const nowISO = new Date().toISOString();
+    await withSync(async ()=>{
+      const {error} = await sb.from('active_session').update({date:todayStr(), in_datetime:nowISO, is_active:true}).eq('id',1);
+      if(error) throw error;
+      await fetchActiveSession();
+    });
+    showToast('🟢 Charge In done!');
+  }
+  renderAll();
+});
+
+async function fixActiveSession(){
+  const dOut = document.getElementById('fix-date-out').value;
+  const tOut = document.getElementById('fix-time-out').value;
+  if(!dOut || !tOut){ showToast('Please fill date & time', true); return; }
+  const inDT = new Date(activeSession.in_datetime);
+  const outDT = new Date(dOut+'T'+tOut);
+  const minutes = (outDT - inDT) / 60000;
+  if(minutes<=0){ showToast('Out time must be after In time', true); return; }
+  await withSync(async ()=>{
+    const {error:e1} = await sb.from('timelogs').insert({
+      date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
+      out_date:dOut, out_time:tOut, minutes, manual:true, hourly_rate:currentHourlyRate
+    });
+    if(e1) throw e1;
+    const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
+    if(e2) throw e2;
+    await Promise.all([fetchTimelogs(), fetchActiveSession()]);
+  });
+  showToast('✅ Session fixed & closed!');
+  renderAll();
+}
+
+// =================== DASHBOARD: Quick Stats ===================
+function renderDashStats(){
+  const today = todayStr();
+  const todayEarn = entries.filter(e=>e.date===today && e.category==='Sell').reduce((s,e)=>s+Number(e.amount),0);
+  const totalPending = kadans.filter(k=>k.status==='Pending').reduce((s,k)=>s+(Number(k.total_amount)-Number(k.paid_amount)),0);
+  document.getElementById('dash-today-earn').textContent = money(todayEarn);
+  document.getElementById('dash-pending').textContent = money(totalPending);
+
+  // This month's hours & salary — each session uses the rate that was active when it was logged
+  const now = new Date();
+  const curMonth = now.getMonth()+1, curYear = now.getFullYear();
+  const monthSessions = timelogs.filter(t=>{
+    if(!t.date) return false;
+    const d = new Date(t.date+'T00:00:00');
+    return d.getFullYear()===curYear && d.getMonth()+1===curMonth;
+  });
+  const monthMinutes = monthSessions.reduce((s,t)=>s+Number(t.minutes),0);
+  const salaryEarned = monthSessions.reduce((s,t)=>s+(Number(t.minutes)/60)*(Number(t.hourly_rate)||currentHourlyRate),0);
+
+  document.getElementById('sal-hours').textContent = fmtMinutes(monthMinutes);
+  document.getElementById('sal-due').textContent = money(salaryEarned);
+}
+
+// =================== ACCOUNTS / FINANCIAL DASHBOARD ===================
+function renderAccounts(){
+  const f = getFilter('acc');
+  const fEntries = entries.filter(e=>matchesPeriod(e.date, f));
+  const fTimelogs = timelogs.filter(t=>matchesPeriod(t.date, f));
+
+  // P&L — filtered by selected period
+  const totalInvestment = fEntries.filter(e=>e.category==='Investment').reduce((s,e)=>s+Number(e.amount),0);
+  const totalEarnings = fEntries.filter(e=>e.category==='Sell').reduce((s,e)=>s+Number(e.amount),0);
+  const totalExpenses = fEntries.filter(e=>e.category==='Expense').reduce((s,e)=>s+Number(e.amount),0);
+  const totalSalary = fEntries.filter(e=>e.category==='Salary').reduce((s,e)=>s+Number(e.amount),0);
+  const totalPersonal = fEntries.filter(e=>e.category==='Personal').reduce((s,e)=>s+Number(e.amount),0);
+  const profit = totalEarnings - totalInvestment - totalExpenses - totalSalary;
+
+  // Cash / Digital balance — ALWAYS all-time (balance is cumulative, carries forward every month)
+  const cashIn = entries.filter(e=>e.mode==='Cash' && e.type==='credit').reduce((s,e)=>s+Number(e.amount),0);
+  const cashOut = entries.filter(e=>e.mode==='Cash' && e.type==='debit').reduce((s,e)=>s+Number(e.amount),0);
+  const digIn = entries.filter(e=>e.mode==='Digital' && e.type==='credit').reduce((s,e)=>s+Number(e.amount),0);
+  const digOut = entries.filter(e=>e.mode==='Digital' && e.type==='debit').reduce((s,e)=>s+Number(e.amount),0);
+
+  // Kadan pending — always live snapshot
+  const totalPending = kadans.filter(k=>k.status==='Pending').reduce((s,k)=>s+(Number(k.total_amount)-Number(k.paid_amount)),0);
+  const pendingCount = kadans.filter(k=>k.status==='Pending').length;
+
+  const totalMinutes = fTimelogs.reduce((s,t)=>s+Number(t.minutes),0);
+
+  document.getElementById('acc-investment').textContent = money(totalInvestment);
+  document.getElementById('acc-earnings').textContent = money(totalEarnings);
+  document.getElementById('acc-expenses').textContent = money(totalExpenses);
+  document.getElementById('acc-profit').textContent = money(Math.abs(profit));
+  document.getElementById('acc-profit-label').textContent = profit>=0 ? 'Profit' : 'Loss';
+  document.getElementById('acc-profit-card').className = 'stat ' + (profit>=0 ? 'profit' : 'loss');
+
+  document.getElementById('acc-cash').textContent = money(cashIn-cashOut);
+  document.getElementById('acc-digital').textContent = money(digIn-digOut);
+  document.getElementById('acc-pending').textContent = money(totalPending);
+  document.getElementById('acc-pending-count').textContent = pendingCount + ' dealers pending (current, not period-based)';
+  document.getElementById('acc-total-hours').textContent = fmtMinutes(totalMinutes);
+  document.getElementById('acc-salary').textContent = money(totalSalary);
+  document.getElementById('acc-personal').textContent = money(totalPersonal);
+}
+
+// =================== RECORDS (All entries with filter) ===================
+function renderRecords(){
+  const f = getFilter('rec');
+  const filtered = entries.filter(e=>matchesPeriod(e.date, f));
+  const totalCredit = filtered.filter(e=>e.type==='credit').reduce((s,e)=>s+Number(e.amount),0);
+  const totalDebit = filtered.filter(e=>e.type==='debit').reduce((s,e)=>s+Number(e.amount),0);
+  document.getElementById('rec-total-credit').textContent = 'Earnings: ' + money(totalCredit);
+  document.getElementById('rec-total-debit').textContent = 'Spent: ' + money(totalDebit);
+
+  const wrap = document.getElementById('records-list');
+  if(filtered.length===0){ wrap.innerHTML = '<div class="empty">No entries in this period.</div>'; return; }
+  wrap.innerHTML = filtered.map(e=>`
+    <div class="entry-row">
+      <div>
+        <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+e.note+')':''}</div>
+        <div class="meta">${e.date} · ${e.mode}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="amt ${e.type}">${e.type==='credit'?'+':'-'}${money(e.amount)}</span>
+        <button class="del-btn" onclick="deleteEntry('${e.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// =================== DEALERS (Profile view) ===================
+let openDealerName = null;
+
+function getDealerSummaries(){
+  const names = new Set();
+  entries.forEach(e=>names.add(e.dealer));
+  kadans.forEach(k=>names.add(k.dealer));
+
+  const list = Array.from(names).map(name=>{
+    const dEntries = entries.filter(e=>e.dealer===name);
+    const dKadans = kadans.filter(k=>k.dealer===name);
+    const totalCredit = dEntries.filter(e=>e.type==='credit').reduce((s,e)=>s+Number(e.amount),0);
+    const totalDebit = dEntries.filter(e=>e.type==='debit').reduce((s,e)=>s+Number(e.amount),0);
+    const pendingKadan = dKadans.filter(k=>k.status==='Pending').reduce((s,k)=>s+(Number(k.total_amount)-Number(k.paid_amount)),0);
+    const lastDate = dEntries.length ? dEntries[0].date : (dKadans.length ? dKadans[0].date : '');
+    return {name, totalCredit, totalDebit, pendingKadan, entryCount:dEntries.length, lastDate, entries:dEntries, kadans:dKadans};
+  });
+  list.sort((a,b)=> (b.lastDate||'').localeCompare(a.lastDate||''));
+  return list;
+}
+
+function renderDealers(){
+  const search = (document.getElementById('dealer-search').value || '').trim().toLowerCase();
+  const wrap = document.getElementById('dealers-list');
+  let list = getDealerSummaries();
+  if(search) list = list.filter(d=>d.name.toLowerCase().includes(search));
+
+  if(list.length===0){ wrap.innerHTML = '<div class="card"><div class="empty">No dealers found.</div></div>'; return; }
+
+  wrap.innerHTML = list.map(d=>{
+    const isOpen = openDealerName===d.name;
+    return `
+    <div class="dealer-card" onclick="toggleDealer('${escapeHtml(d.name).replace(/'/g,"\\'")}')">
+      <div class="dealer-head">
+        <span class="dealer-name">${escapeHtml(d.name)}</span>
+        <span class="chevron ${isOpen?'open':''}">▼</span>
+      </div>
+      <div class="dealer-stats">
+        <span>Sales/Credit: <b style="color:var(--green-deep);">${money(d.totalCredit)}</b></span>
+        <span>Given/Debit: <b style="color:var(--rust);">${money(d.totalDebit)}</b></span>
+        ${d.pendingKadan>0 ? `<span>Pending Kadan: <b style="color:var(--rust);">${money(d.pendingKadan)}</b></span>` : ''}
+        <span>Entries: <b>${d.entryCount}</b></span>
+      </div>
+      <div class="dealer-detail ${isOpen?'open':''}" onclick="event.stopPropagation()">
+        ${renderDealerDetail(d)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDealerDetail(d){
+  let html = '';
+  if(d.kadans.length){
+    html += `<div class="day-heading">Kadan History</div>`;
+    html += d.kadans.map(k=>{
+      const remaining = k.total_amount - k.paid_amount;
+      return `<div class="kadan-item ${k.status==='Cleared'?'cleared':''}" style="margin-bottom:8px;">
+        <div class="kadan-top">
+          <span style="font-size:13px;">${k.date}</span>
+          <span class="kadan-badge ${k.status==='Cleared'?'cleared':''}">${k.status.toUpperCase()}</span>
+        </div>
+        <div class="kadan-amounts">
+          <span>Total: <b>${money(k.total_amount)}</b></span>
+          <span>Paid: <b>${money(k.paid_amount)}</b></span>
+          ${k.status==='Pending' ? `<span>Remaining: <b style="color:var(--rust);">${money(remaining)}</b></span>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+  if(d.entries.length){
+    html += `<div class="day-heading">Entry History</div>`;
+    html += d.entries.map(e=>`
+      <div class="entry-row">
+        <div>
+          <div>${e.category}${e.note?' ('+e.note+')':''}</div>
+          <div class="meta">${e.date} · ${e.mode}</div>
+        </div>
+        <span class="amt ${e.type}">${e.type==='credit'?'+':'-'}${money(e.amount)}</span>
+      </div>
+    `).join('');
+  }
+  if(!d.kadans.length && !d.entries.length){
+    html = '<div class="empty">No records.</div>';
+  }
+  return html;
+}
+
+function toggleDealer(name){
+  openDealerName = openDealerName===name ? null : name;
+  renderAll();
+}
+
+document.getElementById('dealer-search').addEventListener('input', renderDealers);
+
+// =================== PERIOD FILTER HELPERS ===================
+const filterState = {
+  rec: {type:'month', month:new Date().getMonth()+1, year:new Date().getFullYear()},
+  acc: {type:'month', month:new Date().getMonth()+1, year:new Date().getFullYear()},
+  time: {type:'month', month:new Date().getMonth()+1, year:new Date().getFullYear()}
+};
+function getFilter(prefix){ return filterState[prefix]; }
+
+function matchesPeriod(dateStr, f){
+  if(!f || f.type==='all') return true;
+  if(!dateStr) return false;
+  const d = new Date(dateStr+'T00:00:00');
+  const y = d.getFullYear(), m = d.getMonth()+1;
+  if(f.type==='year') return y===Number(f.year);
+  if(f.type==='month') return y===Number(f.year) && m===Number(f.month);
+  return true;
+}
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function setupFilterUI(prefix, onChange){
+  const typeSel = document.getElementById(prefix+'-filter-type');
+  const monthSel = document.getElementById(prefix+'-filter-month');
+  const yearSel = document.getElementById(prefix+'-filter-year');
+
+  const thisYear = new Date().getFullYear();
+  monthSel.innerHTML = MONTH_NAMES.map((mn,i)=>`<option value="${i+1}">${mn}</option>`).join('');
+  monthSel.value = filterState[prefix].month;
+  yearSel.innerHTML = '';
+  for(let y=thisYear-5; y<=thisYear+1; y++){
+    yearSel.innerHTML += `<option value="${y}">${y}</option>`;
+  }
+  yearSel.value = filterState[prefix].year;
+  typeSel.value = filterState[prefix].type;
+
+  function updateVisibility(){
+    const type = typeSel.value;
+    monthSel.style.display = type==='month' ? 'block' : 'none';
+    yearSel.style.display = (type==='month' || type==='year') ? 'block' : 'none';
+  }
+  updateVisibility();
+
+  typeSel.addEventListener('change', ()=>{
+    filterState[prefix].type = typeSel.value;
+    updateVisibility();
+    onChange();
+  });
+  monthSel.addEventListener('change', ()=>{
+    filterState[prefix].month = Number(monthSel.value);
+    onChange();
+  });
+  yearSel.addEventListener('change', ()=>{
+    filterState[prefix].year = Number(yearSel.value);
+    onChange();
+  });
+}
+
+setupFilterUI('rec', renderRecords);
+setupFilterUI('acc', renderAccounts);
+setupFilterUI('time', renderTimeLog);
+
+function updateDealerSuggestions(){
+  const names = new Set();
+  entries.forEach(e=>names.add(e.dealer));
+  kadans.forEach(k=>names.add(k.dealer));
+  const datalist = document.getElementById('dealer-suggestions');
+  datalist.innerHTML = Array.from(names).sort().map(n=>`<option value="${escapeHtml(n)}">`).join('');
+}
+
+// ---------- Render everything ----------
+// Sub-tabs inside Data page
+document.querySelectorAll('.sub-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.subpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sub-'+btn.dataset.sub).classList.add('active');
+  });
+});
+
+// =================== SETTINGS (PIN protected) ===================
+function renderSettingsLock(){
+  const lockedView = document.getElementById('settings-locked-view');
+  const unlockedView = document.getElementById('settings-unlocked-view');
+  if(!lockedView) return;
+  if(settingsUnlocked){
+    lockedView.style.display = 'none';
+    unlockedView.style.display = 'block';
+    const rateInput = document.getElementById('settings-rate-input');
+    if(rateInput && document.activeElement !== rateInput){
+      rateInput.value = currentHourlyRate;
+    }
+  } else {
+    lockedView.style.display = 'block';
+    unlockedView.style.display = 'none';
+    updatePinDots();
+  }
+}
+
+function updatePinDots(){
+  const dots = document.querySelectorAll('#pin-dots .dot');
+  dots.forEach((d,i)=>{ d.classList.toggle('filled', i < pinEntry.length); });
+}
+
+function pinPress(digit){
+  if(pinEntry.length>=4) return;
+  pinEntry += digit;
+  document.getElementById('pin-error').textContent = '';
+  updatePinDots();
+  if(pinEntry.length===4){
+    setTimeout(()=>{
+      if(pinEntry === adminPin){
+        settingsUnlocked = true;
+        pinEntry = '';
+        renderSettingsLock();
+      } else {
+        document.getElementById('pin-error').textContent = 'Incorrect PIN, try again';
+        pinEntry = '';
+        updatePinDots();
+      }
+    }, 150);
+  }
+}
+function pinBackspace(){
+  pinEntry = pinEntry.slice(0,-1);
+  document.getElementById('pin-error').textContent = '';
+  updatePinDots();
+}
+function pinClear(){
+  pinEntry = '';
+  document.getElementById('pin-error').textContent = '';
+  updatePinDots();
+}
+function lockSettings(){
+  settingsUnlocked = false;
+  renderSettingsLock();
+}
+
+document.getElementById('btn-save-rate').addEventListener('click', async ()=>{
+  const newRate = Number(document.getElementById('settings-rate-input').value);
+  if(!newRate || newRate<=0){ showToast('Please enter a valid rate', true); return; }
+  await withSync(async ()=>{
+    const {error} = await sb.from('settings').update({hourly_rate:newRate}).eq('id', 1);
+    if(error) throw error;
+    await fetchSettings();
+  });
+  showToast('✅ Rate updated to ₹'+newRate+'/hour for future sessions!');
+  renderAll();
+});
+
+document.getElementById('btn-save-pin').addEventListener('click', async ()=>{
+  const newPin = document.getElementById('settings-new-pin').value.trim();
+  if(!/^\d{4}$/.test(newPin)){ showToast('PIN must be exactly 4 digits', true); return; }
+  await withSync(async ()=>{
+    const {error} = await sb.from('settings').update({admin_pin:newPin}).eq('id', 1);
+    if(error) throw error;
+    await fetchSettings();
+  });
+  document.getElementById('settings-new-pin').value = '';
+  showToast('✅ Admin PIN updated!');
+});
+
+function renderAll(){
+  renderEntries();
+  renderKadans();
+  renderTimeLog();
+  renderTaskHistory();
+  renderDashTasks();
+  renderStatus();
+  renderDashStats();
+  renderAccounts();
+  renderRecords();
+  renderDealers();
+  updateDealerSuggestions();
+  renderSettingsLock();
+}
+
+setTimeout(()=>{
+  const splash = document.getElementById('splash-screen');
+  if(splash) splash.style.display = 'none';
+}, 2300);
+
+updateCategoryUI();
+loadAll();
+</script>
+</body>
+</html>

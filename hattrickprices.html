@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hattrick Diagnostic Lab - Premium Smart Pricing Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <style>
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ea580c;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .cart-animate {
+            animation: cartBounce 0.4s ease-out;
+        }
+        @keyframes cartBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes revealUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-reveal-hero {
+            animation: revealUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* CUSTOM TRANSTIONS FOR MODE CHANGE */
+        .focus-transition {
+            transition: filter 0.5s ease, opacity 0.5s ease, border-color 0.4s ease, transform 0.4s ease;
+        }
+        /* WHOLE PAGE BLACK & WHITE STATE */
+        .grayscale-focus-mode .grayscale-target {
+            filter: grayscale(100%);
+            opacity: 0.6;
+        }
+        /* KEEP ACTIVE CONTAINER IMMUNE TO BLACK & WHITE */
+        .grayscale-focus-mode .keep-colored {
+            filter: grayscale(0%) !important;
+            opacity: 1 !important;
+        }
+    </style>
+</head>
+<body id="mainBody" class="bg-orange-50/30 text-slate-800 font-sans antialiased relative min-h-screen pb-28 md:pb-24 focus-transition">
+
+    <section class="bg-gradient-to-r from-orange-500 to-amber-500 text-white py-12 px-4 text-center shadow-sm overflow-hidden grayscale-target focus-transition">
+        <div class="max-w-4xl mx-auto animate-reveal-hero">
+            <span class="bg-white/20 text-white font-bold tracking-widest text-xs uppercase px-3 py-1 rounded-full border border-white/30">Hattrick Assurance</span>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight mt-3 mb-2">100% TRANSPARENT PRICING</h1>
+            <p class="text-orange-50 text-base md:text-lg max-w-2xl mx-auto font-medium">
+                Pick your exploration matrix card below, then select your profile package option to check rates instantly.
+            </p>
+        </div>
+    </section>
+
+    <header class="bg-white border-b border-orange-100 shadow-sm sticky top-0 z-40 py-4 grayscale-target focus-transition">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h2 class="text-xl font-black text-orange-600 tracking-wide">HATTRICK DIAGNOSTIC LAB</h2>
+                <p class="text-slate-500 text-xs mt-0.5">Accurate Diagnosis • Honest Pricing</p>
+            </div>
+            <div class="w-full sm:w-80">
+                <input type="text" id="searchInput" oninput="filterTests()" placeholder="Search test or package name..." class="w-full px-4 py-2 rounded-lg text-slate-900 border border-orange-200 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm bg-orange-50/20 text-sm">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+
+        <div class="mb-8">
+            <div class="flex items-center gap-2 mb-3 grayscale-target focus-transition">
+                <span class="bg-slate-800 text-white font-black text-[10px] px-2 py-0.5 rounded">STEP 1</span>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Select Exploration Category Matrix</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-3.5 relative z-10">
+                
+                <div id="tabCard-all" onclick="selectTopLevelTab('all')" class="focus-transition border-2 border-transparent bg-white p-4 rounded-xl shadow-xs cursor-pointer select-none">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-2xl">🔬</span>
+                        <span id="allDot" class="w-2 h-2 rounded-full"></span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm md:text-base">All Tests</h4>
+                    <p class="text-slate-400 text-[10px] mt-0.5">View Entire Catalog</p>
+                </div>
+
+                <div id="tabCard-packages" onclick="selectTopLevelTab('packages')" class="focus-transition border-2 border-transparent bg-white p-4 rounded-xl shadow-xs cursor-pointer select-none">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-2xl">🎁</span>
+                        <span id="packagesDot" class="w-2 h-2 rounded-full"></span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm md:text-base">Hattrick Packages</h4>
+                    <p class="text-slate-400 text-[10px] mt-0.5">Premium Bundles</p>
+                </div>
+
+                <div id="tabCard-category" onclick="selectTopLevelTab('category')" class="focus-transition border-2 border-transparent bg-white p-4 rounded-xl shadow-xs cursor-pointer select-none">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-2xl">📦</span>
+                        <span id="categoryDot" class="w-2 h-2 rounded-full"></span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm md:text-base">Medical Category</h4>
+                    <p class="text-slate-400 text-[10px] mt-0.5">Database Live Catalog</p>
+                </div>
+
+                <div id="tabCard-work" onclick="selectTopLevelTab('work')" class="focus-transition border-2 border-transparent bg-white p-4 rounded-xl shadow-xs cursor-pointer select-none">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-2xl">💼</span>
+                        <span id="workDot" class="w-2 h-2 rounded-full"></span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm md:text-base">Your Work</h4>
+                    <p class="text-slate-400 text-[10px] mt-0.5">Occupational Checks</p>
+                </div>
+
+                <div id="tabCard-location" onclick="selectTopLevelTab('location')" class="focus-transition border-2 border-transparent bg-white p-4 rounded-xl shadow-xs cursor-pointer select-none">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-2xl">📍</span>
+                        <span id="locationDot" class="w-2 h-2 rounded-full"></span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm md:text-base">Your Location</h4>
+                    <p class="text-slate-400 text-[10px] mt-0.5">Environmental Risks</p>
+                </div>
+
+                <div id="tabCard-hobby" onclick="selectTopLevelTab('hobby')" class="focus-transition border-2 border-transparent bg-white p-4 rounded-xl shadow-xs cursor-pointer select-none">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-2xl">🏋️‍♂️</span>
+                        <span id="hobbyDot" class="w-2 h-2 rounded-full"></span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm md:text-base">Your Hobby</h4>
+                    <p class="text-slate-400 text-[10px] mt-0.5">Lifestyle Profile</p>
+                </div>
+
+            </div>
+
+            <div id="subFilterContainer" class="hidden bg-white border-2 border-orange-500 rounded-b-xl border-t-0 p-5 shadow-lg relative -mt-3 pt-6 z-0 keep-colored transition-all">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2 border-b border-orange-100">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-orange-600 text-white font-black text-[10px] px-2 py-0.5 rounded animate-pulse">● STEP 2</span>
+                        <span id="subFilterTitle" class="text-xs font-black text-orange-600 uppercase tracking-wider">Choose sub-package:</span>
+                    </div>
+                    <button onclick="clearSubFilter()" class="text-xs text-slate-400 hover:text-red-500 font-bold cursor-pointer bg-slate-50 hover:bg-red-50 px-2 py-1 rounded border border-slate-200 transition-colors">Reset Selection ×</button>
+                </div>
+                <div id="subFilterPillsWrapper" class="flex items-center gap-2.5 overflow-x-auto py-1 no-scrollbar min-h-[46px]">
+                    </div>
+            </div>
+        </div>
+        
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm grayscale-target focus-transition">
+            <div class="flex items-start gap-3">
+                <div class="p-2 bg-amber-500 text-white rounded-lg mt-0.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="font-bold text-amber-900 text-sm md:text-base">Want to save more on health packages?</h4>
+                    <p class="text-xs text-amber-700 mt-0.5">When you contact our lab technician to book, ask about our ongoing premium seasonal discounts and custom group profile offers!</p>
+                </div>
+            </div>
+            <a href="tel:+919500005061" class="w-full md:w-auto text-center bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 rounded-lg transition-colors shadow-sm shrink-0">
+                Contact Technician
+            </a>
+        </div>
+
+        <div id="catalogTargetHeader" class="flex justify-between items-center mb-4 grayscale-target focus-transition scroll-mt-28">
+            <h3 id="tableHeadlineText" class="text-sm font-bold text-slate-500 uppercase tracking-wider">Official Service Catalog</h3>
+            <span id="testCount" class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full">Loading master list...</span>
+        </div>
+
+        <div id="loadingElement" class="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-orange-100 shadow-sm grayscale-target focus-transition">
+            <div class="loader mb-3"></div>
+            <p class="text-slate-500 text-sm font-medium">Fetching public catalog securely from Supabase...</p>
+        </div>
+
+        <div id="errorElement" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-4 rounded-xl text-center my-6 max-w-xl mx-auto shadow-sm">
+            <p class="font-bold text-base">Database connection issue</p>
+            <p class="text-xs mt-1 text-red-600" id="errorMessage"></p>
+        </div>
+
+        <div id="tableContainer" class="hidden bg-white rounded-xl border border-orange-100 shadow-sm overflow-hidden mb-12 grayscale-target focus-transition">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr id="tableHeaderRow" class="bg-orange-50/60 border-b border-orange-100 text-orange-950 text-xs uppercase font-bold tracking-wider">
+                            <th class="py-3.5 px-4 w-16 text-center">S.No</th>
+                            <th class="py-3.5 px-4 w-28">Code/ID</th>
+                            <th class="py-3.5 px-4">Description Name</th>
+                            <th class="py-3.5 px-4 w-32">Type / Tag</th>
+                            <th class="py-3.5 px-4 w-44 text-right">Pricing (INR)</th>
+                            <th class="py-3.5 px-4 w-24 text-center">Select</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testTableBody" class="text-sm divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="noResultsElement" class="hidden text-center py-16 text-slate-500 bg-white border border-dashed border-orange-200 rounded-xl shadow-sm grayscale-target focus-transition">
+            <p class="text-base font-medium">No records found matching that criteria.</p>
+            <p class="text-xs text-slate-400 mt-1">Try another matrix tab or reset filter controls.</p>
+        </div>
+
+    </main>
+
+    <div id="floatingCartButton" onclick="toggleCartModal(true)" class="fixed bottom-6 right-6 bg-gradient-to-r from-orange-600 to-amber-600 text-white px-5 py-4 rounded-full shadow-xl hidden md:flex items-center gap-3 cursor-pointer select-none transition-all hover:scale-105 active:scale-95 z-40 animate-pulse hover:animate-none grayscale-target focus-transition">
+        <div class="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span id="cartCountBadge" class="absolute -top-2 -right-2 bg-white text-orange-600 font-black text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-orange-600 shadow-sm">0</span>
+        </div>
+        <span class="font-black text-sm tracking-wider uppercase">Go To Cart</span>
+    </div>
+
+    <div id="mobileBottomCartBar" onclick="toggleCartModal(true)" class="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-orange-600 to-amber-600 text-white px-4 py-4 shadow-2xl flex md:hidden justify-between items-center z-50 cursor-pointer border-t border-orange-400/20 backdrop-blur-md transition-all transform translate-y-full">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/20 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+            </div>
+            <div>
+                <p id="mobileCartTotal" class="text-lg font-black tracking-wide">₹0.00</p>
+                <p id="mobileCartCount" class="text-[11px] text-orange-100 font-bold uppercase tracking-wider">0 Selected Tests</p>
+            </div>
+        </div>
+        <span class="bg-white text-orange-600 text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-lg shadow-sm">View Cart &rarr;</span>
+    </div>
+
+    <div id="cartModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl w-full max-w-xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl border border-orange-100">
+            <div class="p-4 border-b border-orange-100 flex justify-between items-center bg-orange-50/50">
+                <div class="flex items-center gap-2">
+                    <h3 class="font-black text-lg text-slate-800 tracking-wide">Selected Test Cart</h3>
+                    <span id="modalCartCount" class="bg-orange-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">0 Selected</span>
+                </div>
+                <button onclick="toggleCartModal(false)" class="text-slate-400 hover:text-slate-600 font-bold text-xl p-1.5 focus:outline-none">&times;</button>
+            </div>
+            <div id="cartItemsContainer" class="p-4 overflow-y-auto flex-1 space-y-3"></div>
+            <div class="p-4 border-t border-orange-100 bg-slate-50 space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-500 font-bold text-sm">Total Estimated Price:</span>
+                    <span id="cartTotalAmount" class="text-2xl font-black text-orange-600">₹0.00</span>
+                </div>
+                <button onclick="sendWhatsAppBooking()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2.5 shadow transition-colors text-base tracking-wide cursor-pointer">
+                    Confirm & Book via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-orange-100 text-slate-400 py-6 text-center text-xs grayscale-target focus-transition">
+        <p class="font-medium text-slate-500">&copy; 2026 Hattrick Diagnostic Lab. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = "https://vyuttatyobyejlbmmhhz.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dXR0YXR5b2J5ZWpsYm1taGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4OTc2ODYsImV4cCI6MjA5ODQ3MzY4Nn0.BQM-0r9UfNkbtdvlMr2gBIOk9mog0gdAsybv4mw87q0";
+        
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allTests = [];
+        let allPackages = [];
+        let dbCategories = []; 
+        let selectedCart = {}; 
+
+        let currentTopTab = ''; 
+        let currentSubFilterValue = ''; 
+
+        const profilePackages = {
+            work: [
+                { id: 'desk', label: '💻 Desk / IT Job Checkup', keywords: ['vitamin d', 'eye', 'lipid', 'cholesterol', 'uric'] },
+                { id: 'field', label: '🏃‍♂️ Field / Outdoor Work', keywords: ['hydration', 'electrolyte', 'sodium', 'kidney', 'cbc'] },
+                { id: 'night', label: '🌙 Night Shift Cycle Test', keywords: ['melatonin', 'thyroid', 'tsh', 'cortisol', 'glucose'] }
+            ],
+            location: [
+                { id: 'pollution', label: '🏭 City Pollution Zone', keywords: ['allergy', 'lung', 'ige', 'cbc', 'immune'] },
+                { id: 'industrial', label: '🧪 Industrial / Factory Area', keywords: ['lead', 'heavy metal', 'liver', 'toxicology', 'renal'] }
+            ],
+            hobby: [
+                { id: 'gym', label: '🏋️‍♂️ Gym Enthusiast Pack', keywords: ['protein', 'calcium', 'vitamin d', 'creatinine', 'urea', 'albumin', 'kidney'] },
+                { id: 'artist', label: '🎨 Creative Artist Profile', keywords: ['lead', 'heavy metal', 'toxic', 'liver', 'hepatic', 'blood'] }
+            ]
+        };
+
+        async function fetchServices() {
+            const loadingElement = document.getElementById('loadingElement');
+            const errorElement = document.getElementById('errorElement');
+            const errorMessage = document.getElementById('errorMessage');
+            const tableContainer = document.getElementById('tableContainer');
+            const testCount = document.getElementById('testCount');
+
+            try {
+                // 1. Fetch individual test items
+                const { data: testData, error: testError } = await sb
+                    .from('services')
+                    .select('id, name, price, active, category')
+                    .eq('active', true)
+                    .order('name', { ascending: true });
+
+                if (testError) throw testError;
+                allTests = testData;
+
+                // 2. Fetch package setups
+                const { data: pkgData, error: pkgError } = await sb
+                    .from('packages')
+                    .select('id, name, test_ids, mrp, rate, active')
+                    .eq('active', true)
+                    .order('name', { ascending: true });
+
+                if (!pkgError && pkgData) {
+                    allPackages = pkgData;
+                }
+
+                testCount.innerText = `${allTests.length} Tests Live`;
+
+                const uniqueCats = new Set();
+                allTests.forEach(t => {
+                    if(t.category) uniqueCats.add(t.category.trim());
+                });
+                dbCategories = Array.from(uniqueCats).sort();
+
+                resetTabUIElements();
+                displayTestsInTable(allTests);
+                
+                loadingElement.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                loadingElement.classList.add('hidden');
+                errorMessage.innerText = error.message || "Failed to sync setup from Supabase.";
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function resetTabUIElements() {
+            const tabs = ['all', 'packages', 'category', 'work', 'location', 'hobby'];
+            tabs.forEach(t => {
+                const card = document.getElementById(`tabCard-${t}`);
+                const dot = document.getElementById(`${t}Dot`);
+                if(card) {
+                    card.className = "focus-transition bg-white p-4 rounded-xl shadow-sm border-2 border-transparent cursor-pointer hover:shadow-md transform hover:-translate-y-0.5 select-none";
+                }
+                if(dot) {
+                    dot.className = "w-2 h-2 bg-slate-300 rounded-full";
+                }
+            });
+            document.getElementById('subFilterContainer').classList.add('hidden');
+            document.getElementById('mainBody').classList.remove('grayscale-focus-mode');
+        }
+
+        function selectTopLevelTab(tabId) {
+            if (currentTopTab === tabId) {
+                currentTopTab = '';
+                currentSubFilterValue = '';
+                resetTabUIElements();
+                applyCombinedFilters();
+                return;
+            }
+
+            currentTopTab = tabId;
+            currentSubFilterValue = ''; 
+
+            // IF "ALL TESTS" OR "PACKAGES" IS SELECTED: Force full-color mode directly
+            if (tabId === 'all' || tabId === 'packages') {
+                document.getElementById('mainBody').classList.remove('grayscale-focus-mode');
+                
+                const tabs = ['all', 'packages', 'category', 'work', 'location', 'hobby'];
+                tabs.forEach(t => {
+                    const card = document.getElementById(`tabCard-${t}`);
+                    const dot = document.getElementById(`${t}Dot`);
+                    if(!card) return;
+
+                    if (t === tabId) {
+                        card.className = "focus-transition border-2 border-orange-500 bg-white p-4 rounded-xl shadow-xl cursor-pointer transform scale-[1.03] z-20 relative";
+                        if(dot) dot.className = "w-2 h-2 bg-orange-500 rounded-full animate-ping";
+                    } else {
+                        card.className = "focus-transition bg-white p-4 rounded-xl shadow-xs border-2 border-transparent cursor-pointer select-none opacity-80";
+                        if(dot) dot.className = "w-2 h-2 bg-transparent rounded-full";
+                    }
+                });
+                
+                document.getElementById('subFilterContainer').classList.add('hidden');
+                applyCombinedFilters();
+                
+                setTimeout(() => {
+                    document.getElementById('catalogTargetHeader').scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+                return;
+            }
+
+            // FOR SUB SELECTION BASED TAB CARDS: Focus Mode Trigger
+            document.getElementById('mainBody').classList.add('grayscale-focus-mode');
+
+            const tabs = ['all', 'packages', 'category', 'work', 'location', 'hobby'];
+            tabs.forEach(t => {
+                const card = document.getElementById(`tabCard-${t}`);
+                const dot = document.getElementById(`${t}Dot`);
+                if(!card) return;
+
+                if (t === tabId) {
+                    card.className = "focus-transition keep-colored border-2 border-orange-500 bg-white p-4 rounded-t-xl rounded-b-none shadow-xl cursor-pointer transform scale-[1.03] z-20 relative";
+                    if(dot) dot.className = "w-2 h-2 bg-orange-500 rounded-full animate-ping";
+                } else {
+                    card.className = "focus-transition grayscale-target bg-white p-4 rounded-xl shadow-xs border-2 border-transparent cursor-pointer opacity-40 scale-95 select-none";
+                    if(dot) dot.className = "w-2 h-2 bg-transparent rounded-full";
+                }
+            });
+
+            document.getElementById('subFilterContainer').classList.remove('hidden');
+            renderSubFilterPills();
+            applyCombinedFilters();
+        }
+
+        function renderSubFilterPills() {
+            const container = document.getElementById('subFilterPillsWrapper');
+            const headline = document.getElementById('subFilterTitle');
+            container.innerHTML = "";
+
+            let displayLabel = "";
+            if (currentTopTab === 'category') displayLabel = "📂 Medical Categories:";
+            if (currentTopTab === 'work') displayLabel = "💼 Work Life Profiles:";
+            if (currentTopTab === 'location') displayLabel = "📍 Geography Environment:";
+            if (currentTopTab === 'hobby') displayLabel = "🏋️‍♂️ Lifestyle & Hobbies:";
+
+            headline.innerText = `${displayLabel} Choose option to load data directly:`;
+
+            if (currentTopTab === 'category') {
+                dbCategories.forEach(cat => {
+                    createPillButton(cat, cat, container);
+                });
+            } else {
+                const subOptions = profilePackages[currentTopTab] || [];
+                subOptions.forEach(opt => {
+                    createPillButton(opt.id, opt.label, container);
+                });
+            }
+        }
+
+        function createPillButton(id, label, parent) {
+            const btn = document.createElement('button');
+            const isActive = (currentSubFilterValue === id);
+            
+            if (isActive) {
+                btn.className = "bg-orange-600 text-white text-xs font-black px-4 py-2.5 rounded-full shadow-md whitespace-nowrap cursor-pointer transition-all shrink-0 ring-2 ring-orange-300 transform scale-105";
+            } else {
+                btn.className = "bg-orange-50/60 text-slate-800 hover:bg-orange-100 text-xs font-bold px-4 py-2.5 rounded-full border border-orange-200 whitespace-nowrap cursor-pointer transition-all shrink-0";
+            }
+            
+            btn.innerText = label;
+            btn.onclick = () => {
+                currentSubFilterValue = id;
+                document.getElementById('mainBody').classList.remove('grayscale-focus-mode');
+                renderSubFilterPills(); 
+                applyCombinedFilters();
+                
+                setTimeout(() => {
+                    document.getElementById('catalogTargetHeader').scrollIntoView({ behavior: 'smooth' });
+                }, 150);
+            };
+            parent.appendChild(btn);
+        }
+
+        function clearSubFilter() {
+            currentSubFilterValue = '';
+            renderSubFilterPills();
+            applyCombinedFilters();
+        }
+
+        function filterTests() {
+            applyCombinedFilters();
+        }
+
+        function applyCombinedFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const headline = document.getElementById('tableHeadlineText');
+
+            if (currentTopTab === 'packages') {
+                headline.innerText = "Premium Bundled Health Packages";
+                let filteredPkgs = allPackages;
+                if (query !== '') {
+                    filteredPkgs = filteredPkgs.filter(p => p.name.toLowerCase().includes(query));
+                }
+                displayPackagesInTable(filteredPkgs);
+                return;
+            }
+
+            headline.innerText = "Official Service Catalog";
+            let filtered = allTests;
+
+            if (currentTopTab === 'all') {
+                filtered = allTests; 
+            } else if (currentTopTab !== '' && currentSubFilterValue !== '') {
+                if (currentTopTab === 'category') {
+                    filtered = filtered.filter(test => test.category && test.category.trim() === currentSubFilterValue);
+                } else {
+                    const configArr = profilePackages[currentTopTab] || [];
+                    const selectedConfig = configArr.find(c => c.id === currentSubFilterValue);
+                    
+                    if (selectedConfig && selectedConfig.keywords) {
+                        filtered = filtered.filter(test => {
+                            const nameLower = test.name.toLowerCase();
+                            return selectedConfig.keywords.some(kw => nameLower.includes(kw));
+                        });
+                    }
+                }
+            } else if (currentTopTab !== '' && currentSubFilterValue === '') {
+                filtered = []; 
+            }
+
+            if (query !== '') {
+                filtered = filtered.filter(test => test.name.toLowerCase().includes(query));
+            }
+
+            displayTestsInTable(filtered);
+        }
+
+        function displayTestsInTable(tests) {
+            const tableBody = document.getElementById('testTableBody');
+            const noResultsElement = document.getElementById('noResultsElement');
+            const tableContainer = document.getElementById('tableContainer');
+            
+            // Set uniform header title parameters
+            document.getElementById('tableHeaderRow').innerHTML = `
+                <th class="py-3.5 px-4 w-16 text-center">S.No</th>
+                <th class="py-3.5 px-4 w-28">Test Code</th>
+                <th class="py-3.5 px-4">Test Description</th>
+                <th class="py-3.5 px-4 w-32">Database Category</th>
+                <th class="py-3.5 px-4 w-36 text-right">Price (INR)</th>
+                <th class="py-3.5 px-4 w-24 text-center">Select</th>
+            `;
+
+            tableBody.innerHTML = "";
+
+            if (tests.length === 0) {
+                tableContainer.classList.add('hidden');
+                noResultsElement.classList.remove('hidden');
+                return;
+            } else {
+                noResultsElement.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+            }
+
+            tests.forEach((test, index) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-orange-50/40 transition-colors odd:bg-white even:bg-orange-50/10";
+                
+                const cartKey = `test-${test.id}`;
+                const isChecked = selectedCart[cartKey] ? 'checked' : '';
+                const displayCategory = test.category ? test.category : 'Uncategorized';
+
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-center font-medium text-slate-400 text-xs">${index + 1}</td>
+                    <td class="py-3 px-4 font-mono text-xs text-slate-400">#${test.id}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800 tracking-wide capitalize">${escapeHtml(test.name)}</td>
+                    <td class="py-3 px-4 text-xs font-medium text-slate-500"><span class="bg-slate-100 px-2 py-1 rounded text-slate-700 border border-slate-200">${escapeHtml(displayCategory)}</span></td>
+                    <td class="py-3 px-4 text-right font-bold text-orange-600 text-base">₹${parseFloat(test.price).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="py-3 px-4 text-center">
+                        <input type="checkbox" ${isChecked} onchange="toggleCartItem('test', '${test.id}', '${escapeHtml(test.name)}', ${test.price}, this.checked)" class="w-4 h-4 text-orange-600 border-orange-300 rounded focus:ring-orange-500 accent-orange-600 cursor-pointer">
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // RENDER METHOD DEDICATED FOR SYSTEM PACKAGES WITH DISCOUNT METRICS
+        function displayPackagesInTable(pkgs) {
+            const tableBody = document.getElementById('testTableBody');
+            const noResultsElement = document.getElementById('noResultsElement');
+            const tableContainer = document.getElementById('tableContainer');
+
+            document.getElementById('tableHeaderRow').innerHTML = `
+                <th class="py-3.5 px-4 w-16 text-center">S.No</th>
+                <th class="py-3.5 px-4 w-24">Package Type</th>
+                <th class="py-3.5 px-4">Health Package Name</th>
+                <th class="py-3.5 px-4 w-32 text-center">Original MRP</th>
+                <th class="py-3.5 px-4 w-36 text-right">Special Rate</th>
+                <th class="py-3.5 px-4 w-24 text-center">Select</th>
+            `;
+
+            tableBody.innerHTML = "";
+
+            if (pkgs.length === 0) {
+                tableContainer.classList.add('hidden');
+                noResultsElement.classList.remove('hidden');
+                return;
+            } else {
+                noResultsElement.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+            }
+
+            pkgs.forEach((pkg, index) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-amber-50/40 transition-colors odd:bg-white even:bg-orange-50/10";
+                
+                const cartKey = `pkg-${pkg.id}`;
+                const isChecked = selectedCart[cartKey] ? 'checked' : '';
+                
+                const mrpVal = parseFloat(pkg.mrp || 0);
+                const rateVal = parseFloat(pkg.rate || 0);
+                
+                let savingsBadge = "";
+                if (mrpVal > rateVal) {
+                    const pct = Math.round(((mrpVal - rateVal) / mrpVal) * 100);
+                    savingsBadge = `<span class="ml-2 bg-emerald-100 text-emerald-800 font-bold text-[10px] px-1.5 py-0.5 rounded">${pct}% OFF</span>`;
+                }
+
+                row.innerHTML = `
+                    <td class="py-4 px-4 text-center font-medium text-slate-400 text-xs">${index + 1}</td>
+                    <td class="py-4 px-4 text-xs font-bold text-amber-700 uppercase tracking-wider"><span class="bg-amber-100 px-2 py-0.5 rounded border border-amber-200">💎 BUNDLE</span></td>
+                    <td class="py-4 px-4 font-black text-slate-800 tracking-wide capitalize">
+                        ${escapeHtml(pkg.name)}
+                        ${savingsBadge}
+                    </td>
+                    <td class="py-4 px-4 text-center text-xs line-through text-slate-400 font-medium">₹${mrpVal.toLocaleString('en-IN')}</td>
+                    <td class="py-4 px-4 text-right font-black text-emerald-600 text-base">₹${rateVal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="py-4 px-4 text-center">
+                        <input type="checkbox" ${isChecked} onchange="toggleCartItem('pkg', '${pkg.id}', '${escapeHtml(pkg.name)}', ${rateVal}, this.checked)" class="w-4 h-4 text-emerald-600 border-amber-300 rounded focus:ring-emerald-500 accent-emerald-600 cursor-pointer">
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function toggleCartItem(type, id, name, price, isSelected) {
+            const cartKey = `${type}-${id}`;
+            if (isSelected) {
+                selectedCart[cartKey] = { id, name, price, type };
+            } else {
+                delete selectedCart[cartKey];
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = Object.keys(selectedCart).length;
+            
+            document.getElementById('cartCountBadge').innerText = count;
+            document.getElementById('modalCartCount').innerText = `${count} Selected`;
+            document.getElementById('mobileCartCount').innerText = `${count} Selected Items`;
+
+            const cartBtn = document.getElementById('floatingCartButton');
+            cartBtn.classList.remove('cart-animate');
+            void cartBtn.offsetWidth; 
+            cartBtn.classList.add('cart-animate');
+
+            let total = 0;
+            for (let key in selectedCart) {
+                total += parseFloat(selectedCart[key].price);
+            }
+            
+            const formattedPrice = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('cartTotalAmount').innerText = formattedPrice;
+            document.getElementById('mobileCartTotal').innerText = formattedPrice;
+
+            const mobileBar = document.getElementById('mobileBottomCartBar');
+            if (count > 0) {
+                mobileBar.classList.remove('translate-y-full');
+            } else {
+                mobileBar.classList.add('translate-y-full');
+            }
+        }
+
+        function toggleCartModal(show) {
+            const modal = document.getElementById('cartModal');
+            const container = document.getElementById('cartItemsContainer');
+            
+            if (show) {
+                container.innerHTML = "";
+                const items = Object.values(selectedCart);
+                
+                if (items.length === 0) {
+                    container.innerHTML = `<p class="text-slate-400 text-center py-8 text-sm">Your cart is empty.</p>`;
+                } else {
+                    items.forEach((item) => {
+                        const isPkg = item.type === 'pkg';
+                        const badgeHtml = isPkg ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1 rounded uppercase mr-1">Package</span>` : '';
+                        const cartKey = `${item.type}-${item.id}`;
+                        
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100";
+                        div.innerHTML = `
+                            <div>
+                                <h5 class="font-bold text-slate-800 capitalize text-sm">${badgeHtml}${item.name}</h5>
+                                <span class="text-xs text-slate-400 font-mono">ID: ${item.id}</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-orange-600 text-sm">₹${parseFloat(item.price).toLocaleString('en-IN')}</span>
+                                <button onclick="removeSpecificCartItem('${cartKey}')" class="text-red-500 hover:text-red-700 font-bold text-lg px-1 cursor-pointer">&times;</button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function removeSpecificCartItem(cartKey) {
+            delete selectedCart[cartKey];
+            updateCartUI();
+            toggleCartModal(true); 
+            applyCombinedFilters(); 
+        }
+
+        function sendWhatsAppBooking() {
+            const items = Object.values(selectedCart);
+            if (items.length === 0) {
+                alert("Please select at least one test or package to book!");
+                return;
+            }
+
+            const targetPhone = "9500005061";
+            let message = `Hello Hattrick Lab Team,\nI would like to book the following laboratory services:\n\n`;
+            
+            let total = 0;
+            items.forEach((item, index) => {
+                const prefix = item.type === 'pkg' ? '[PACKAGE] ' : '[TEST] ';
+                message += `${index + 1}. *${prefix}${item.name.toUpperCase()}* - ₹${parseFloat(item.price).toLocaleString('en-IN')}\n`;
+                total += parseFloat(item.price);
+            });
+
+            message += `\n---------------------------\n`;
+            message += `*Total Amount:* ₹${total.toLocaleString('en-IN')}\n`;
+            message += `---------------------------\n`;
+            message += `Please confirm my appointment slot. Thank you.`;
+
+            const encodedText = encodeURIComponent(message);
+            window.open(`https://wa.me/${targetPhone}?text=${encodedText}`, '_blank');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        window.onload = fetchServices;
+    </script>
+</body>
+</html>

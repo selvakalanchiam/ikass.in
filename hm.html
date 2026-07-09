@@ -1,0 +1,3680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shift Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf5ec; --panel:#ffffff; --ink:#2e241c; --ink-dim:#9c8a77;
+    --rule:#ecdfce; --amber:#df7a37; --amber-soft:#f7ead9; --moss:#6f9b6a; --red:#c1573f;
+    --font-display:'Fraunces',serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--font-body);
+    min-height:100vh; line-height:1.6;
+  }
+  a{ color:inherit; }
+  :focus-visible{ outline:2px solid var(--amber); outline-offset:3px; }
+  .center{ min-height:100vh; display:flex; align-items:center; justify-content:center; }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--amber); display:flex; align-items:center; gap:10px; margin-bottom:18px;
+  }
+  .eyebrow::before{ content:''; width:7px; height:7px; background:var(--amber); border-radius:50%; display:inline-block; }
+  h1.title{ font-family:var(--font-display); font-weight:600; font-size:34px; letter-spacing:-0.02em; margin-bottom:8px; }
+  .sub{ color:var(--ink-dim); font-size:14px; margin-bottom:32px; }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-dim); margin-bottom:8px;
+  }
+  .field input, select.field-select{
+    width:100%; background:#fffdfa; border:1px solid var(--rule); color:var(--ink);
+    padding:13px 14px; font-family:var(--font-body); font-size:15px; border-radius:6px;
+  }
+  .field input:focus, select.field-select:focus{ border-color:var(--amber); }
+
+  .btn{
+    padding:14px; font-family:var(--font-mono); font-size:13px; letter-spacing:.04em;
+    text-transform:uppercase; border:1px solid var(--amber); background:var(--amber); color:#fff;
+    cursor:pointer; border-radius:6px; font-weight:600; transition:opacity .15s, transform .1s;
+  }
+  .btn:hover{ opacity:.9; }
+  .btn:active{ transform:scale(.98); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .btn.full{ width:100%; }
+  .btn.moss{ background:var(--moss); border-color:var(--moss); color:#fff; }
+  .btn.red{ background:var(--red); border-color:var(--red); color:#fff; }
+  .btn.ghost{ background:#fff; color:var(--ink-dim); border:1px solid var(--rule); }
+  .btn.ghost:hover{ color:var(--amber); border-color:var(--amber); }
+
+  .msg{ font-family:var(--font-mono); font-size:12px; padding:10px 12px; border-radius:6px; margin-bottom:16px; display:none; }
+  .msg.show{ display:block; }
+  .msg.err{ background:#fbe9e4; color:var(--red); border:1px solid #f2cec3; }
+  .msg.ok{ background:#eaf3e9; color:var(--moss); border:1px solid #d3e6d1; }
+
+  /* ---------- Login ---------- */
+  .auth-wrap{ width:100%; max-width:380px; padding:24px; }
+
+  /* ---------- Shared dashboard shell ---------- */
+  .dash-wrap{ display:none; width:100%; max-width:760px; margin:0 auto; padding:48px 24px 80px; transition:max-width .2s; }
+  body.pc-view .dash-wrap{ max-width:1360px; }
+  body.pc-view .stats-grid{ grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); }
+  body.pc-view .form-row .field{ min-width:200px; }
+  body.pc-view .cust-table{ font-size:14px; }
+
+  /* ---------- View mode toggle (login screen) ---------- */
+  .view-toggle{ display:flex; gap:8px; justify-content:center; margin-top:28px; }
+  .view-toggle-btn{
+    font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-dim); background:#fff; border:1px solid var(--rule); padding:9px 16px;
+    border-radius:20px; cursor:pointer;
+  }
+  .view-toggle-btn.active{ background:var(--amber); color:#fff; border-color:var(--amber); }
+  .view-toggle-btn:hover:not(.active){ border-color:var(--amber); color:var(--amber); }
+  .dash-header{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; }
+  .greeting-eyebrow{ font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+  .greeting{ font-family:var(--font-display); font-weight:600; font-size:26px; letter-spacing:-0.01em; word-break:break-word; max-width:340px; }
+
+  /* ---------- Tabs ---------- */
+  .tabs{ display:flex; gap:4px; border-bottom:1px solid var(--rule); margin-bottom:28px; overflow-x:auto; }
+  .tab-btn{
+    font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-dim); background:none; border:none; padding:12px 16px; cursor:pointer;
+    white-space:nowrap; border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{ color:var(--amber); border-bottom-color:var(--amber); }
+  .tab-btn:hover{ color:var(--ink); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .placeholder-card{
+    background:var(--panel); border:1px dashed var(--rule); border-radius:8px;
+    padding:64px 32px; text-align:center;
+  }
+  .placeholder-card .ph-title{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:8px; }
+  .placeholder-card .ph-sub{ font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); }
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:var(--panel); border:1px solid var(--rule); border-radius:10px; padding:28px; margin-bottom:24px;
+    box-shadow:0 1px 3px rgba(46,36,28,0.04);
+  }
+  .panel-title{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); margin-bottom:20px; }
+  .panel-header-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+  .form-row{ display:flex; gap:12px; flex-wrap:wrap; }
+  .form-row .field{ flex:1; min-width:140px; }
+  .import-input{ display:none; }
+
+  /* ---------- Dashboard stat cards ---------- */
+  .stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px; }
+  .stat-card{
+    background:var(--panel); border:1px solid var(--rule); border-radius:10px; padding:26px 20px; text-align:center;
+    box-shadow:0 1px 3px rgba(46,36,28,0.04);
+  }
+  .stat-value{ font-family:var(--font-display); font-size:34px; font-weight:600; color:var(--amber); }
+  .stat-label{ font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-dim); margin-top:8px; }
+
+  /* ---------- Employee/service lists ---------- */
+  .emp-row{
+    display:flex; justify-content:space-between; align-items:center; padding:14px 0;
+    border-bottom:1px solid var(--rule); font-size:14px;
+  }
+  .emp-row:last-child{ border-bottom:none; }
+  .emp-name{ font-weight:500; }
+  .emp-username{ font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); }
+  .emp-del{
+    font-family:var(--font-mono); font-size:11px; color:var(--red); background:none; border:none; cursor:pointer;
+    text-decoration:underline;
+  }
+  .empty{ font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); padding:14px 0; text-align:center; }
+
+  .cust-table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .cust-table th{
+    font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--ink-dim); text-align:left; padding:8px 10px; border-bottom:1px solid var(--rule);
+  }
+  .cust-table td{ padding:10px; border-bottom:1px solid var(--rule); vertical-align:top; }
+  .cust-table tr:last-child td{ border-bottom:none; }
+  .cust-name{ font-weight:500; }
+  .cust-meta{ font-family:var(--font-mono); font-size:11px; color:var(--ink-dim); }
+  .table-wrap{ overflow-x:auto; }
+
+  /* ---------- Employee: mini clock beside name ---------- */
+  .mini-clock{ display:flex; align-items:center; gap:14px; margin-top:12px; flex-wrap:wrap; }
+  .status-tag{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-dim); display:inline-flex; align-items:center; gap:8px; }
+  .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--ink-dim); }
+  .status-tag.active .status-dot{ background:var(--moss); box-shadow:0 0 8px var(--moss); }
+  .status-tag.active{ color:var(--moss); }
+  .timer{ font-family:var(--font-mono); font-weight:600; font-size:22px; letter-spacing:.02em; color:var(--ink); font-variant-numeric: tabular-nums; }
+  .timer.idle{ color:var(--ink-dim); }
+  .punch-btn{
+    padding:10px 18px; font-family:var(--font-mono); font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; border:none; cursor:pointer; border-radius:6px; font-weight:600; transition:opacity .15s;
+  }
+  .punch-btn.in{ background:var(--moss); color:#fff; }
+  .punch-btn.out{ background:var(--red); color:#fff; }
+  .punch-btn:hover{ opacity:.88; }
+  .punch-btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  .history-title{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-dim); margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--rule); }
+  .row{ display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--rule); font-size:14px; }
+  .row:last-child{ border-bottom:none; }
+  .row-date{ color:var(--ink); }
+  .row-time{ font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); }
+  .row-duration{ font-family:var(--font-mono); font-size:13px; color:var(--amber); font-weight:600; }
+
+  /* ---------- Invoice Generator ---------- */
+  .inv-search-wrap{ position:relative; }
+  .inv-results-list{
+    position:absolute; width:100%; max-height:220px; overflow-y:auto; border:1px solid var(--amber);
+    background:#fff; z-index:20; border-radius:6px; box-shadow:0 4px 14px rgba(46,36,28,0.1); margin-top:4px;
+  }
+  .inv-result-item{ padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--rule); font-size:13px; }
+  .inv-result-item:hover{ background:var(--amber-soft); }
+  .inv-result-item:last-child{ border-bottom:none; }
+  .inv-selected-customer{
+    border:1px solid var(--amber); background:var(--amber-soft); border-radius:8px;
+    padding:16px; margin-top:4px; font-size:13px; line-height:1.8;
+  }
+  .inv-service-list{
+    max-height:320px; overflow-y:auto; border:1px solid var(--rule); border-radius:8px;
+    padding:6px 10px; background:#fffdfa;
+  }
+  .inv-service-item{
+    display:flex; align-items:center; padding:9px 4px; border-bottom:1px dotted var(--rule);
+    cursor:pointer; font-size:13px;
+  }
+  .inv-service-item:last-child{ border-bottom:none; }
+  .inv-service-item:hover{ background:var(--amber-soft); border-radius:4px; }
+  .inv-service-item input[type="checkbox"]{ width:auto; margin-right:10px; transform:scale(1.15); accent-color:var(--amber); }
+  .inv-service-price{ font-weight:600; color:var(--amber); margin-left:auto; padding-left:10px; font-family:var(--font-mono); font-size:12px; }
+  .pkg-item-wrap{ border-bottom:1px dotted var(--rule); }
+  .pkg-item-wrap:last-child{ border-bottom:none; }
+  .pkg-expand-toggle{
+    background:none; border:none; color:var(--ink-dim); font-family:var(--font-mono); font-size:10px;
+    cursor:pointer; padding:0 4px; margin-left:6px;
+  }
+  .pkg-expand-toggle:hover{ color:var(--amber); }
+  .pkg-tests-detail{
+    font-size:12px; color:var(--ink-dim); padding:4px 4px 10px 30px; display:none; line-height:1.6;
+  }
+  .pkg-tests-detail.open{ display:block; }
+  .pkg-mrp-strike{ text-decoration:line-through; color:var(--ink-dim); font-size:11px; margin-right:6px; }
+  .inv-summary{ padding-top:6px; }
+  .inv-summary-row{ display:flex; justify-content:space-between; padding:7px 0; border-top:1px solid var(--rule); font-size:14px; }
+  .inv-summary-row.total{ font-size:18px; font-weight:700; border-top:2px solid var(--amber); margin-top:8px; padding-top:14px; color:var(--amber); }
+  .inv-checkbox-row{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .inv-checkbox-row input{ width:auto; transform:scale(1.15); accent-color:var(--moss); }
+  .inv-checkbox-row label{ margin-bottom:0; }
+  .inv-toast{
+    position:fixed; top:16px; right:16px; padding:14px 22px; border-radius:8px; font-weight:600;
+    z-index:1000; color:#fff; font-family:var(--font-body); font-size:14px; transition:opacity .3s;
+    box-shadow:0 6px 16px rgba(46,36,28,0.18);
+  }
+  #invInvoicePrintArea{ display:none; }
+
+  /* ---------- Accounts sub-tabs ---------- */
+  .subtabs{ display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+  .subtab-btn{
+    font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-dim); background:#fff; border:1px solid var(--rule); padding:9px 16px;
+    border-radius:20px; cursor:pointer;
+  }
+  .subtab-btn.active{ background:var(--amber); color:#fff; border-color:var(--amber); }
+  .subtab-btn:hover:not(.active){ border-color:var(--amber); color:var(--amber); }
+  .subtab-panel{ display:none; }
+  .subtab-panel.active{ display:block; }
+
+  /* ---------- Inline clear-payment form ---------- */
+  .clear-form{ display:flex; align-items:center; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+  .clear-form input[type="number"]{
+    width:90px; padding:8px 10px; font-size:13px; border:1px solid var(--rule); border-radius:6px;
+    font-family:var(--font-mono); background:#fffdfa; color:var(--ink);
+  }
+  .mode-pills{ display:flex; gap:4px; }
+  .mode-pill{
+    font-family:var(--font-mono); font-size:10px; text-transform:uppercase; padding:7px 10px;
+    border:1px solid var(--rule); background:#fff; color:var(--ink-dim); border-radius:6px; cursor:pointer;
+  }
+  .mode-pill.selected{ background:var(--amber); border-color:var(--amber); color:#fff; }
+  .btn-sm{ padding:8px 12px; font-size:10px; border-radius:6px; }
+
+  /* ---------- Modal (replaces browser prompt/alert popups) ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(46,36,28,0.45); display:none;
+    align-items:center; justify-content:center; z-index:200; padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-card{
+    background:#fff; border-radius:12px; padding:28px; width:100%; max-width:420px;
+    box-shadow:0 20px 50px rgba(46,36,28,0.25);
+  }
+  .modal-title{ font-family:var(--font-display); font-size:20px; font-weight:600; margin-bottom:20px; }
+  .modal-actions{ display:flex; gap:10px; margin-top:20px; }
+  .modal-actions .btn{ flex:1; }
+
+  /* ---------- Ledger row expand/detail panel ---------- */
+  .ledger-expand-btn{
+    background:none; border:1px solid var(--rule); border-radius:6px; color:var(--ink-dim);
+    width:28px; height:28px; cursor:pointer; font-size:12px;
+  }
+  .ledger-expand-btn:hover{ border-color:var(--amber); color:var(--amber); }
+  .ledger-detail-row td{ background:var(--amber-soft); padding:16px 20px !important; }
+  .ledger-detail-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px 20px;
+  }
+  .ledger-detail-item .dlabel{
+    font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-dim); margin-bottom:4px;
+  }
+  .ledger-detail-item .dvalue{ font-size:14px; font-weight:600; color:var(--ink); }
+
+  @media print {
+    body > *:not(#invInvoicePrintArea){ display:none !important; }
+    body{ background:none; padding:0; margin:0; justify-content:flex-start; }
+    #invInvoicePrintArea{ display:block !important; width:100%; margin:0; }
+  }
+
+  @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="center" id="authScreen">
+  <div class="auth-wrap">
+    <div class="eyebrow">Shift Log</div>
+    <h1 class="title">Sign in</h1>
+    <p class="sub">Admin or employee — same login screen.</p>
+    <div class="msg" id="authMsg"></div>
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" type="text" autocomplete="username" placeholder="username" />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+    </div>
+    <button class="btn full" id="authSubmit">Sign in</button>
+
+    <div class="view-toggle">
+      <button type="button" class="view-toggle-btn" id="viewModeMobileBtn">📱 Mobile View</button>
+      <button type="button" class="view-toggle-btn" id="viewModePcBtn">🖥️ PC View</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="dash-wrap" id="adminWrap">
+  <div class="dash-header">
+    <div>
+      <div class="greeting-eyebrow">Signed in as</div>
+      <div class="greeting">Admin</div>
+    </div>
+    <button class="btn ghost" id="adminLogout">Log out</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="admin-dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="admin-employees">Employee Management</button>
+    <button class="tab-btn" data-tab="admin-services">Services</button>
+    <button class="tab-btn" data-tab="admin-accounts">Accounts</button>
+    <button class="tab-btn" data-tab="admin-customers">Customers</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="tab-panel active" id="tab-admin-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card" id="statEmployeesCard" style="cursor:pointer;"><div class="stat-value" id="statEmployees">—</div><div class="stat-label">Employees ›</div></div>
+      <div class="stat-card" id="statCustomersCard" style="cursor:pointer;"><div class="stat-value" id="statCustomers">—</div><div class="stat-label">Customers ›</div></div>
+      <div class="stat-card" id="statServicesCard" style="cursor:pointer;"><div class="stat-value" id="statServices">—</div><div class="stat-label">Services ›</div></div>
+      <div class="stat-card"><div class="stat-value" id="statActive">—</div><div class="stat-label">On Shift Now</div></div>
+      <div class="stat-card" id="statAccountsCard" style="cursor:pointer; text-align:left; padding:20px 22px;">
+        <div class="stat-label" style="margin-bottom:12px;">Accounts ›</div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span class="cust-meta">Cash Balance</span><strong id="dashCashBalance">—</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span class="cust-meta">Digital Balance</span><strong id="dashDigitalBalance">—</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span class="cust-meta">Today's Profit</span><strong id="dashTodayProfit">—</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Management -->
+  <div class="tab-panel" id="tab-admin-employees">
+    <div class="panel">
+      <div class="panel-title">Create employee</div>
+      <div class="msg" id="empMsg"></div>
+      <div class="form-row">
+        <div class="field"><label>Name</label><input id="empName" type="text" placeholder="Employee name" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Username</label><input id="empUsername" type="text" placeholder="e.g. rahul" /></div>
+        <div class="field"><label>Password</label><input id="empPassword" type="text" placeholder="Set a password" /></div>
+      </div>
+      <button class="btn moss" id="createEmpBtn">Add employee</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Employees</div>
+        <div class="inv-checkbox-row" style="margin-bottom:0;">
+          <input type="checkbox" id="empShowArchived" />
+          <label for="empShowArchived">Show archived</label>
+        </div>
+      </div>
+      <div id="empList"></div>
+    </div>
+  </div>
+
+  <!-- Services -->
+  <div class="tab-panel" id="tab-admin-services">
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="svc-tests">Tests</button>
+      <button class="subtab-btn" data-subtab="svc-packages">Packages</button>
+    </div>
+
+    <div class="subtab-panel active" id="subtab-svc-tests">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Services / Tests</div>
+        <div>
+          <input type="file" id="svcImportFile" class="import-input" accept="application/json,.json" />
+          <button class="btn ghost" id="svcImportBtn">Import Data</button>
+        </div>
+      </div>
+      <div class="msg" id="svcMsg"></div>
+      <div class="form-row">
+        <div class="field"><label>Test name</label><input id="svcName" type="text" placeholder="e.g. CBC" /></div>
+        <div class="field" style="max-width:160px;"><label>Price (₹)</label><input id="svcPrice" type="number" placeholder="e.g. 260" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Category</label>
+          <select class="field-select" id="svcCategory"></select>
+        </div>
+        <div class="field" id="svcNewCategoryWrap" style="display:none;">
+          <label>New category name</label>
+          <input id="svcNewCategory" type="text" placeholder="Type new category..." />
+        </div>
+      </div>
+      <button class="btn moss" id="createSvcBtn">Add service</button>
+
+      <div class="inv-checkbox-row" style="margin-top:20px; margin-bottom:0;">
+        <input type="checkbox" id="svcShowArchived" />
+        <label for="svcShowArchived">Show archived</label>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>Filter by category</label>
+        <select class="field-select" id="svcCategoryFilter"><option value="">All Categories</option></select>
+      </div>
+      <div class="field" style="margin-top:16px;"><input id="svcSearchFilter" type="text" placeholder="Search by test name..." /></div>
+
+      <div class="table-wrap" style="margin-top:16px;">
+        <table class="cust-table" id="svcTable">
+          <thead><tr><th>Name</th><th>Category</th><th>Price (₹)</th><th>Website</th><th></th></tr></thead>
+          <tbody id="svcTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+
+    <div class="subtab-panel" id="subtab-svc-packages">
+      <div class="panel">
+        <div class="panel-title">Create package</div>
+        <div class="msg" id="pkgMsg"></div>
+        <div class="field"><label>Package name</label><input id="pkgName" type="text" placeholder="e.g. Full Body Checkup" /></div>
+        <div class="field"><label>Search tests</label><input id="pkgTestSearch" type="text" placeholder="Start typing test name..." /></div>
+        <div class="inv-service-list" id="pkgTestSelector" style="max-height:280px;"><p class="empty">Loading tests…</p></div>
+
+        <div class="inv-summary" style="margin-top:16px;">
+          <div class="inv-summary-row total"><span>Total MRP (sum of selected tests):</span><strong id="pkgMrpDisplay">₹0.00</strong></div>
+        </div>
+        <div class="field" style="max-width:220px; margin-top:12px;"><label>Published Package Rate (₹)</label><input id="pkgRate" type="number" placeholder="Discounted price" /></div>
+        <button class="btn moss" id="createPkgBtn" style="margin-top:16px;">Publish package</button>
+      </div>
+
+      <div class="panel">
+        <div class="inv-checkbox-row" style="margin-bottom:16px;">
+          <input type="checkbox" id="pkgShowArchived" />
+          <label for="pkgShowArchived">Show archived</label>
+        </div>
+        <div class="table-wrap">
+          <table class="cust-table" id="pkgTable">
+            <thead><tr><th>Package</th><th>Tests</th><th>MRP</th><th>Rate</th><th>Savings</th><th></th></tr></thead>
+            <tbody id="pkgTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accounts -->
+  <div class="tab-panel" id="tab-admin-accounts">
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="admin-overview">Overview</button>
+      <button class="subtab-btn" data-subtab="admin-ledger">Ledger</button>
+    </div>
+
+    <div class="subtab-panel active" id="subtab-admin-overview">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Filter</div>
+        <div class="mode-pills">
+          <button type="button" class="mode-pill selected" id="acctFilterDailyBtn" data-range="daily">Daily</button>
+          <button type="button" class="mode-pill" id="acctFilterMonthlyBtn" data-range="monthly">Monthly</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field" id="acctDailyFieldWrap" style="max-width:220px;">
+          <label>Date</label>
+          <input id="acctFilterDate" type="date" />
+        </div>
+        <div class="field" id="acctMonthlyFieldWrap" style="max-width:220px; display:none;">
+          <label>Month</label>
+          <input id="acctFilterMonth" type="month" />
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Collections — <span id="acctPeriodLabel">today</span></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="acctCashToday">—</div><div class="stat-label">Cash</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctUpiToday">—</div><div class="stat-label">UPI</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctCardToday">—</div><div class="stat-label">Card</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctCreditToday">—</div><div class="stat-label">Credit (new)</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctTotalToday">—</div><div class="stat-label">Total Revenue</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Profit &amp; loss — <span id="acctPeriodLabel2">today</span></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="acctRevenueStat">—</div><div class="stat-label">Revenue</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctExpenseStat">—</div><div class="stat-label">Expenses</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctProfitStat">—</div><div class="stat-label">Net Profit / Loss</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Current balances (all-time, from ledger)</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="acctCashBalanceOverview">—</div><div class="stat-label">Cash Balance</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctDigitalBalanceOverview">—</div><div class="stat-label">Digital Balance</div></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="subtab-panel" id="subtab-admin-ledger">
+      <div class="panel">
+        <div class="panel-header-row">
+          <div class="panel-title" style="margin-bottom:0;">Full ledger (invoices + expenses + manual entries)</div>
+          <div>
+            <input type="file" id="ledgerImportFile" class="import-input" accept="application/json,.json" />
+            <button class="btn ghost" id="ledgerImportBtn">Import JSON backup</button>
+            <button class="btn ghost" id="ledgerExportCsvBtn">Export CSV</button>
+          </div>
+        </div>
+        <div class="msg" id="ledgerImportMsg"></div>
+
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-value" id="ledgerIncomeStat">—</div><div class="stat-label">Total Customer Income</div></div>
+          <div class="stat-card"><div class="stat-value" id="ledgerExpenseStat">—</div><div class="stat-label">Total Expenses (Debit)</div></div>
+          <div class="stat-card"><div class="stat-value" id="ledgerCashClosingStat">—</div><div class="stat-label">Cash Closing Balance</div></div>
+          <div class="stat-card"><div class="stat-value" id="ledgerBankClosingStat">—</div><div class="stat-label">Bank Closing Balance</div></div>
+        </div>
+
+        <div class="form-row">
+          <div class="field"><input id="ledgerSearch" type="text" placeholder="Search invoice / customer / B2B / reason..." /></div>
+          <div class="field" style="max-width:160px;"><input id="ledgerPatientIdFilter" type="text" placeholder="Patient ID" /></div>
+          <div class="field" style="max-width:170px;"><select class="field-select" id="ledgerMonthFilter"><option value="">All Months</option></select></div>
+          <div class="field" style="max-width:150px;"><select class="field-select" id="ledgerModeFilter">
+            <option value="">All Modes</option><option>Cash</option><option>UPI</option><option>Card</option><option>Credit</option><option>Bank</option>
+          </select></div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="max-width:170px;"><label>Start date</label><input id="ledgerStartDate" type="date" /></div>
+          <div class="field" style="max-width:170px;"><label>End date</label><input id="ledgerEndDate" type="date" /></div>
+          <div class="field" style="display:flex; align-items:flex-end;">
+            <button class="btn moss" id="ledgerAddAmountBtn" type="button">+ Add Amount</button>
+            <button class="btn red" id="ledgerAddExpenseBtn" type="button">+ Add Expense</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="max-width:180px;"><label>Opening Cash Balance (₹)</label><input id="ledgerOpeningCash" type="number" step="0.01" /></div>
+          <div class="field" style="max-width:180px;"><label>Opening Bank Balance (₹)</label><input id="ledgerOpeningBank" type="number" step="0.01" /></div>
+          <div class="field" style="display:flex; align-items:flex-end;">
+            <button class="btn ghost" id="ledgerSaveOpeningBtn" type="button">Save Opening Balances</button>
+          </div>
+        </div>
+        <div class="msg" id="ledgerOpeningMsg"></div>
+
+        <div class="table-wrap" style="margin-top:16px;">
+          <table class="cust-table" id="ledgerAllTable">
+            <thead><tr>
+              <th>Type</th><th>Date</th><th>Invoice</th><th>Customer / Reason</th><th>Mode</th>
+              <th>Received</th><th>Pending</th><th>Holding</th><th></th><th></th>
+            </tr></thead>
+            <tbody id="ledgerAllBody"></tbody>
+            <tfoot id="ledgerFooter"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customers -->
+  <div class="tab-panel" id="tab-admin-customers">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">All customers</div>
+        <div class="inv-checkbox-row" style="margin-bottom:0;">
+          <input type="checkbox" id="adminCustShowArchived" />
+          <label for="adminCustShowArchived">Show archived</label>
+        </div>
+      </div>
+      <div class="field"><input id="adminCustSearchFilter" type="text" placeholder="Search by name, phone, or Patient ID..." /></div>
+      <div class="table-wrap">
+        <table class="cust-table" id="adminCustTable">
+          <thead><tr><th>Name</th><th>Age / Sex</th><th>Phone</th><th>Patient ID</th><th>Branch</th><th>Added</th><th></th></tr></thead>
+          <tbody id="adminCustTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMPLOYEE DASHBOARD -->
+<div class="dash-wrap" id="empWrap">
+  <div class="dash-header">
+    <div>
+      <div class="greeting-eyebrow">Signed in as</div>
+      <div class="greeting" id="empGreeting"></div>
+      <div class="mini-clock">
+        <div class="status-tag" id="statusTag"><span class="status-dot"></span><span id="statusText">Off shift</span></div>
+        <div class="timer idle" id="timer">00:00:00</div>
+        <button class="punch-btn in" id="punchBtn">Check In</button>
+      </div>
+    </div>
+    <button class="btn ghost" id="empLogout">Log out</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="customer">Customer Registration</button>
+    <button class="tab-btn" data-tab="invoice">Invoice Generator</button>
+    <button class="tab-btn" data-tab="inventory">Inventory Update</button>
+    <button class="tab-btn" data-tab="timelog">Time Log History</button>
+    <button class="tab-btn" data-tab="accounts">Accounts</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-customer">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Register new customer</div>
+        <div>
+          <input type="file" id="importFile" class="import-input" accept="application/json,.json" />
+          <button class="btn ghost" id="importBtn">Import Data</button>
+        </div>
+      </div>
+      <div class="msg" id="custMsg"></div>
+      <div class="form-row">
+        <div class="field"><label>Title</label>
+          <select class="field-select" id="custTitle">
+            <option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Miss.</option>
+            <option>Master.</option><option>Baby.</option><option>Child.</option><option>Dr.</option>
+          </select>
+        </div>
+        <div class="field"><label>Name</label><input id="custName" type="text" placeholder="Full name" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Age</label><input id="custAge" type="text" placeholder="e.g. 34" /></div>
+        <div class="field"><label>Sex</label>
+          <select class="field-select" id="custSex">
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Patient ID</label><input id="custPatientId" type="text" placeholder="optional" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Phone</label><input id="custPhone" type="text" placeholder="Phone number" /></div>
+        <div class="field"><label>Email</label><input id="custEmail" type="text" placeholder="optional" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field" style="flex:2;"><label>Address</label><input id="custAddress" type="text" placeholder="optional" /></div>
+        <div class="field"><label>Branch / Spot</label><input id="custBranch" type="text" placeholder="e.g. Egmore" /></div>
+      </div>
+      <button class="btn moss" id="createCustBtn">Add customer</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">All customers</div>
+        <div class="inv-checkbox-row" style="margin-bottom:0;">
+          <input type="checkbox" id="custShowArchived" />
+          <label for="custShowArchived">Show archived</label>
+        </div>
+      </div>
+      <div class="field"><input id="custSearchFilter" type="text" placeholder="Search by name, phone, or Patient ID..." /></div>
+      <div class="table-wrap">
+        <table class="cust-table" id="custTable">
+          <thead><tr><th>Name</th><th>Age / Sex</th><th>Phone</th><th>Patient ID</th><th>Branch</th><th>Added</th><th></th></tr></thead>
+          <tbody id="custTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-invoice">
+    <div class="panel">
+      <div class="panel-title">Patient details</div>
+      <div class="form-row">
+        <div class="field" style="max-width:200px;">
+          <label>Invoice date</label>
+          <input id="invInvoiceDate" type="date" />
+        </div>
+        <div class="field inv-search-wrap">
+          <label>Search patient</label>
+          <input id="invCustomerSearch" type="text" placeholder="Search by name, ID, or phone..." autocomplete="off" />
+          <div class="inv-results-list" id="invCustomerResultsList" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="inv-selected-customer" id="invSelectedCustomerDisplay">Select or type a patient name above.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Select tests / packages</div>
+        <div class="mode-pills" id="invModePills">
+          <button type="button" class="mode-pill selected" data-mode="tests">Tests <span id="invTestsSelectedBadge"></span></button>
+          <button type="button" class="mode-pill" data-mode="packages">Packages <span id="invPackagesSelectedBadge"></span></button>
+        </div>
+      </div>
+
+      <div id="invTestsModeWrap">
+        <div class="field">
+          <label>Search test</label>
+          <input id="invServiceSearch" type="text" placeholder="Start typing test name..." />
+        </div>
+        <div class="inv-service-list" id="invServiceSelectorContainer"><p class="empty">Loading services…</p></div>
+      </div>
+
+      <div id="invPackagesModeWrap" style="display:none;">
+        <div class="field">
+          <label>Search package</label>
+          <input id="invPackageSearch" type="text" placeholder="Start typing package name..." />
+        </div>
+        <div class="inv-service-list" id="invPackageSelectorContainer"><p class="empty">Loading packages…</p></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Charges &amp; discount</div>
+      <div class="form-row">
+        <div class="field"><label>Discount (₹)</label><input id="invDiscountInput" type="number" value="0" min="0" /></div>
+        <div class="field"><label>Other charges (₹)</label><input id="invOtherChargesInput" type="number" value="0" /></div>
+      </div>
+      <div class="field"><label>Charges note (optional)</label><input id="invOtherChargesNote" type="text" placeholder="e.g. Home Collection Fee" /></div>
+      <div class="inv-summary">
+        <div class="inv-summary-row"><span>Subtotal:</span><strong id="invSubTotalDisplay">₹0.00</strong></div>
+        <div class="inv-summary-row" style="color:var(--red);"><span>Discount:</span><strong id="invDiscountDisplay">- ₹0.00</strong></div>
+        <div class="inv-summary-row"><span>Other charges:</span><strong id="invChargesDisplay">+ ₹0.00</strong></div>
+        <div class="inv-summary-row total"><span>GRAND TOTAL:</span><strong id="invGrandTotalDisplay">₹0.00</strong></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Customer payment</div>
+      <div class="field">
+        <label>Customer payment mode</label>
+        <select class="field-select" id="invPaymentMode">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Card">Card</option>
+          <option value="Credit">Credit (Outstanding)</option>
+        </select>
+      </div>
+      <div class="inv-checkbox-row">
+        <input type="checkbox" id="invFullPaymentCheckbox" checked />
+        <label for="invFullPaymentCheckbox">Full payment received</label>
+      </div>
+      <div id="invAdvancePaymentSection" style="display:none;">
+        <div class="field"><label>Advance / partial amount paid (₹)</label><input id="invAdvancePaidAmountInput" type="number" value="0" min="0" /></div>
+      </div>
+      <div class="inv-summary-row total" style="margin-top:6px;"><span>Balance due:</span><strong id="invBalanceDueDisplay">₹0.00</strong></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">B2B / ledger info</div>
+      <div class="field">
+        <label>Business / hospital name (B2B)</label>
+        <select class="field-select" id="invB2bNameSelect">
+          <option value="">Quotation only</option>
+          <option value="SRM">SRM</option>
+          <option value="Tyrocare">Tyrocare</option>
+        </select>
+      </div>
+      <div class="field"><label>Paid amount to B2B (₹)</label><input id="invPaidAmountToB2B" type="number" value="0" min="0" placeholder="Enter amount paid to B2B" /></div>
+      <button class="btn ghost full" id="invSaveLedgerBtn">Save to Transaction Ledger</button>
+    </div>
+
+    <div class="panel">
+      <button class="btn full" id="invPrintBtn" style="margin-bottom:12px;">Generate &amp; Print Invoice</button>
+      <button class="btn ghost full" id="invSaveHtmlBtn">Save Invoice as HTML</button>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-timelog">
+    <div class="panel">
+      <div class="history-title">Recent sessions (your check-ins only)</div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-accounts">
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="transactions">Transactions History</button>
+      <button class="subtab-btn" data-subtab="pending">Pending Payments</button>
+      <button class="subtab-btn" data-subtab="closing">Daily Closing</button>
+      <button class="subtab-btn" data-subtab="expenses">Expenses</button>
+    </div>
+
+    <!-- TRANSACTIONS HISTORY -->
+    <div class="subtab-panel active" id="subtab-transactions">
+      <div class="panel">
+        <div class="panel-header-row">
+          <div class="panel-title" style="margin-bottom:0;">All transactions</div>
+        </div>
+        <div class="field"><input id="acctTxnSearch" type="text" placeholder="Search by invoice number or customer name..." /></div>
+        <div class="table-wrap" style="margin-top:16px;">
+          <table class="cust-table" id="acctTxnTable">
+            <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Mode</th><th>Total</th><th>Paid</th><th>Due</th></tr></thead>
+            <tbody id="acctTxnBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING PAYMENTS -->
+    <div class="subtab-panel" id="subtab-pending">
+      <div class="panel">
+        <div class="panel-title">Pending payments (credit / outstanding)</div>
+        <div class="msg" id="acctPendingMsg"></div>
+        <div class="table-wrap">
+          <table class="cust-table" id="acctPendingTable">
+            <thead><tr><th>Invoice</th><th>Customer</th><th>Balance Due</th><th></th></tr></thead>
+            <tbody id="acctPendingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Recently cleared payments</div>
+        <div class="table-wrap">
+          <table class="cust-table" id="acctClearedTable">
+            <thead><tr><th>Invoice</th><th>Customer</th><th>Amount</th><th>Mode</th><th>Date</th></tr></thead>
+            <tbody id="acctClearedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY CLOSING -->
+    <div class="subtab-panel" id="subtab-closing">
+      <div class="panel">
+        <div class="panel-title">Today's collections (Cash &amp; UPI only)</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value" id="acctCashBalance">—</div><div class="stat-label">Today's Cash Balance</div></div>
+          <div class="stat-card"><div class="stat-value" id="acctDigitalBalance">—</div><div class="stat-label">Today's UPI Balance</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Closing check — does today's actual cash/UPI match?</div>
+        <div class="msg" id="acctMsg"></div>
+
+        <div class="form-row">
+          <div class="field"><label>Actual cash counted (₹)</label><input id="acctActualCash" type="number" placeholder="Count the cash drawer" /></div>
+          <div class="field"><label>Actual UPI received (₹)</label><input id="acctActualDigital" type="number" placeholder="Check UPI app" /></div>
+        </div>
+
+        <div class="inv-summary-row total" id="acctCashDiffRow"><span>Cash — matches?</span><strong id="acctCashDiff">Enter amount above</strong></div>
+        <div class="inv-summary-row total" id="acctDigitalDiffRow"><span>UPI — matches?</span><strong id="acctDigitalDiff">Enter amount above</strong></div>
+
+        <button class="btn moss full" id="acctSubmitBtn" style="margin-top:20px;">Close &amp; Save Today's Report</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Recent closing reports</div>
+        <div class="table-wrap">
+          <table class="cust-table" id="acctHistoryTable">
+            <thead><tr><th>Date</th><th>Employee</th><th>Cash</th><th>UPI</th></tr></thead>
+            <tbody id="acctHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div class="subtab-panel" id="subtab-expenses">
+      <div class="panel">
+        <div class="panel-title">Add expense</div>
+        <div class="msg" id="expMsg"></div>
+        <div class="form-row">
+          <div class="field" style="max-width:180px;"><label>Date</label><input id="expDate" type="date" /></div>
+          <div class="field" style="max-width:200px;"><label>Category</label>
+            <select class="field-select" id="expCategory">
+              <option>Rent</option><option>Salary</option><option>Supplies</option>
+              <option>Electricity</option><option>Maintenance</option><option>Other</option>
+            </select>
+          </div>
+          <div class="field"><label>Description</label><input id="expDescription" type="text" placeholder="e.g. Reagent stock" /></div>
+          <div class="field" style="max-width:150px;"><label>Amount (₹)</label><input id="expAmount" type="number" placeholder="0.00" /></div>
+          <div class="field" style="max-width:150px;"><label>Paid from</label>
+            <select class="field-select" id="expSource">
+              <option>Cash</option><option>UPI</option><option>Card</option><option>Bank</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn moss" id="expAddBtn">Add expense</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">All expenses</div>
+        <div class="table-wrap">
+          <table class="cust-table" id="expTable">
+            <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Paid from</th><th></th></tr></thead>
+            <tbody id="expTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="invInvoicePrintArea"></div>
+
+<!-- Add Amount modal -->
+<div class="modal-overlay" id="addAmountModal">
+  <div class="modal-card">
+    <div class="modal-title">Add Amount</div>
+    <div class="msg" id="addAmountMsg"></div>
+    <div class="field"><label>Amount received (₹)</label><input id="addAmountValue" type="number" placeholder="0.00" /></div>
+    <div class="field"><label>Reason</label><input id="addAmountReason" type="text" value="Manual Cash Input" /></div>
+    <div class="field"><label>Payment mode</label>
+      <div class="mode-pills" id="addAmountModePills">
+        <button type="button" class="mode-pill selected" data-mode="Cash">Cash</button>
+        <button type="button" class="mode-pill" data-mode="UPI">UPI</button>
+        <button type="button" class="mode-pill" data-mode="Card">Card</button>
+        <button type="button" class="mode-pill" data-mode="Bank">Bank</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="addAmountCancelBtn" type="button">Cancel</button>
+      <button class="btn moss" id="addAmountSaveBtn" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Expense modal -->
+<div class="modal-overlay" id="addExpenseModal">
+  <div class="modal-card">
+    <div class="modal-title">Add Expense</div>
+    <div class="msg" id="addExpenseMsg"></div>
+    <div class="field"><label>Amount (₹)</label><input id="addExpenseValue" type="number" placeholder="0.00" /></div>
+    <div class="field"><label>Description</label><input id="addExpenseDescription" type="text" placeholder="e.g. Reagent stock" /></div>
+    <div class="field"><label>Category</label>
+      <select class="field-select" id="addExpenseCategory">
+        <option>Rent</option><option>Salary</option><option>Supplies</option>
+        <option>Electricity</option><option>Maintenance</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Paid from</label>
+      <div class="mode-pills" id="addExpenseModePills">
+        <button type="button" class="mode-pill selected" data-mode="Cash">Cash</button>
+        <button type="button" class="mode-pill" data-mode="UPI">UPI</button>
+        <button type="button" class="mode-pill" data-mode="Card">Card</button>
+        <button type="button" class="mode-pill" data-mode="Bank">Bank</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="addExpenseCancelBtn" type="button">Cancel</button>
+      <button class="btn moss" id="addExpenseSaveBtn" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic confirm modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-card">
+    <div class="modal-title" id="confirmModalTitle">Are you sure?</div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="confirmModalCancelBtn" type="button">Cancel</button>
+      <button class="btn red" id="confirmModalOkBtn" type="button">Remove</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = "https://vyuttatyobyejlbmmhhz.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dXR0YXR5b2J5ZWpsYm1taGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4OTc2ODYsImV4cCI6MjA5ODQ3MzY4Nn0.BQM-0r9UfNkbtdvlMr2gBIOk9mog0gdAsybv4mw87q0";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ---------- IST (India Standard Time, UTC+5:30) helpers ----------
+  // Always compute "today" and invoice timestamps in IST, regardless of
+  // the device/browser's own timezone setting.
+  function nowIST(){
+    return new Date(Date.now() + 5.5 * 60 * 60000);
+  }
+  function istDateStr(d){
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+  function istTimeCompact(d){
+    const h = String(d.getUTCHours()).padStart(2, '0');
+    const mi = String(d.getUTCMinutes()).padStart(2, '0');
+    const s = String(d.getUTCSeconds()).padStart(2, '0');
+    const ms = String(d.getUTCMilliseconds()).padStart(3, '0');
+    return `${h}${mi}${s}${ms}`;
+  }
+
+  // ---------- Screens ----------
+  const authScreen = document.getElementById('authScreen');
+  const adminWrap = document.getElementById('adminWrap');
+  const empWrap = document.getElementById('empWrap');
+
+  function showScreen(name){
+    authScreen.style.display = name === 'auth' ? 'flex' : 'none';
+    adminWrap.style.display = name === 'admin' ? 'block' : 'none';
+    empWrap.style.display = name === 'employee' ? 'block' : 'none';
+  }
+
+  function escapeHtml(str){
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function showMsg(el, text, type){
+    el.textContent = text;
+    el.className = 'msg show ' + type;
+  }
+  function clearMsg(el){ el.className = 'msg'; }
+
+  // ---------- Login ----------
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const authSubmit = document.getElementById('authSubmit');
+  const authMsg = document.getElementById('authMsg');
+
+  let currentEmployee = null;
+  let openSession = null;
+  let tickHandle = null;
+
+  authSubmit.addEventListener('click', async () => {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+    if (!username || !password){ showMsg(authMsg, 'Enter both username and password.', 'err'); return; }
+
+    clearMsg(authMsg);
+    authSubmit.disabled = true;
+
+    const { data: adminMatch } = await sb
+      .from('admin_users')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .maybeSingle();
+
+    if (adminMatch){
+      usernameInput.value = ''; passwordInput.value = '';
+      showScreen('admin');
+      await loadEmployees();
+      await loadServices();
+      await pkgLoadServiceSelector();
+      await pkgLoadList();
+      await loadAdminCustomers();
+      await loadAdminStats();
+      await acctRefreshAdminOverview();
+      await loadDashboardAccountsCard();
+      authSubmit.disabled = false;
+      return;
+    }
+
+    const { data, error } = await sb
+      .from('employees')
+      .select('*')
+      .eq('username', username)
+      .eq('password', password)
+      .eq('active', true)
+      .maybeSingle();
+
+    authSubmit.disabled = false;
+
+    if (error || !data){
+      showMsg(authMsg, 'Invalid username or password.', 'err');
+      return;
+    }
+
+    currentEmployee = data;
+    usernameInput.value = ''; passwordInput.value = '';
+    document.getElementById('empGreeting').textContent = data.name || data.username;
+    showScreen('employee');
+    await loadOpenSession();
+    await loadHistory();
+    await loadCustomers();
+    await suggestNextPatientId();
+    await invLoadInitialData();
+    await acctRefreshEmployeeAccounts();
+    startTicking();
+  });
+
+  document.getElementById('adminLogout').addEventListener('click', () => { showScreen('auth'); });
+  document.getElementById('empLogout').addEventListener('click', () => {
+    if (tickHandle) clearInterval(tickHandle);
+    currentEmployee = null;
+    openSession = null;
+    showScreen('auth');
+  });
+
+  // ---------- Admin: dashboard stats ----------
+  async function loadAdminStats(){
+    const results = await Promise.allSettled([
+      sb.from('employees').select('*', { count: 'exact', head: true }),
+      sb.from('customers').select('*', { count: 'exact', head: true }),
+      sb.from('services').select('*', { count: 'exact', head: true }),
+      sb.from('checkins').select('*', { count: 'exact', head: true }).is('check_out', null)
+    ]);
+    const [emp, cust, svc, active] = results;
+    document.getElementById('statEmployees').textContent = (emp.status === 'fulfilled' && !emp.value.error) ? emp.value.count : '—';
+    document.getElementById('statCustomers').textContent = (cust.status === 'fulfilled' && !cust.value.error) ? cust.value.count : '—';
+    document.getElementById('statServices').textContent = (svc.status === 'fulfilled' && !svc.value.error) ? svc.value.count : '—';
+    document.getElementById('statActive').textContent = (active.status === 'fulfilled' && !active.value.error) ? active.value.count : '—';
+  }
+
+  // ---------- Admin: employee management ----------
+  const empMsg = document.getElementById('empMsg');
+  const empList = document.getElementById('empList');
+
+  async function loadEmployees(){
+    const showArchived = document.getElementById('empShowArchived').checked;
+    let query = sb.from('employees').select('*').order('created_at', { ascending: false });
+    query = showArchived ? query : query.eq('active', true);
+    const { data, error } = await query;
+
+    if (error || !data || data.length === 0){
+      empList.innerHTML = '<div class="empty">No employees yet. Add one above.</div>';
+      return;
+    }
+    empList.innerHTML = data.map(e => `
+      <div class="emp-row">
+        <div>
+          <div class="emp-name">${escapeHtml(e.name) || '(no name)'} ${e.active === false ? '<span class="cust-meta" style="color:var(--red);">(archived)</span>' : ''}</div>
+          <div class="emp-username">${escapeHtml(e.username)}</div>
+        </div>
+        <button class="emp-del" data-id="${e.id}" data-active="${e.active}" style="color:${e.active === false ? 'var(--moss)' : 'var(--red)'};">${e.active === false ? 'Restore' : 'Archive'}</button>
+      </div>
+    `).join('');
+
+    empList.querySelectorAll('.emp-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const isActive = btn.dataset.active === 'true';
+        await sb.from('employees').update({ active: !isActive }).eq('id', btn.dataset.id);
+        await loadEmployees();
+        await loadAdminStats();
+      });
+    });
+  }
+  document.getElementById('empShowArchived').addEventListener('change', loadEmployees);
+
+  document.getElementById('createEmpBtn').addEventListener('click', async () => {
+    const name = document.getElementById('empName').value.trim();
+    const username = document.getElementById('empUsername').value.trim();
+    const password = document.getElementById('empPassword').value;
+
+    if (!username || !password){
+      showMsg(empMsg, 'Username and password are required.', 'err');
+      return;
+    }
+
+    const { error } = await sb.from('employees').insert({ name, username, password });
+    if (error){
+      showMsg(empMsg, error.message.includes('duplicate') ? 'That username is already taken.' : error.message, 'err');
+      return;
+    }
+
+    showMsg(empMsg, 'Employee created.', 'ok');
+    document.getElementById('empName').value = '';
+    document.getElementById('empUsername').value = '';
+    document.getElementById('empPassword').value = '';
+    await loadEmployees();
+    await loadAdminStats();
+  });
+
+  // ---------- Admin: services / tests management ----------
+  const svcMsg = document.getElementById('svcMsg');
+  const svcTableBody = document.getElementById('svcTableBody');
+
+  const SVC_PRESET_CATEGORIES = [
+    'Diabetes Related Tests','Complete Blood Count (CBC) / Haematology Profile','Liver Function Tests (LFT)',
+    'Kidney Function Tests (KFT / RFT)','Thyroid Profile','Lipid Profile (Cholesterol)','Vitamins and Minerals Tests',
+    'Infection and Inflammation Markers','Blood Grouping and Typing','Cardiac Markers (Heart Markers)',
+    'Cancer / Tumor Markers','Hormone Profiles','Autoimmune Disease Tests / Immunology',
+    'Coagulation Profiles (Blood Clotting Tests)','Serum Electrolytes and Blood Gas Analysis (ABG)','Allergy Panels',
+    'Genetic and DNA Blood Tests','Blood Culture and Sensitivity','Bone Profile / Metabolic Bone Markers',
+    'Anemia Profiles (Iron & Ferritin tracking)','STD / STI Screening','Therapeutic Drug Monitoring (TDM)',
+    'Toxicology Screening','Prenatal / Screening Tests','Arthritis Profiles','Immunoglobulins Test',
+    'Fluid Analysis','Flow Cytometry','Sepsis Markers','Neurological Biomarkers','Uncategorized'
+  ];
+  const SVC_NEW_CATEGORY_VALUE = '__new__';
+
+  function svcPopulateCategoryDropdowns(extraCategories){
+    const allCats = Array.from(new Set([...SVC_PRESET_CATEGORIES, ...(extraCategories || [])])).sort();
+
+    const createSel = document.getElementById('svcCategory');
+    createSel.innerHTML = allCats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
+      + `<option value="${SVC_NEW_CATEGORY_VALUE}">+ Add New Category...</option>`;
+
+    const filterSel = document.getElementById('svcCategoryFilter');
+    const currentFilter = filterSel.value;
+    filterSel.innerHTML = '<option value="">All Categories</option>' + allCats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    filterSel.value = currentFilter;
+  }
+
+  document.getElementById('svcCategory').addEventListener('change', (e) => {
+    document.getElementById('svcNewCategoryWrap').style.display = e.target.value === SVC_NEW_CATEGORY_VALUE ? 'block' : 'none';
+  });
+
+  let svcAllRows = [];
+
+  async function loadServices(){
+    const showArchived = document.getElementById('svcShowArchived').checked;
+    const categoryFilter = document.getElementById('svcCategoryFilter').value;
+
+    let query = sb.from('services').select('*').order('category', { ascending: true }).order('name', { ascending: true });
+    query = showArchived ? query : query.eq('active', true);
+    if (categoryFilter) query = query.eq('category', categoryFilter);
+    const { data, error } = await query;
+
+    // Refresh category dropdowns with any custom categories already in use
+    const { data: allForCats } = await sb.from('services').select('category');
+    svcPopulateCategoryDropdowns((allForCats || []).map(r => r.category).filter(Boolean));
+
+    svcAllRows = (!error && data) ? data : [];
+    svcApplyFilter();
+  }
+
+  function svcApplyFilter(){
+    const term = document.getElementById('svcSearchFilter').value.toLowerCase().trim();
+    const rows = term ? svcAllRows.filter(s => (s.name || '').toLowerCase().includes(term)) : svcAllRows;
+    svcRenderRows(rows);
+  }
+  document.getElementById('svcSearchFilter').addEventListener('input', svcApplyFilter);
+
+  function svcRenderRows(data){
+    if (!data || data.length === 0){
+      svcTableBody.innerHTML = '<tr><td colspan="5" class="empty">No services found.</td></tr>';
+      return;
+    }
+    svcTableBody.innerHTML = data.map(s => `
+      <tr>
+        <td>${escapeHtml(s.name)} ${s.active === false ? '<span class="cust-meta" style="color:var(--red);">(archived)</span>' : ''}</td>
+        <td class="cust-meta">${escapeHtml(s.category || 'Uncategorized')}</td>
+        <td class="cust-meta">₹${escapeHtml(s.price)}</td>
+        <td style="text-align:center;">
+          <button class="svc-visibility-toggle" data-id="${s.id}" data-visible="${s.visible_external !== false}" title="${s.visible_external !== false ? 'Visible on linked website — click to hide' : 'Hidden from linked website — click to show'}" style="background:none; border:none; cursor:pointer; font-size:18px; color:${s.visible_external !== false ? 'var(--moss)' : 'var(--red)'}; text-decoration:${s.visible_external !== false ? 'none' : 'line-through'};">👁</button>
+        </td>
+        <td style="text-align:right; white-space:nowrap;">
+          <button class="emp-del svc-edit" data-id="${s.id}" data-name="${escapeHtml(s.name)}" data-price="${s.price}" data-category="${escapeHtml(s.category || 'Uncategorized')}" style="color:var(--moss); margin-right:14px;">Edit</button>
+          <button class="emp-del svc-del" data-id="${s.id}" data-active="${s.active}" style="color:${s.active === false ? 'var(--moss)' : 'var(--red)'};">${s.active === false ? 'Restore' : 'Archive'}</button>
+        </td>
+      </tr>
+    `).join('');
+
+    svcTableBody.querySelectorAll('.svc-visibility-toggle').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const wasVisible = btn.dataset.visible === 'true';
+        const nowVisible = !wasVisible;
+
+        // Update instantly — don't wait for the network round-trip or reload the table.
+        btn.dataset.visible = String(nowVisible);
+        btn.style.color = nowVisible ? 'var(--moss)' : 'var(--red)';
+        btn.style.textDecoration = nowVisible ? 'none' : 'line-through';
+        btn.title = nowVisible ? 'Visible on linked website — click to hide' : 'Hidden from linked website — click to show';
+
+        const { error } = await sb.from('services').update({ visible_external: nowVisible }).eq('id', btn.dataset.id);
+        if (error){
+          // Revert only if the save actually failed
+          btn.dataset.visible = String(wasVisible);
+          btn.style.color = wasVisible ? 'var(--moss)' : 'var(--red)';
+          btn.style.textDecoration = wasVisible ? 'none' : 'line-through';
+          btn.title = wasVisible ? 'Visible on linked website — click to hide' : 'Hidden from linked website — click to show';
+          showMsg(svcMsg, 'Could not update visibility: ' + error.message, 'err');
+        }
+      });
+    });
+
+    svcTableBody.querySelectorAll('.svc-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const isActive = btn.dataset.active === 'true';
+        await sb.from('services').update({ active: !isActive }).eq('id', btn.dataset.id);
+        await loadServices();
+        await loadAdminStats();
+      });
+    });
+
+    svcTableBody.querySelectorAll('.svc-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tr = btn.closest('tr');
+        const name = btn.dataset.name;
+        const price = btn.dataset.price;
+        const category = btn.dataset.category;
+        const catOptions = SVC_PRESET_CATEGORIES.includes(category) ? SVC_PRESET_CATEGORIES : [category, ...SVC_PRESET_CATEGORIES];
+
+        tr.innerHTML = `
+          <td><input type="text" class="svc-edit-name" value="${escapeHtml(name)}" style="width:100%; padding:8px 10px; font-size:13px; border:1px solid var(--rule); border-radius:6px; font-family:var(--font-body); background:#fffdfa; color:var(--ink);" /></td>
+          <td><select class="svc-edit-category field-select" style="padding:8px 10px; font-size:13px;">
+            ${catOptions.map(c => `<option value="${escapeHtml(c)}" ${c === category ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
+          </select></td>
+          <td><input type="number" class="svc-edit-price" value="${price}" step="0.01" style="width:100px; padding:8px 10px; font-size:13px; border:1px solid var(--rule); border-radius:6px; font-family:var(--font-mono); background:#fffdfa; color:var(--ink);" /></td>
+          <td class="cust-meta" style="text-align:center;">—</td>
+          <td style="text-align:right; white-space:nowrap;">
+            <button class="btn moss btn-sm svc-edit-save">Save</button>
+            <button class="btn ghost btn-sm svc-edit-cancel">Cancel</button>
+          </td>`;
+
+        tr.querySelector('.svc-edit-cancel').addEventListener('click', () => svcApplyFilter());
+
+        tr.querySelector('.svc-edit-save').addEventListener('click', async () => {
+          const newName = tr.querySelector('.svc-edit-name').value.trim().toUpperCase();
+          const newPrice = parseFloat(tr.querySelector('.svc-edit-price').value);
+          const newCategory = tr.querySelector('.svc-edit-category').value;
+          if (!newName || isNaN(newPrice)){
+            showMsg(svcMsg, 'Enter a valid test name and price.', 'err');
+            return;
+          }
+          const { error } = await sb.from('services')
+            .update({ name: newName, price: newPrice, category: newCategory })
+            .eq('id', btn.dataset.id);
+          if (error){ showMsg(svcMsg, error.message, 'err'); return; }
+          await loadServices();
+        });
+      });
+    });
+  }
+  document.getElementById('svcCategoryFilter').addEventListener('change', loadServices);
+  document.getElementById('svcShowArchived').addEventListener('change', loadServices);
+
+  document.getElementById('createSvcBtn').addEventListener('click', async () => {
+    const name = document.getElementById('svcName').value.trim().toUpperCase();
+    const priceRaw = document.getElementById('svcPrice').value;
+    const price = parseFloat(priceRaw);
+    const categorySelect = document.getElementById('svcCategory').value;
+    const category = categorySelect === SVC_NEW_CATEGORY_VALUE
+      ? (document.getElementById('svcNewCategory').value.trim() || 'Uncategorized')
+      : categorySelect;
+
+    if (!name || isNaN(price)){
+      showMsg(svcMsg, 'Enter a test name and a valid price.', 'err');
+      return;
+    }
+
+    const { data: existing } = await sb.from('services').select('id').order('id', { ascending: false }).limit(1);
+    const nextId = (existing && existing.length > 0) ? existing[0].id + 1 : 1;
+
+    const { error } = await sb.from('services').insert({ id: nextId, name, price, category });
+    if (error){ showMsg(svcMsg, error.message, 'err'); return; }
+
+    showMsg(svcMsg, 'Service added.', 'ok');
+    document.getElementById('svcName').value = '';
+    document.getElementById('svcPrice').value = '';
+    document.getElementById('svcNewCategory').value = '';
+    document.getElementById('svcNewCategoryWrap').style.display = 'none';
+    await loadServices();
+    await loadAdminStats();
+  });
+
+  function sanitizeServiceRecord(r){
+    return {
+      id: Number(r.id),
+      name: String(r.name || '').trim().toUpperCase(),
+      price: Number(r.price),
+      category: (r.category && String(r.category).trim()) || 'Uncategorized'
+    };
+  }
+
+  const svcImportBtn = document.getElementById('svcImportBtn');
+  const svcImportFile = document.getElementById('svcImportFile');
+  svcImportBtn.addEventListener('click', () => svcImportFile.click());
+
+  svcImportFile.addEventListener('change', async () => {
+    const file = svcImportFile.files[0];
+    if (!file) return;
+
+    svcImportBtn.disabled = true;
+    showMsg(svcMsg, 'Reading file…', 'ok');
+
+    try{
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const rawRecords = Array.isArray(parsed) ? parsed : [parsed];
+
+      if (rawRecords.length === 0){
+        showMsg(svcMsg, 'File has no records.', 'err');
+        svcImportBtn.disabled = false;
+        return;
+      }
+
+      const records = rawRecords.map(sanitizeServiceRecord);
+      const { error } = await sb.from('services').upsert(records, { onConflict: 'id' });
+
+      if (error){
+        showMsg(svcMsg, 'Import failed: ' + error.message, 'err');
+      } else {
+        showMsg(svcMsg, `Imported ${records.length} service(s) successfully.`, 'ok');
+        await loadServices();
+        await loadAdminStats();
+      }
+    } catch(e){
+      showMsg(svcMsg, 'Invalid JSON file: ' + e.message, 'err');
+    }
+
+    svcImportFile.value = '';
+    svcImportBtn.disabled = false;
+  });
+
+  // ---------- Packages ----------
+  let pkgAllServices = [];
+  let pkgSelectedTestIds = new Set();
+
+  async function pkgLoadServiceSelector(){
+    const { data } = await sb.from('services').select('id, name, price').eq('active', true).order('name');
+    pkgAllServices = data || [];
+    pkgRenderServiceSelector(pkgAllServices);
+  }
+
+  function pkgRenderServiceSelector(list){
+    const container = document.getElementById('pkgTestSelector');
+    if (!list || list.length === 0){
+      container.innerHTML = '<p class="empty">No services found.</p>';
+      return;
+    }
+    container.innerHTML = list.map(s => `
+      <div class="inv-service-item">
+        <input type="checkbox" id="pkg-test-${s.id}" value="${s.id}" ${pkgSelectedTestIds.has(s.id) ? 'checked' : ''} />
+        <label for="pkg-test-${s.id}" style="flex-grow:1; margin-bottom:0; font-weight:400; cursor:pointer;">${escapeHtml(s.name)}</label>
+        <span class="inv-service-price">₹${parseFloat(s.price).toFixed(2)}</span>
+      </div>`).join('');
+
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const id = parseInt(cb.value, 10);
+        if (cb.checked) pkgSelectedTestIds.add(id); else pkgSelectedTestIds.delete(id);
+        pkgUpdateMrp();
+      });
+    });
+  }
+
+  function pkgUpdateMrp(){
+    const total = pkgAllServices
+      .filter(s => pkgSelectedTestIds.has(s.id))
+      .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
+    document.getElementById('pkgMrpDisplay').textContent = acctFmt(total);
+    return total;
+  }
+
+  document.getElementById('pkgTestSearch').addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    pkgRenderServiceSelector(term ? pkgAllServices.filter(s => s.name.toLowerCase().includes(term)) : pkgAllServices);
+  });
+
+  document.getElementById('createPkgBtn').addEventListener('click', async () => {
+    const name = document.getElementById('pkgName').value.trim();
+    const rate = parseFloat(document.getElementById('pkgRate').value);
+    const mrp = pkgUpdateMrp();
+    const testIds = Array.from(pkgSelectedTestIds);
+
+    if (!name){ showMsg(document.getElementById('pkgMsg'), 'Enter a package name.', 'err'); return; }
+    if (testIds.length === 0){ showMsg(document.getElementById('pkgMsg'), 'Select at least one test.', 'err'); return; }
+    if (isNaN(rate) || rate <= 0){ showMsg(document.getElementById('pkgMsg'), 'Enter a valid published rate.', 'err'); return; }
+
+    const { error } = await sb.from('packages').insert({ name, test_ids: testIds, mrp, rate });
+    if (error){ showMsg(document.getElementById('pkgMsg'), error.message, 'err'); return; }
+
+    showMsg(document.getElementById('pkgMsg'), 'Package published.', 'ok');
+    document.getElementById('pkgName').value = '';
+    document.getElementById('pkgRate').value = '';
+    pkgSelectedTestIds = new Set();
+    pkgRenderServiceSelector(pkgAllServices);
+    pkgUpdateMrp();
+    await pkgLoadList();
+    await loadAdminStats();
+  });
+
+  async function pkgLoadList(){
+    const showArchived = document.getElementById('pkgShowArchived').checked;
+    let query = sb.from('packages').select('*').order('created_at', { ascending: false });
+    query = showArchived ? query : query.eq('active', true);
+    const { data, error } = await query;
+
+    const { data: allServicesForLookup } = await sb.from('services').select('id, name');
+    const serviceNameById = {};
+    (allServicesForLookup || []).forEach(s => { serviceNameById[s.id] = s.name; });
+
+    const body = document.getElementById('pkgTableBody');
+    if (error || !data || data.length === 0){
+      body.innerHTML = '<tr><td colspan="6" class="empty">No packages yet.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = data.map((p, idx) => {
+      const savings = (parseFloat(p.mrp) || 0) - (parseFloat(p.rate) || 0);
+      const rowId = 'pkg-detail-' + idx;
+      const testNames = (p.test_ids || []).map(id => serviceNameById[id] || `#${id}`).join(', ') || '—';
+      return `
+      <tr>
+        <td>
+          ${escapeHtml(p.name)} ${p.active === false ? '<span class="cust-meta" style="color:var(--red);">(archived)</span>' : ''}
+        </td>
+        <td class="cust-meta">
+          <button class="pkg-expand-toggle" data-target="${rowId}" style="margin-left:0;">▼ ${(p.test_ids || []).length} tests</button>
+        </td>
+        <td class="cust-meta">${acctFmt(p.mrp)}</td>
+        <td style="color:var(--amber); font-weight:600;">${acctFmt(p.rate)}</td>
+        <td style="color:var(--moss);">${acctFmt(savings)}</td>
+        <td style="text-align:right;">
+          <button class="emp-del pkg-del" data-id="${p.id}" data-active="${p.active}" style="color:${p.active === false ? 'var(--moss)' : 'var(--red)'};">${p.active === false ? 'Restore' : 'Archive'}</button>
+        </td>
+      </tr>
+      <tr id="${rowId}" style="display:none;">
+        <td colspan="6" style="background:var(--amber-soft); font-size:13px; color:var(--ink-dim);">${escapeHtml(testNames)}</td>
+      </tr>`;
+    }).join('');
+
+    body.querySelectorAll('.pkg-expand-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const row = document.getElementById(btn.dataset.target);
+        const show = row.style.display === 'none';
+        row.style.display = show ? 'table-row' : 'none';
+        btn.textContent = btn.textContent.replace(/^[▼▲]/, show ? '▲' : '▼');
+      });
+    });
+
+    body.querySelectorAll('.pkg-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const isActive = btn.dataset.active === 'true';
+        await sb.from('packages').update({ active: !isActive }).eq('id', btn.dataset.id);
+        await pkgLoadList();
+        await loadAdminStats();
+      });
+    });
+  }
+  document.getElementById('pkgShowArchived').addEventListener('change', pkgLoadList);
+
+  // ---------- Employee: timer ----------
+  const statusTag = document.getElementById('statusTag');
+  const statusText = document.getElementById('statusText');
+  const timerEl = document.getElementById('timer');
+  const punchBtn = document.getElementById('punchBtn');
+  const historyList = document.getElementById('historyList');
+
+  function formatElapsed(ms){
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+    const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+    const s = String(totalSec % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  }
+
+  function startTicking(){
+    if (tickHandle) clearInterval(tickHandle);
+    tickHandle = setInterval(renderTimer, 1000);
+    renderTimer();
+  }
+
+  function renderTimer(){
+    if (openSession){
+      const elapsed = Date.now() - new Date(openSession.check_in).getTime();
+      timerEl.textContent = formatElapsed(elapsed);
+      timerEl.classList.remove('idle');
+      statusTag.classList.add('active');
+      statusText.textContent = 'On shift';
+      punchBtn.textContent = 'Check Out';
+      punchBtn.className = 'punch-btn out';
+    } else {
+      timerEl.textContent = '00:00:00';
+      timerEl.classList.add('idle');
+      statusTag.classList.remove('active');
+      statusText.textContent = 'Off shift';
+      punchBtn.textContent = 'Check In';
+      punchBtn.className = 'punch-btn in';
+    }
+  }
+
+  async function loadOpenSession(){
+    const { data, error } = await sb
+      .from('checkins')
+      .select('id, check_in')
+      .eq('employee_id', currentEmployee.id)
+      .is('check_out', null)
+      .order('check_in', { ascending: false })
+      .limit(1);
+
+    openSession = (!error && data && data.length > 0) ? data[0] : null;
+    renderTimer();
+  }
+
+  async function loadHistory(){
+    const { data, error } = await sb
+      .from('checkins')
+      .select('id, check_in, check_out, duration_seconds')
+      .eq('employee_id', currentEmployee.id)
+      .not('check_out', 'is', null)
+      .order('check_in', { ascending: false })
+      .limit(10);
+
+    if (error || !data || data.length === 0){
+      historyList.innerHTML = '<div class="empty">No completed sessions yet.</div>';
+      return;
+    }
+
+    historyList.innerHTML = data.map(row => {
+      const d = new Date(row.check_in);
+      const dateStr = d.toLocaleDateString('en-US', { month:'short', day:'2-digit' });
+      const inTime = d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+      const outTime = new Date(row.check_out).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+      return `
+        <div class="row">
+          <div>
+            <div class="row-date">${dateStr}</div>
+            <div class="row-time">${inTime} → ${outTime}</div>
+          </div>
+          <div class="row-duration">${formatElapsed(row.duration_seconds * 1000)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  punchBtn.addEventListener('click', async () => {
+    punchBtn.disabled = true;
+    if (!openSession){
+      const { data, error } = await sb
+        .from('checkins')
+        .insert({ employee_id: currentEmployee.id, check_in: new Date().toISOString() })
+        .select('id, check_in')
+        .single();
+      if (!error && data){ openSession = data; renderTimer(); }
+    } else {
+      const checkOutTime = new Date();
+      const durationSec = Math.round((checkOutTime.getTime() - new Date(openSession.check_in).getTime()) / 1000);
+      const { error } = await sb
+        .from('checkins')
+        .update({ check_out: checkOutTime.toISOString(), duration_seconds: durationSec })
+        .eq('id', openSession.id);
+      if (!error){ openSession = null; renderTimer(); await loadHistory(); }
+    }
+    punchBtn.disabled = false;
+  });
+
+  // ---------- Customer registration (shared controller — used by Employee & Admin views) ----------
+  const custMsg = document.getElementById('custMsg');
+  const custTableBody = document.getElementById('custTableBody');
+
+  function makeCustomerListController(ids){
+    let allRows = [];
+
+    function matchesSearch(c, term){
+      return (c.name || '').toLowerCase().includes(term) ||
+        (c.phone || '').toLowerCase().includes(term) ||
+        (c.patientId || '').toLowerCase().includes(term);
+    }
+
+    function applyFilter(){
+      const term = document.getElementById(ids.searchId).value.toLowerCase().trim();
+      render(term ? allRows.filter(c => matchesSearch(c, term)) : allRows);
+    }
+
+    function render(rows){
+      const tbody = document.getElementById(ids.tbodyId);
+      if (!rows || rows.length === 0){
+        tbody.innerHTML = '<tr><td colspan="7" class="empty">No customers found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map((c, idx) => {
+        const rowId = ids.tbodyId + '-edit-' + idx;
+        return `
+        <tr>
+          <td><div class="cust-name">${escapeHtml(c.title || '')} ${escapeHtml(c.name || '')}</div></td>
+          <td class="cust-meta">${escapeHtml(c.age || '—')} / ${escapeHtml(c.sex || '—')}</td>
+          <td class="cust-meta">${escapeHtml(c.phone || '—')}</td>
+          <td class="cust-meta">${escapeHtml(c.patientId || '—')}</td>
+          <td class="cust-meta">${escapeHtml(c.branch || '—')}</td>
+          <td class="cust-meta">${escapeHtml(c.dateAdded ? new Date(c.dateAdded).toLocaleDateString() : '—')}</td>
+          <td style="text-align:right; white-space:nowrap;">
+            <button class="pkg-expand-toggle cust-edit-toggle" data-target="${rowId}" style="margin-left:0; margin-right:10px;">Edit</button>
+            <button class="emp-del cust-archive" data-id="${escapeHtml(c.id)}" data-active="${c.active}" style="color:${c.active === false ? 'var(--moss)' : 'var(--red)'};">${c.active === false ? 'Restore' : 'Archive'}</button>
+          </td>
+        </tr>
+        <tr id="${rowId}" style="display:none;">
+          <td colspan="7" style="background:var(--amber-soft);">
+            <div class="ledger-detail-grid" style="margin-bottom:14px;">
+              <div class="field" style="margin-bottom:0;"><label>Title</label>
+                <select class="field-select cust-edit-title">
+                  <option ${c.title==='Mr.'?'selected':''}>Mr.</option><option ${c.title==='Mrs.'?'selected':''}>Mrs.</option>
+                  <option ${c.title==='Ms.'?'selected':''}>Ms.</option><option ${c.title==='Miss.'?'selected':''}>Miss.</option>
+                  <option ${c.title==='Master.'?'selected':''}>Master.</option><option ${c.title==='Baby.'?'selected':''}>Baby.</option>
+                  <option ${c.title==='Child.'?'selected':''}>Child.</option><option ${c.title==='Dr.'?'selected':''}>Dr.</option>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom:0;"><label>Name</label><input type="text" class="cust-edit-name" value="${escapeHtml(c.name || '')}" /></div>
+              <div class="field" style="margin-bottom:0;"><label>Age</label><input type="text" class="cust-edit-age" value="${escapeHtml(c.age || '')}" /></div>
+              <div class="field" style="margin-bottom:0;"><label>Sex</label>
+                <select class="field-select cust-edit-sex">
+                  <option ${c.sex==='Male'?'selected':''}>Male</option><option ${c.sex==='Female'?'selected':''}>Female</option><option ${c.sex==='Other'?'selected':''}>Other</option>
+                </select>
+              </div>
+              <div class="field" style="margin-bottom:0;"><label>Patient ID</label><input type="text" class="cust-edit-patientid" value="${escapeHtml(c.patientId || '')}" /></div>
+              <div class="field" style="margin-bottom:0;"><label>Phone</label><input type="text" class="cust-edit-phone" value="${escapeHtml(c.phone || '')}" /></div>
+              <div class="field" style="margin-bottom:0;"><label>Email</label><input type="text" class="cust-edit-email" value="${escapeHtml(c.email || '')}" /></div>
+              <div class="field" style="margin-bottom:0;"><label>Branch / Spot</label><input type="text" class="cust-edit-branch" value="${escapeHtml(c.branch || '')}" /></div>
+              <div class="field" style="margin-bottom:0; grid-column:span 2;"><label>Address</label><input type="text" class="cust-edit-address" value="${escapeHtml(c.address || '')}" /></div>
+            </div>
+            <div class="msg" id="${rowId}-msg"></div>
+            <button class="btn moss btn-sm cust-edit-save" data-id="${escapeHtml(c.id)}">Save</button>
+            <button class="btn ghost btn-sm cust-edit-cancel" data-target="${rowId}">Cancel</button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      tbody.querySelectorAll('.cust-edit-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const row = document.getElementById(btn.dataset.target);
+          const show = row.style.display === 'none';
+          row.style.display = show ? 'table-row' : 'none';
+        });
+      });
+
+      tbody.querySelectorAll('.cust-edit-cancel').forEach(btn => {
+        btn.addEventListener('click', () => { document.getElementById(btn.dataset.target).style.display = 'none'; });
+      });
+
+      tbody.querySelectorAll('.cust-edit-save').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const tr = btn.closest('tr');
+          const msgEl = tr.querySelector('.msg');
+          const updated = {
+            title: tr.querySelector('.cust-edit-title').value,
+            name: tr.querySelector('.cust-edit-name').value.trim(),
+            age: tr.querySelector('.cust-edit-age').value.trim() || null,
+            sex: tr.querySelector('.cust-edit-sex').value,
+            patientId: tr.querySelector('.cust-edit-patientid').value.trim() || null,
+            phone: tr.querySelector('.cust-edit-phone').value.trim() || null,
+            email: tr.querySelector('.cust-edit-email').value.trim() || null,
+            address: tr.querySelector('.cust-edit-address').value.trim() || null,
+            branch: tr.querySelector('.cust-edit-branch').value.trim() || null
+            // dateAdded / created_at are intentionally never included here —
+            // editing a customer must never change their position in the list.
+          };
+          if (!updated.name){ showMsg(msgEl, 'Name is required.', 'err'); return; }
+
+          const { error } = await sb.from('customers').update(updated).eq('id', btn.dataset.id);
+          if (error){ showMsg(msgEl, error.message, 'err'); return; }
+          await load();
+        });
+      });
+
+      tbody.querySelectorAll('.cust-archive').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const isCurrentlyActive = btn.dataset.active !== 'false';
+          await sb.from('customers').update({ active: !isCurrentlyActive }).eq('id', btn.dataset.id);
+          await load();
+        });
+      });
+    }
+
+    async function load(){
+      const showArchived = document.getElementById(ids.archiveId).checked;
+      let query = sb.from('customers').select('*').order('created_at', { ascending: false }).limit(200);
+      query = showArchived ? query : query.eq('active', true);
+      const { data, error } = await query;
+      allRows = (!error && data) ? data : [];
+      applyFilter();
+    }
+
+    document.getElementById(ids.searchId).addEventListener('input', applyFilter);
+    document.getElementById(ids.archiveId).addEventListener('change', load);
+
+    return { load };
+  }
+
+  const employeeCustList = makeCustomerListController({ tbodyId: 'custTableBody', searchId: 'custSearchFilter', archiveId: 'custShowArchived' });
+  const adminCustList = makeCustomerListController({ tbodyId: 'adminCustTableBody', searchId: 'adminCustSearchFilter', archiveId: 'adminCustShowArchived' });
+
+  async function loadCustomers(){ await employeeCustList.load(); }
+  async function loadAdminCustomers(){ await adminCustList.load(); }
+
+  document.getElementById('statCustomersCard').addEventListener('click', () => {
+    document.querySelector('#adminWrap .tab-btn[data-tab="admin-customers"]').click();
+  });
+  document.getElementById('statEmployeesCard').addEventListener('click', () => {
+    document.querySelector('#adminWrap .tab-btn[data-tab="admin-employees"]').click();
+  });
+  document.getElementById('statServicesCard').addEventListener('click', () => {
+    document.querySelector('#adminWrap .tab-btn[data-tab="admin-services"]').click();
+  });
+  document.getElementById('statAccountsCard').addEventListener('click', () => {
+    document.querySelector('#adminWrap .tab-btn[data-tab="admin-accounts"]').click();
+  });
+
+  // ---------- Dashboard: Accounts summary card (Cash/Digital balance + today's profit) ----------
+  async function loadDashboardAccountsCard(){
+    document.getElementById('dashCashBalance').textContent = acctFmt(acctCashBalanceVal);
+    document.getElementById('dashDigitalBalance').textContent = acctFmt(acctDigitalBalanceVal);
+
+    const today = acctToday();
+    const { data: ledgerRows } = await sb
+      .from('ledger')
+      .select('customerPaidAmount')
+      .eq('type', 'INVOICE')
+      .eq('invoiceDate', today);
+
+    let revenue = (ledgerRows || []).reduce((sum, r) => sum + (parseFloat(r.customerPaidAmount) || 0), 0);
+    (acctAllClearances || []).filter(c => c.clearedDate === today).forEach(c => { revenue += parseFloat(c.amount) || 0; });
+
+    const { data: expenseRows } = await sb.from('expenses').select('amount').eq('date', today);
+    const expenses = (expenseRows || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+
+    const profit = revenue - expenses;
+    const profitEl = document.getElementById('dashTodayProfit');
+    profitEl.textContent = (profit < 0 ? '-' : '') + acctFmt(Math.abs(profit));
+    profitEl.style.color = profit >= 0 ? 'var(--moss)' : 'var(--red)';
+  }
+
+  // ---------- Patient ID auto-suggest (highest existing numeric ID + 1) ----------
+  async function suggestNextPatientId(){
+    const { data } = await sb.from('customers').select('patientId');
+    let maxNum = 0, width = 3; // default 3-digit padding, matching typical existing IDs like "030"
+    (data || []).forEach(c => {
+      const val = (c.patientId || '').trim();
+      if (/^\d+$/.test(val)){
+        const num = parseInt(val, 10);
+        if (num > maxNum){ maxNum = num; width = val.length; }
+      }
+    });
+    const nextNum = maxNum + 1;
+    const nextStr = String(nextNum);
+    document.getElementById('custPatientId').value = nextStr.padStart(Math.max(width, nextStr.length), '0');
+  }
+
+  document.getElementById('createCustBtn').addEventListener('click', async () => {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+
+    if (!name){
+      showMsg(custMsg, 'Name is required.', 'err');
+      return;
+    }
+
+    const patientIdVal = document.getElementById('custPatientId').value.trim();
+
+    // Prevent duplicate patients — check phone and Patient ID first.
+    const orParts = [];
+    if (phone) orParts.push(`phone.eq.${phone}`);
+    if (patientIdVal) orParts.push(`patientId.eq.${patientIdVal}`);
+
+    if (orParts.length > 0){
+      const { data: existing } = await sb.from('customers').select('*').or(orParts.join(',')).limit(1);
+      if (existing && existing.length > 0){
+        const p = existing[0];
+        showMsg(custMsg, `This patient already exists — ${p.name} (ID: ${p.patientId || p.id}, Ph: ${p.phone}). Search for them in Invoice Generator to create a new visit instead of adding a duplicate.`, 'err');
+        return;
+      }
+    }
+
+    const newCustomer = {
+      id: (crypto.randomUUID ? crypto.randomUUID() : 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2)),
+      patientId: document.getElementById('custPatientId').value.trim() || null,
+      title: document.getElementById('custTitle').value,
+      name: name,
+      age: document.getElementById('custAge').value.trim() || null,
+      sex: document.getElementById('custSex').value,
+      phone: phone || null,
+      email: document.getElementById('custEmail').value.trim() || null,
+      address: document.getElementById('custAddress').value.trim() || null,
+      branch: document.getElementById('custBranch').value.trim() || null,
+      dateAdded: new Date().toISOString()
+    };
+
+    const { error } = await sb.from('customers').insert(newCustomer);
+    if (error){
+      showMsg(custMsg, error.message, 'err');
+      return;
+    }
+
+    showMsg(custMsg, 'Customer added.', 'ok');
+    ['custName','custAge','custPhone','custEmail','custAddress','custBranch'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('custTitle').value = 'Mr.';
+    document.getElementById('custSex').value = 'Male';
+    await loadCustomers();
+    await suggestNextPatientId();
+    await loadAdminStats();
+  });
+
+  const CUSTOMER_FIELDS = ['id','patientId','title','name','age','sex','phone','email','address','dateAdded'];
+  function sanitizeCustomerRecord(r){
+    const out = {};
+    CUSTOMER_FIELDS.forEach(f => {
+      const v = r[f];
+      out[f] = (v === undefined || v === '') ? null : v;
+    });
+    if (out.id !== null) out.id = String(out.id);
+    return out;
+  }
+
+  const importBtn = document.getElementById('importBtn');
+  const importFile = document.getElementById('importFile');
+  importBtn.addEventListener('click', () => importFile.click());
+
+  importFile.addEventListener('change', async () => {
+    const file = importFile.files[0];
+    if (!file) return;
+
+    importBtn.disabled = true;
+    showMsg(custMsg, 'Reading file…', 'ok');
+
+    try{
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const rawRecords = Array.isArray(parsed) ? parsed : [parsed];
+
+      if (rawRecords.length === 0){
+        showMsg(custMsg, 'File has no records.', 'err');
+        importBtn.disabled = false;
+        return;
+      }
+
+      const records = rawRecords.map(sanitizeCustomerRecord);
+      const skippedHistoryCount = rawRecords.filter(r => r.history && r.history.length > 0).length;
+
+      const { error } = await sb.from('customers').upsert(records, { onConflict: 'id' });
+
+      if (error){
+        showMsg(custMsg, 'Import failed: ' + error.message, 'err');
+      } else {
+        let msg = `Imported ${records.length} customer(s) successfully.`;
+        if (skippedHistoryCount > 0){
+          msg += ` (${skippedHistoryCount} had invoice history — that will be imported once Invoice Generator is built.)`;
+        }
+        showMsg(custMsg, msg, 'ok');
+        await loadCustomers();
+        await suggestNextPatientId();
+        await loadAdminStats();
+      }
+    } catch(e){
+      showMsg(custMsg, 'Invalid JSON file: ' + e.message, 'err');
+    }
+
+    importFile.value = '';
+    importBtn.disabled = false;
+  });
+
+  // ============================================================
+  // INVOICE GENERATOR (reads customers/services from Supabase,
+  // writes to invoice_history + ledger tables)
+  // ============================================================
+  let invAllCustomers = [];
+  let invAllTests = [];
+  let invSelectedTests = [];
+  let invAllPackages = [];
+  let invSelectedPackages = [];
+  let invCurrentSelectedCustomerId = null;
+
+  const INV_DEFAULT_CUSTOMERS = [
+    { id: '1', patientId: 'P1001', title: 'Mr.', name: 'John Doe', age: '35', sex: 'Male', phone: '9876543210', email: null, address: '123 Main St', dateAdded: new Date().toISOString() },
+    { id: '2', patientId: 'P1002', title: 'Ms.', name: 'Jane Smith', age: '28', sex: 'Female', phone: '9000123456', email: null, address: '456 Oak Ave', dateAdded: new Date().toISOString() }
+  ];
+  const INV_DEFAULT_TESTS = [
+    { id: 101, name: 'COMPLETE BLOOD COUNT (CBC)', price: 450.00 },
+    { id: 102, name: 'LIVER FUNCTION TEST (LFT)', price: 900.00 }
+  ];
+
+  async function invLoadInitialData(){
+    const { data: testsFromDb, error: testsErr } = await sb.from('services').select('id, name, price, visible_external').order('name', { ascending: true });
+    const { data: customersFromDb, error: custErr } = await sb.from('customers').select('*').order('name', { ascending: true });
+    const { data: packagesFromDb } = await sb.from('packages').select('*').eq('active', true).order('name', { ascending: true });
+
+    invAllTests = (!testsErr && testsFromDb && testsFromDb.length > 0) ? testsFromDb : INV_DEFAULT_TESTS;
+    invAllCustomers = (!custErr && customersFromDb && customersFromDb.length > 0) ? customersFromDb : INV_DEFAULT_CUSTOMERS;
+    invAllPackages = packagesFromDb || [];
+
+    document.getElementById('invInvoiceDate').value = istDateStr(nowIST());
+    invUpdateCustomerDisplay();
+    invPopulateServiceSelector();
+    invPopulatePackageSelector();
+    invHandlePaymentTypeChange();
+    invCalculateTotal();
+  }
+
+  // ---------- Patient search ----------
+  function invFilterCustomers(searchTerm){
+    const resultsDiv = document.getElementById('invCustomerResultsList');
+    const lower = searchTerm.toLowerCase().trim();
+    resultsDiv.innerHTML = '';
+    resultsDiv.style.display = 'block';
+
+    let toDisplay = invAllCustomers;
+    if (lower !== ''){
+      toDisplay = invAllCustomers.filter(c =>
+        (c.name || '').toLowerCase().includes(lower) ||
+        (c.patientId && String(c.patientId).toLowerCase().includes(lower)) ||
+        (c.id && String(c.id).toLowerCase().includes(lower)) ||
+        (c.phone && String(c.phone).toLowerCase().includes(lower))
+      );
+    }
+
+    if (lower === '' || 'walk-in'.includes(lower)){
+      resultsDiv.innerHTML += `<div class="inv-result-item" onclick="invSelectCustomerFromList('WALKIN')"><strong>Walk-in Patient</strong></div>`;
+    }
+
+    toDisplay.forEach(c => {
+      const displayId = c.patientId || c.id;
+      resultsDiv.innerHTML += `
+        <div class="inv-result-item" onclick="invSelectCustomerFromList('${escapeHtml(c.id)}')">
+          ${escapeHtml(c.name)} (ID: ${escapeHtml(displayId)}) — Ph: ${escapeHtml(c.phone || '—')}
+        </div>`;
+    });
+
+    if (resultsDiv.innerHTML === ''){
+      resultsDiv.innerHTML = `<div class="inv-result-item" style="color:var(--red);">No matching customers found.</div>`;
+    }
+  }
+
+  function invSelectCustomerFromList(customerId){
+    invCurrentSelectedCustomerId = customerId;
+    document.getElementById('invCustomerResultsList').style.display = 'none';
+    document.getElementById('invCustomerSearch').value = '';
+    invUpdateCustomerDisplay();
+  }
+
+  function invUpdateCustomerDisplay(){
+    const el = document.getElementById('invSelectedCustomerDisplay');
+    const c = invGetSelectedCustomerData();
+    if (c){
+      el.innerHTML = `
+        <strong>Patient ID:</strong> ${escapeHtml(c.id)}<br>
+        <strong>Patient Name:</strong> ${escapeHtml(c.name)}<br>
+        <strong>Age:</strong> ${escapeHtml(c.age)} &nbsp;&nbsp; <strong>Sex:</strong> ${escapeHtml(c.sex)}<br>
+        <strong>Phone:</strong> ${escapeHtml(c.phone)}<br>
+        <strong>Address:</strong> ${escapeHtml(c.address)}
+      `;
+    } else {
+      el.textContent = 'Select or type a patient name above.';
+    }
+    invCalculateTotal();
+  }
+
+  function invGetSelectedCustomerData(){
+    if (!invCurrentSelectedCustomerId) return null;
+    if (invCurrentSelectedCustomerId === 'WALKIN'){
+      return { name: 'Walk-in Patient', phone: 'N/A', address: 'N/A', id: 'WALKIN', age: 'N/A', sex: 'N/A' };
+    }
+    const c = invAllCustomers.find(x => x.id == invCurrentSelectedCustomerId);
+    if (!c) return null;
+    const officialId = c.patientId || c.id;
+    return { name: c.name, phone: c.phone, address: c.address, id: officialId, age: c.age || 'N/A', sex: c.sex || 'N/A' };
+  }
+
+  document.getElementById('invCustomerSearch').addEventListener('input', (e) => invFilterCustomers(e.target.value));
+  document.getElementById('invCustomerSearch').addEventListener('focus', (e) => invFilterCustomers(e.target.value));
+  document.getElementById('invCustomerSearch').addEventListener('blur', () => {
+    setTimeout(() => { document.getElementById('invCustomerResultsList').style.display = 'none'; }, 200);
+  });
+
+  // ---------- Service selection ----------
+  function invRenderServiceCheckboxes(testsToDisplay){
+    const container = document.getElementById('invServiceSelectorContainer');
+    container.innerHTML = '';
+    if (testsToDisplay.length === 0){
+      container.innerHTML = '<p class="empty">No matching services found.</p>';
+      return;
+    }
+    testsToDisplay.forEach(test => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'inv-service-item';
+      const isChecked = invSelectedTests.some(t => t.id === test.id);
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `inv-test-${test.id}`;
+      checkbox.value = String(test.id);
+      checkbox.checked = isChecked;
+      checkbox.onchange = invHandleTestSelection;
+
+      const label = document.createElement('label');
+      label.htmlFor = `inv-test-${test.id}`;
+      label.textContent = test.name;
+      label.style.flexGrow = '1';
+      label.style.marginBottom = '0';
+      label.style.fontWeight = '400';
+      label.style.cursor = 'pointer';
+
+      const eyeSpan = document.createElement('span');
+      const isVisible = test.visible_external !== false;
+      eyeSpan.textContent = '👁';
+      eyeSpan.title = isVisible ? 'Visible on linked website' : 'Hidden from linked website';
+      eyeSpan.style.color = isVisible ? 'var(--moss)' : 'var(--red)';
+      eyeSpan.style.textDecoration = isVisible ? 'none' : 'line-through';
+      eyeSpan.style.fontSize = '13px';
+      eyeSpan.style.marginRight = '8px';
+
+      const priceSpan = document.createElement('span');
+      priceSpan.className = 'inv-service-price';
+      priceSpan.textContent = `₹${parseFloat(test.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+      itemDiv.appendChild(checkbox);
+      itemDiv.appendChild(label);
+      itemDiv.appendChild(eyeSpan);
+      itemDiv.appendChild(priceSpan);
+      container.appendChild(itemDiv);
+    });
+  }
+
+  function invPopulateServiceSelector(){ invFilterServices(''); }
+
+  function invFilterServices(searchTerm){
+    const lower = searchTerm.toLowerCase().trim();
+    if (invAllTests.length === 0){
+      document.getElementById('invServiceSelectorContainer').innerHTML = '<p class="empty">No services/tests found.</p>';
+      return;
+    }
+    if (lower === ''){ invRenderServiceCheckboxes(invAllTests); return; }
+    invRenderServiceCheckboxes(invAllTests.filter(t => t.name.toLowerCase().includes(lower)));
+  }
+
+  function invHandleTestSelection(event){
+    const testId = parseInt(event.target.value, 10);
+    const test = invAllTests.find(t => t.id === testId);
+    if (event.target.checked){
+      if (test && !invSelectedTests.some(t => t.id === test.id)){
+        test.price = parseFloat(test.price);
+        invSelectedTests.push(test);
+      }
+    } else {
+      invSelectedTests = invSelectedTests.filter(t => t.id !== testId);
+    }
+    invUpdateSelectionBadges();
+    invCalculateTotal();
+  }
+
+  document.getElementById('invServiceSearch').addEventListener('input', (e) => invFilterServices(e.target.value));
+
+  // ---------- Tests / Packages mode toggle (shared selection box) ----------
+  function invUpdateSelectionBadges(){
+    const testsBadge = document.getElementById('invTestsSelectedBadge');
+    const pkgBadge = document.getElementById('invPackagesSelectedBadge');
+    testsBadge.textContent = invSelectedTests.length > 0 ? `(${invSelectedTests.length})` : '';
+    pkgBadge.textContent = invSelectedPackages.length > 0 ? `(${invSelectedPackages.length})` : '';
+  }
+
+  document.querySelectorAll('#invModePills .mode-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#invModePills .mode-pill').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const showTests = btn.dataset.mode === 'tests';
+      document.getElementById('invTestsModeWrap').style.display = showTests ? 'block' : 'none';
+      document.getElementById('invPackagesModeWrap').style.display = showTests ? 'none' : 'block';
+    });
+  });
+  // ---------- Package selector ----------
+  function invPopulatePackageSelector(){ invFilterPackages(''); }
+
+  function invFilterPackages(searchTerm){
+    const lower = searchTerm.toLowerCase().trim();
+    if (invAllPackages.length === 0){
+      document.getElementById('invPackageSelectorContainer').innerHTML = '<p class="empty">No packages available.</p>';
+      return;
+    }
+    const list = lower === '' ? invAllPackages : invAllPackages.filter(p => p.name.toLowerCase().includes(lower));
+    invRenderPackageCheckboxes(list);
+  }
+
+  function invPackageTestNames(pkg){
+    const ids = pkg.test_ids || [];
+    return ids.map(id => {
+      const t = invAllTests.find(x => x.id === id);
+      return t ? t.name : null;
+    }).filter(Boolean).join(', ') || '—';
+  }
+
+  function invRenderPackageCheckboxes(list){
+    const container = document.getElementById('invPackageSelectorContainer');
+    if (list.length === 0){
+      container.innerHTML = '<p class="empty">No matching packages found.</p>';
+      return;
+    }
+    container.innerHTML = list.map(p => {
+      const isChecked = invSelectedPackages.some(sp => sp.id === p.id);
+      return `
+      <div class="pkg-item-wrap">
+        <div class="inv-service-item">
+          <input type="checkbox" id="inv-pkg-${p.id}" value="${p.id}" ${isChecked ? 'checked' : ''} />
+          <label for="inv-pkg-${p.id}" style="flex-grow:1; margin-bottom:0; font-weight:400; cursor:pointer;">${escapeHtml(p.name)}</label>
+          <button type="button" class="pkg-expand-toggle" data-target="inv-pkg-detail-${p.id}">▼ tests</button>
+          <span class="pkg-mrp-strike">₹${parseFloat(p.mrp).toFixed(2)}</span>
+          <span class="inv-service-price">₹${parseFloat(p.rate).toFixed(2)}</span>
+        </div>
+        <div class="pkg-tests-detail" id="inv-pkg-detail-${p.id}">${escapeHtml(invPackageTestNames(p))}</div>
+      </div>`;
+    }).join('');
+
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', invHandlePackageSelection));
+    container.querySelectorAll('.pkg-expand-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const detail = document.getElementById(btn.dataset.target);
+        const show = !detail.classList.contains('open');
+        detail.classList.toggle('open', show);
+        btn.textContent = show ? '▲ tests' : '▼ tests';
+      });
+    });
+  }
+
+  function invHandlePackageSelection(event){
+    const pkgId = event.target.value;
+    const pkg = invAllPackages.find(p => p.id === pkgId);
+    if (event.target.checked){
+      if (pkg && !invSelectedPackages.some(p => p.id === pkg.id)) invSelectedPackages.push(pkg);
+    } else {
+      invSelectedPackages = invSelectedPackages.filter(p => p.id !== pkgId);
+    }
+    invUpdateSelectionBadges();
+    invCalculateTotal();
+  }
+
+  document.getElementById('invPackageSearch').addEventListener('input', (e) => invFilterPackages(e.target.value));
+
+  // ---------- Payment type ----------
+  function invHandlePaymentTypeChange(){
+    const isFull = document.getElementById('invFullPaymentCheckbox').checked;
+    const section = document.getElementById('invAdvancePaymentSection');
+    if (isFull){
+      section.style.display = 'none';
+      document.getElementById('invAdvancePaidAmountInput').value = 0;
+    } else {
+      section.style.display = 'block';
+    }
+    invCalculateTotal();
+  }
+  document.getElementById('invFullPaymentCheckbox').addEventListener('change', invHandlePaymentTypeChange);
+
+  // ---------- Calculation ----------
+  function invCalculateTotal(){
+    // Packages are folded in as ordinary line items (name + price) so every
+    // downstream calculation, printed invoice, and ledger/pending record
+    // works exactly like it already does for individual tests — no separate
+    // code path, so nothing can drift out of sync.
+    const packageLineItems = invSelectedPackages.map(p => ({
+      id: 'pkg-' + p.id, name: `PACKAGE: ${p.name} (${(p.test_ids || []).length} tests)`, price: parseFloat(p.rate) || 0
+    }));
+    const effectiveLineItems = [...invSelectedTests, ...packageLineItems];
+
+    let subtotal = effectiveLineItems.reduce((sum, t) => sum + parseFloat(t.price || 0), 0);
+
+    const discount = parseFloat(document.getElementById('invDiscountInput').value) || 0;
+    const charges = parseFloat(document.getElementById('invOtherChargesInput').value) || 0;
+    const chargesNoteInput = document.getElementById('invOtherChargesNote').value;
+
+    const effectiveDiscount = Math.min(discount, subtotal);
+    let invoiceTotal = subtotal - effectiveDiscount + charges;
+
+    const isFullPayment = document.getElementById('invFullPaymentCheckbox').checked;
+    const advancePaid = parseFloat(document.getElementById('invAdvancePaidAmountInput').value) || 0;
+
+    let amountReceived, balanceDue;
+    if (isFullPayment){
+      amountReceived = invoiceTotal;
+      balanceDue = 0;
+    } else {
+      amountReceived = Math.min(invoiceTotal, advancePaid);
+      balanceDue = invoiceTotal - amountReceived;
+    }
+
+    subtotal = parseFloat(subtotal.toFixed(2));
+    const effectiveDiscountFixed = parseFloat(effectiveDiscount.toFixed(2));
+    const chargesFixed = parseFloat(charges.toFixed(2));
+    const amountReceivedFixed = parseFloat(amountReceived.toFixed(2));
+    const balanceDueFixed = parseFloat(balanceDue.toFixed(2));
+    const invoiceTotalFixed = parseFloat(invoiceTotal.toFixed(2));
+
+    const now = nowIST();
+    const datePart = istDateStr(now).slice(2).replace(/-/g, '');
+    const timePart = istTimeCompact(now);
+    const uniqueInvoiceNumber = `INV-${datePart}-${timePart}`;
+
+    const fmt = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+
+    document.getElementById('invSubTotalDisplay').textContent = `₹${subtotal.toLocaleString('en-IN', fmt)}`;
+    document.getElementById('invDiscountDisplay').textContent = `- ₹${effectiveDiscountFixed.toLocaleString('en-IN', fmt)}`;
+    document.getElementById('invChargesDisplay').textContent = `+ ₹${chargesFixed.toLocaleString('en-IN', fmt)}`;
+    document.getElementById('invGrandTotalDisplay').textContent = `₹${Math.max(0, invoiceTotalFixed).toLocaleString('en-IN', fmt)}`;
+    document.getElementById('invBalanceDueDisplay').textContent = `₹${balanceDueFixed.toLocaleString('en-IN', fmt)}`;
+
+    window.invInvoiceData = {
+      subtotal, discount: effectiveDiscountFixed, charges: chargesFixed, chargesNote: chargesNoteInput.trim(),
+      grandTotal: amountReceivedFixed, invoiceTotal: invoiceTotalFixed,
+      isFullPayment, amountReceived: amountReceivedFixed, balanceDue: balanceDueFixed,
+      selectedTests: effectiveLineItems, customer: invGetSelectedCustomerData(),
+      invoiceDate: document.getElementById('invInvoiceDate').value, invoiceNumber: uniqueInvoiceNumber
+    };
+  }
+
+  ['invDiscountInput','invOtherChargesInput','invAdvancePaidAmountInput'].forEach(id => {
+    document.getElementById(id).addEventListener('input', invCalculateTotal);
+  });
+  document.getElementById('invB2bNameSelect').addEventListener('change', invCalculateTotal);
+
+  // ---------- Save invoice to customer history (Supabase invoice_history) ----------
+  async function invSaveInvoiceTransaction(data){
+    const customerId = invCurrentSelectedCustomerId;
+    if (customerId === 'WALKIN' || !customerId) return null;
+
+    const paymentModeText = document.getElementById('invPaymentMode').value;
+    const historyRecord = {
+      invoiceNumber: data.invoiceNumber,
+      customerId: customerId,
+      invoiceDate: data.invoiceDate,
+      selectedTests: data.selectedTests.map(t => ({ name: t.name, price: t.price })),
+      invoiceTotal: data.invoiceTotal,
+      grandTotal: data.grandTotal,
+      discount: data.discount,
+      otherCharges: data.charges,
+      paymentMode: paymentModeText,
+      paymentType: data.isFullPayment ? 'Full' : 'Advance/Partial',
+      amountReceived: data.amountReceived,
+      balanceDue: data.balanceDue
+    };
+
+    const { error } = await sb.from('invoice_history').insert(historyRecord);
+    if (error){ console.error(error); return `Could not save invoice ${data.invoiceNumber}: ${error.message}`; }
+    return `Invoice ${data.invoiceNumber} saved to ${data.customer.name}'s history.`;
+  }
+
+  // ---------- Save to ledger ----------
+  async function invSaveTransactionToLedger(){
+    if (!invValidateInvoiceData()){
+      invAlertModal('Cannot save to ledger: select customer and tests first.', 'error');
+      return;
+    }
+    invCalculateTotal();
+    const d = window.invInvoiceData;
+
+    const ledgerEntry = {
+      invoiceNumber: d.invoiceNumber,
+      invoiceDate: d.invoiceDate,
+      customerId: String(invCurrentSelectedCustomerId),
+      patientId: d.customer.id !== 'WALKIN' ? d.customer.id : null,
+      customerName: d.customer.name,
+      b2bName: document.getElementById('invB2bNameSelect').value.trim(),
+      customerPaymentMode: document.getElementById('invPaymentMode').value,
+      paymentType: d.isFullPayment ? 'Full' : 'Advance/Partial',
+      invoiceTotal: d.invoiceTotal,
+      grandTotal: d.grandTotal,
+      customerPaidAmount: d.amountReceived,
+      balanceDue: d.balanceDue,
+      paidAmountToB2B: parseFloat(document.getElementById('invPaidAmountToB2B').value) || 0,
+      discount: d.discount,
+      otherCharges: d.charges,
+      testsCount: d.selectedTests.length
+    };
+
+    const { data: existingRows } = await sb.from('ledger').select('id').eq('invoiceNumber', ledgerEntry.invoiceNumber).limit(1);
+    const isUpdate = existingRows && existingRows.length > 0;
+
+    const { error } = await sb.from('ledger').upsert(ledgerEntry, { onConflict: 'invoiceNumber' });
+    if (error){ invAlertModal(`Could not save to ledger: ${error.message}`, 'error'); return; }
+
+    invAlertModal(isUpdate
+      ? `Invoice ${ledgerEntry.invoiceNumber} updated in the Ledger (prevented duplicate).`
+      : `Invoice ${ledgerEntry.invoiceNumber} successfully recorded in the Transaction Ledger!`, isUpdate ? 'warning' : 'success');
+  }
+  document.getElementById('invSaveLedgerBtn').addEventListener('click', invSaveTransactionToLedger);
+
+  // ---------- Print / Save / Validate ----------
+  function invValidateInvoiceData(){
+    const c = invGetSelectedCustomerData();
+    if (!c){ invAlertModal('Please select a customer before generating the invoice.', 'error'); return false; }
+    if (invSelectedTests.length === 0 && invSelectedPackages.length === 0){
+      invAlertModal('Please select at least one service/test or package.', 'error');
+      return false;
+    }
+    return true;
+  }
+
+  async function invGenerateAndPrint(){
+    if (!invValidateInvoiceData()) return;
+    invCalculateTotal();
+
+    if (window.invInvoiceData.customer.id !== 'WALKIN'){
+      const msg = await invSaveInvoiceTransaction(window.invInvoiceData);
+      invAlertModal(msg, 'info');
+    } else {
+      invAlertModal('Walk-in invoice generated (not saved to customer history).', 'info');
+    }
+
+    document.getElementById('invInvoicePrintArea').innerHTML = invGenerateInvoiceHTML(window.invInvoiceData);
+    window.print();
+  }
+  document.getElementById('invPrintBtn').addEventListener('click', invGenerateAndPrint);
+
+  function invSaveInvoiceHTML(){
+    if (!invValidateInvoiceData()) return;
+    invCalculateTotal();
+
+    const invoiceHTML = invGenerateInvoiceHTML(window.invInvoiceData);
+    const fullHTML = `<!DOCTYPE html>
+      <html lang="en"><head><meta charset="UTF-8"><title>Invoice ${window.invInvoiceData.invoiceNumber}</title>
+      <style>
+        body{ font-family:'Inter',sans-serif; margin:0; padding:20px; color:#000; }
+        .invoice-table{ width:100%; border-collapse:collapse; margin-top:20px; font-size:11pt; }
+        .invoice-table th,.invoice-table td{ border:1px solid #333; padding:8px; text-align:left; }
+        .invoice-table th{ background-color:#f2f2f2; }
+        .total-row strong{ color:#d63333; }
+      </style></head><body>
+        ${invoiceHTML}
+        <p style="text-align:center; margin-top:50px; font-size:0.8em; color:#555;">-- Saved from Hattrick Lab Invoice Generator --</p>
+      </body></html>`;
+
+    const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `INV_${window.invInvoiceData.invoiceNumber}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    invAlertModal(`Invoice ${window.invInvoiceData.invoiceNumber} saved. Check your Downloads folder.`, 'info');
+  }
+  document.getElementById('invSaveHtmlBtn').addEventListener('click', invSaveInvoiceHTML);
+
+  function invGenerateInvoiceHTML(data){
+    const customer = data.customer;
+    const tests = [...data.selectedTests];
+    const invoiceNumber = data.invoiceNumber;
+    const fmt = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+
+    const chargesNote = data.chargesNote;
+    const chargesNoteRow = (chargesNote.trim().length > 0) ? `
+      <tr><td colspan="5" style="border:none; padding:0 0 8px 0; font-style:italic; font-size:0.9em;">
+        <span style="font-weight:bold;">Note:</span> ${chargesNote}
+      </td></tr>` : '';
+
+    tests.sort((a, b) => a.name.localeCompare(b.name));
+
+    const serviceRows = tests.map((test, index) => {
+      const price = parseFloat(test.price).toLocaleString('en-IN', fmt);
+      return `<tr>
+        <td style="border:1px solid #333; padding:8px;">${index + 1}</td>
+        <td style="border:1px solid #333; padding:8px;">${test.name}</td>
+        <td style="text-align:right; border:1px solid #333; padding:8px;">1</td>
+        <td style="text-align:right; border:1px solid #333; padding:8px;">₹${price}</td>
+        <td style="text-align:right; border:1px solid #333; padding:8px;">₹${price}</td>
+      </tr>`;
+    }).join('');
+
+    const fillerCount = Math.max(0, 8 - tests.length);
+    const fillerRows = Array(fillerCount).fill('<tr><td style="border:1px solid #ddd; padding:8px;">&nbsp;</td><td style="border:1px solid #ddd; padding:8px;"></td><td style="border:1px solid #ddd; padding:8px;"></td><td style="border:1px solid #ddd; padding:8px;"></td><td style="border:1px solid #ddd; padding:8px;"></td></tr>').join('');
+
+    const subtotal = data.subtotal.toLocaleString('en-IN', fmt);
+    const discount = data.discount.toLocaleString('en-IN', fmt);
+    const charges = data.charges.toLocaleString('en-IN', fmt);
+    const grandTotalDisplay = data.invoiceTotal.toLocaleString('en-IN', fmt);
+    const paymentStatus = data.isFullPayment ? 'Full Payment' : 'Advance/Partial Payment';
+    const amountReceived = data.amountReceived.toLocaleString('en-IN', fmt);
+    const balanceDue = data.balanceDue.toLocaleString('en-IN', fmt);
+    const paymentModeText = document.getElementById('invPaymentMode').value;
+
+    const paymentRow = `
+      <tr>
+        <td colspan="3" style="border:none; padding:8px 0; font-weight:bold; font-size:0.9em;">Payment Status: ${paymentStatus} (${paymentModeText})</td>
+        <td style="text-align:right; border:1px solid #333; border-top:1px solid #333; background-color:#f9f9f9; padding:8px;">Amount Paid:</td>
+        <td style="text-align:right; border:1px solid #333; border-top:1px solid #333; background-color:#f9f9f9; padding:8px;">₹${amountReceived}</td>
+      </tr>
+      <tr style="background-color:#ffe6e6;">
+        <td colspan="3" style="border:none; padding:8px 0;"></td>
+        <td style="text-align:right; font-weight:bold; border:1px solid #333; padding:8px;">Balance Due:</td>
+        <td style="text-align:right; font-weight:bold; color:#d63333; border:1px solid #333; padding:8px;">₹${balanceDue}</td>
+      </tr>`;
+
+    return `
+      <div style="max-width:700px; margin:0 auto; padding:20px; border:1px solid #ccc; color:#000; font-size:11pt;">
+        <div style="border-bottom:2px solid #333; padding-bottom:10px; margin-bottom:20px; display:flex; align-items:center;">
+          <div style="flex-grow:1; text-align:center;">
+            <h1 style="margin:0; color:#000; font-size:1.8em;">HATTRICK DIAGNOSTIC LAB</h1>
+            <p style="margin:5px 0 0 0; font-size:0.9em;">35/18, Samy street, Egmore, Near by Childrens Hospotal, Chennai - 600 008.<br>Phone: 95 00 00 5061</p>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+          <div style="flex:1;">
+            <p style="margin:0;"><strong>INVOICE NO:</strong> ${invoiceNumber}</p>
+            <p style="margin:5px 0 0 0;"><strong>PATIENT ID:</strong> ${customer.id}</p>
+            <p style="margin:5px 0 0 0;"><strong>DATE:</strong> ${data.invoiceDate}</p>
+          </div>
+          <div style="flex:1; text-align:right;">
+            <p style="margin:0; font-weight:bold;">BILL TO:</p>
+            <p style="margin:0; font-weight:bold;">${customer.name}</p>
+            <p style="margin:0; font-size:0.9em;"><strong>Age:</strong> ${customer.age} &nbsp;|&nbsp; <strong>Sex:</strong> ${customer.sex}</p>
+            <p style="margin:0; font-size:0.9em;">Ph: ${customer.phone}</p>
+            <p style="margin:0; font-size:0.9em;">Addr: ${customer.address}</p>
+          </div>
+        </div>
+        <table class="invoice-table" style="width:100%; border-collapse:collapse; margin-top:20px;">
+          <thead><tr>
+            <th style="width:5%; border:1px solid #333; background-color:#f2f2f2; padding:8px;">#</th>
+            <th style="width:50%; border:1px solid #333; background-color:#f2f2f2; padding:8px;">Test Name</th>
+            <th style="width:15%; text-align:right; border:1px solid #333; background-color:#f2f2f2; padding:8px;">Qty</th>
+            <th style="width:15%; text-align:right; border:1px solid #333; background-color:#f2f2f2; padding:8px;">Unit Price (₹)</th>
+            <th style="width:15%; text-align:right; border:1px solid #333; background-color:#f2f2f2; padding:8px;">Amount (₹)</th>
+          </tr></thead>
+          <tbody>${serviceRows}${fillerRows}</tbody>
+          <tfoot>
+            ${chargesNoteRow}
+            <tr>
+              <td colspan="3" style="border:none; padding:8px 0; border-top:1px solid #ddd;"></td>
+              <td style="text-align:right; border:1px solid #333; border-bottom:none; border-top:1px solid #333; background-color:#f9f9f9; padding:8px;">Subtotal:</td>
+              <td style="text-align:right; border:1px solid #333; border-bottom:none; border-top:1px solid #333; background-color:#f9f9f9; padding:8px;">₹${subtotal}</td>
+            </tr>
+            <tr>
+              <td colspan="3" style="border:none;"></td>
+              <td style="text-align:right; border:1px solid #333; border-top:none; border-bottom:none; background-color:#f9f9f9; padding:8px;">Discount:</td>
+              <td style="text-align:right; border:1px solid #333; border-top:none; border-bottom:none; background-color:#f9f9f9; padding:8px;">- ₹${discount}</td>
+            </tr>
+            <tr>
+              <td colspan="3" style="border:none;"></td>
+              <td style="text-align:right; border:1px solid #333; border-top:none; border-bottom:2px solid #333; background-color:#f9f9f9; padding:8px;">Other Charges:</td>
+              <td style="text-align:right; border:1px solid #333; border-top:none; border-bottom:2px solid #333; background-color:#f9f9f9; padding:8px;">+ ₹${charges}</td>
+            </tr>
+            <tr style="background-color:#f2f2f2;">
+              <td colspan="4" style="text-align:right; font-size:1.1em; border:1px solid #333; padding:8px;"><strong>GRAND TOTAL:</strong></td>
+              <td class="total-row" style="text-align:right; font-size:1.1em; border:1px solid #333; padding:8px;"><strong>₹${grandTotalDisplay}</strong></td>
+            </tr>
+            ${paymentRow}
+          </tfoot>
+        </table>
+        <div style="margin-top:20px; font-size:0.8em; color:#555;">
+          <p><em>*Prices are inclusive of all standard charges. Thank you for visiting the Hattrick.</em></p>
+        </div>
+        <div style="border-top:1px dashed #aaa; margin-top:50px; padding-top:20px; text-align:right;">
+          <p style="margin:0; padding-top:30px; color:#000;">Authorized Signature</p>
+        </div>
+      </div>`;
+  }
+
+  function invAlertModal(message, type = 'info'){
+    const div = document.createElement('div');
+    div.className = 'inv-toast';
+    div.style.backgroundColor = type === 'error' ? 'var(--red)' : (type === 'warning' ? '#d99a3e' : 'var(--moss)');
+    div.textContent = message;
+    document.body.appendChild(div);
+    setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 4000);
+  }
+
+  // ============================================================
+  // ACCOUNTS — live balances from ledger, pending payment history,
+  // simple closing verification
+  // ============================================================
+  function acctFmt(n){
+    return `₹${(parseFloat(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+  function acctToday(){ return istDateStr(nowIST()); }
+
+  let acctAllClearances = [];   // full payment_clearances table, cached
+  let acctCashBalanceVal = 0;
+  let acctDigitalBalanceVal = 0;
+
+  // Sum of clearances already recorded against one invoice
+  function acctClearedTotalFor(invoiceNumber){
+    return acctAllClearances
+      .filter(c => c.invoiceNumber === invoiceNumber)
+      .reduce((sum, c) => sum + (parseFloat(c.amount) || 0), 0);
+  }
+
+  async function acctLoadClearances(){
+    const { data, error } = await sb
+      .from('payment_clearances')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(300);
+    acctAllClearances = (!error && data) ? data : [];
+  }
+
+  // ---------- Live balances (all-time, straight from the ledger) ----------
+  async function acctLoadBalances(){
+    const { data, error } = await sb.from('ledger').select('customerPaymentMode, customerPaidAmount');
+
+    let cash = 0, digital = 0;
+    if (!error && data){
+      data.forEach(r => {
+        const amt = parseFloat(r.customerPaidAmount) || 0;
+        if (r.customerPaymentMode === 'Cash') cash += amt;
+        else if (r.customerPaymentMode === 'UPI' || r.customerPaymentMode === 'Card') digital += amt;
+      });
+    }
+
+    acctAllClearances.forEach(c => {
+      const amt = parseFloat(c.amount) || 0;
+      if (c.paymentMode === 'Cash') cash += amt;
+      else if (c.paymentMode === 'UPI' || c.paymentMode === 'Card') digital += amt;
+    });
+
+    // Opening (collections so far) minus expenses paid out of each source
+    const { data: expenseRows } = await sb.from('expenses').select('amount, source');
+    (expenseRows || []).forEach(e => {
+      const amt = parseFloat(e.amount) || 0;
+      if ((e.source || 'Cash') === 'Cash') cash -= amt;
+      else digital -= amt; // UPI / Card / Bank all draw from the digital balance
+    });
+
+    acctCashBalanceVal = cash;
+    acctDigitalBalanceVal = digital;
+
+    document.getElementById('acctCashBalanceOverview').textContent = acctFmt(cash);
+    document.getElementById('acctDigitalBalanceOverview').textContent = acctFmt(digital);
+  }
+
+  // ---------- Employee Daily Closing: TODAY's Cash & UPI only (not all-time balance) ----------
+  let acctClosingCashVal = 0, acctClosingUpiVal = 0;
+
+  async function acctLoadTodayClosingBalances(){
+    const today = acctToday();
+    const { data } = await sb
+      .from('ledger')
+      .select('customerPaymentMode, customerPaidAmount')
+      .eq('type', 'INVOICE')
+      .eq('invoiceDate', today);
+
+    let cash = 0, upi = 0;
+    (data || []).forEach(r => {
+      const amt = parseFloat(r.customerPaidAmount) || 0;
+      if (r.customerPaymentMode === 'Cash') cash += amt;
+      else if (r.customerPaymentMode === 'UPI') upi += amt;
+    });
+
+    acctAllClearances.filter(c => c.clearedDate === today).forEach(c => {
+      const amt = parseFloat(c.amount) || 0;
+      if (c.paymentMode === 'Cash') cash += amt;
+      else if (c.paymentMode === 'UPI') upi += amt;
+    });
+
+    acctClosingCashVal = cash;
+    acctClosingUpiVal = upi;
+
+    document.getElementById('acctCashBalance').textContent = acctFmt(cash);
+    document.getElementById('acctDigitalBalance').textContent = acctFmt(upi);
+
+    acctUpdateClosingCheck();
+  }
+
+  // ---------- Overview (admin): daily/monthly filter, collections, profit & loss ----------
+  function acctGetFilterRange(){
+    const isMonthly = document.getElementById('acctFilterMonthlyBtn').classList.contains('selected');
+    if (isMonthly){
+      const monthVal = document.getElementById('acctFilterMonth').value; // "YYYY-MM"
+      if (!monthVal) return null;
+      const [y, m] = monthVal.split('-');
+      const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+      return { start: `${y}-${m}-01`, end: `${y}-${m}-${String(lastDay).padStart(2,'0')}`, label: new Date(`${monthVal}-01`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) };
+    } else {
+      const dateVal = document.getElementById('acctFilterDate').value;
+      if (!dateVal) return null;
+      return { start: dateVal, end: dateVal, label: dateVal === acctToday() ? 'today' : dateVal };
+    }
+  }
+
+  async function acctLoadOverviewStats(){
+    const range = acctGetFilterRange();
+    if (!range) return;
+
+    document.getElementById('acctPeriodLabel').textContent = range.label;
+    document.getElementById('acctPeriodLabel2').textContent = range.label;
+
+    const { data: ledgerRows, error } = await sb
+      .from('ledger')
+      .select('customerPaymentMode, customerPaidAmount, invoiceDate')
+      .eq('type', 'INVOICE')
+      .gte('invoiceDate', range.start)
+      .lte('invoiceDate', range.end);
+
+    let cash = 0, upi = 0, card = 0, credit = 0;
+    if (!error && ledgerRows){
+      ledgerRows.forEach(r => {
+        const amt = parseFloat(r.customerPaidAmount) || 0;
+        if (r.customerPaymentMode === 'Cash') cash += amt;
+        else if (r.customerPaymentMode === 'UPI') upi += amt;
+        else if (r.customerPaymentMode === 'Card') card += amt;
+        else if (r.customerPaymentMode === 'Credit') credit += amt;
+      });
+    }
+
+    acctAllClearances
+      .filter(c => c.clearedDate >= range.start && c.clearedDate <= range.end)
+      .forEach(c => {
+        const amt = parseFloat(c.amount) || 0;
+        if (c.paymentMode === 'Cash') cash += amt;
+        else if (c.paymentMode === 'UPI') upi += amt;
+        else if (c.paymentMode === 'Card') card += amt;
+      });
+
+    const revenue = cash + upi + card + credit;
+    document.getElementById('acctCashToday').textContent = acctFmt(cash);
+    document.getElementById('acctUpiToday').textContent = acctFmt(upi);
+    document.getElementById('acctCardToday').textContent = acctFmt(card);
+    document.getElementById('acctCreditToday').textContent = acctFmt(credit);
+    document.getElementById('acctTotalToday').textContent = acctFmt(revenue);
+
+    const { data: expenseRows } = await sb
+      .from('expenses')
+      .select('amount, date')
+      .gte('date', range.start)
+      .lte('date', range.end);
+
+    const totalExpenses = (expenseRows || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+    const profit = revenue - totalExpenses;
+
+    document.getElementById('acctRevenueStat').textContent = acctFmt(revenue);
+    document.getElementById('acctExpenseStat').textContent = acctFmt(totalExpenses);
+    const profitEl = document.getElementById('acctProfitStat');
+    profitEl.textContent = (profit < 0 ? '-' : '') + acctFmt(Math.abs(profit));
+    profitEl.style.color = profit >= 0 ? 'var(--moss)' : 'var(--red)';
+  }
+
+  document.getElementById('acctFilterDailyBtn').addEventListener('click', () => {
+    document.getElementById('acctFilterDailyBtn').classList.add('selected');
+    document.getElementById('acctFilterMonthlyBtn').classList.remove('selected');
+    document.getElementById('acctDailyFieldWrap').style.display = 'block';
+    document.getElementById('acctMonthlyFieldWrap').style.display = 'none';
+    acctLoadOverviewStats();
+  });
+  document.getElementById('acctFilterMonthlyBtn').addEventListener('click', () => {
+    document.getElementById('acctFilterMonthlyBtn').classList.add('selected');
+    document.getElementById('acctFilterDailyBtn').classList.remove('selected');
+    document.getElementById('acctMonthlyFieldWrap').style.display = 'block';
+    document.getElementById('acctDailyFieldWrap').style.display = 'none';
+    if (!document.getElementById('acctFilterMonth').value){
+      document.getElementById('acctFilterMonth').value = acctToday().slice(0, 7);
+    }
+    acctLoadOverviewStats();
+  });
+  document.getElementById('acctFilterDate').addEventListener('change', acctLoadOverviewStats);
+  document.getElementById('acctFilterMonth').addEventListener('change', acctLoadOverviewStats);
+
+  async function acctRefreshAdminOverview(){
+    document.getElementById('acctFilterDate').value = acctToday();
+    await acctLoadClearances();
+    await acctLoadBalances();
+    await acctLoadOverviewStats();
+  }
+
+  // ---------- Admin: Full Ledger view (invoices + expenses + manual entries) ----------
+  let ledgerAllRows = [];
+  let ledgerOpeningCashVal = 0;
+  let ledgerOpeningBankVal = 0;
+
+  function ledgerRowMetrics(r){
+    // credit/debit/holding, replicating the original ledger report's logic exactly
+    const isExpense = r.type === 'EXPENSE';
+    const isAmountIn = r.type === 'AMOUNT_IN' || r.type === 'PAYMENT';
+    const paid = parseFloat(r.paid) || 0;
+    const b2bPaid = parseFloat(r.b2bPaid) || 0;
+    const clearedAmt = parseFloat(r.clearedAmt) || 0;
+    const expenseAmt = isExpense ? paid : 0;
+
+    const credit = isExpense ? 0 : paid;
+    const debit = isAmountIn ? 0 : (isExpense ? expenseAmt : b2bPaid);
+    const holding = credit - debit;
+    // Pending on an invoice also accounts for any amount already cleared
+    // separately against it (shown as its own PAYMENT row), so the two
+    // views (here and Employee → Pending Payments) always agree.
+    const pending = (r.type === 'INVOICE') ? Math.max(0, (parseFloat(r.total) || 0) - paid - clearedAmt) : 0;
+
+    return { credit, debit, holding, pending, expenseAmt };
+  }
+
+  async function acctLoadLedgerAll(){
+    await acctLoadClearances();
+    const { data: invRows } = await sb.from('ledger').select('*').order('timestamp', { ascending: false }).limit(1000);
+    const { data: expRows } = await sb.from('expenses').select('*').order('timestamp', { ascending: false }).limit(1000);
+    const { data: settingsRows } = await sb.from('ledger_settings').select('*').limit(1);
+
+    ledgerOpeningCashVal = (settingsRows && settingsRows[0]) ? parseFloat(settingsRows[0].opening_cash) || 0 : 0;
+    ledgerOpeningBankVal = (settingsRows && settingsRows[0]) ? parseFloat(settingsRows[0].opening_bank) || 0 : 0;
+    document.getElementById('ledgerOpeningCash').value = ledgerOpeningCashVal;
+    document.getElementById('ledgerOpeningBank').value = ledgerOpeningBankVal;
+
+    const invEntries = (invRows || []).map(r => ({
+      type: r.type || 'INVOICE', date: r.invoiceDate, invoiceNumber: r.invoiceNumber,
+      customer: r.customerName, patientId: r.patientId || '', mode: r.customerPaymentMode,
+      total: r.invoiceTotal, discount: r.discount, paid: r.customerPaidAmount,
+      b2bName: r.b2bName, b2bPaid: r.paidAmountToB2B, timestamp: r.timestamp,
+      clearedAmt: (r.type || 'INVOICE') === 'INVOICE' ? acctClearedTotalFor(r.invoiceNumber) : 0
+    }));
+    const expEntries = (expRows || []).map(r => ({
+      type: 'EXPENSE', date: r.date, invoiceNumber: r.import_ref || ('EXP-' + r.id.slice(0, 8)),
+      customer: r.description, patientId: '', mode: r.source,
+      total: 0, discount: 0, paid: r.amount,
+      b2bName: '', b2bPaid: 0, timestamp: r.timestamp, _expenseId: r.id, clearedAmt: 0
+    }));
+    const paymentEntries = (acctAllClearances || []).map(c => ({
+      type: 'PAYMENT', date: c.clearedDate, invoiceNumber: c.invoiceNumber,
+      customer: c.customerName + ' (payment against pending)', patientId: c.patientId || '', mode: c.paymentMode,
+      total: 0, discount: 0, paid: c.amount,
+      b2bName: '', b2bPaid: 0, timestamp: c.timestamp, clearedAmt: 0
+    }));
+
+    ledgerAllRows = [...invEntries, ...expEntries, ...paymentEntries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    ledgerPopulateMonthFilter();
+    ledgerApplyFilters();
+  }
+
+  function ledgerPopulateMonthFilter(){
+    const months = new Set();
+    ledgerAllRows.forEach(r => { if (r.date && r.date.length >= 7) months.add(r.date.slice(0, 7)); });
+    const sel = document.getElementById('ledgerMonthFilter');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All Months</option>' + Array.from(months).sort().reverse().map(m => {
+      const label = new Date(m + '-01').toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+      return `<option value="${m}">${label}</option>`;
+    }).join('');
+    sel.value = current;
+  }
+
+  function ledgerApplyFilters(){
+    const search = document.getElementById('ledgerSearch').value.toLowerCase().trim();
+    const patientId = document.getElementById('ledgerPatientIdFilter').value.toLowerCase().trim();
+    const month = document.getElementById('ledgerMonthFilter').value;
+    const mode = document.getElementById('ledgerModeFilter').value;
+    const startDate = document.getElementById('ledgerStartDate').value;
+    const endDate = document.getElementById('ledgerEndDate').value;
+
+    const filtered = ledgerAllRows.filter(r => {
+      if (search){
+        const hay = `${r.invoiceNumber || ''} ${r.customer || ''} ${r.b2bName || ''}`.toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      if (patientId && !(r.patientId || '').toLowerCase().includes(patientId)) return false;
+      if (month && !(r.date || '').startsWith(month)) return false;
+      if (mode && r.mode !== mode) return false;
+      if (startDate && r.date < startDate) return false;
+      if (endDate && r.date > endDate) return false;
+      return true;
+    });
+
+    ledgerRenderTable(filtered);
+    ledgerRenderDashboard(filtered);
+  }
+
+  function ledgerRenderDashboard(rows){
+    let income = 0, expenseDebit = 0;
+    let cashCredit = 0, cashDebit = 0, bankCredit = 0, bankDebit = 0;
+    rows.forEach(r => {
+      const m = ledgerRowMetrics(r);
+      const isCash = r.mode === 'Cash';
+      if (isCash){ cashCredit += m.credit; cashDebit += m.debit; }
+      else { bankCredit += m.credit; bankDebit += m.debit; }
+      if (r.type === 'INVOICE') income += (parseFloat(r.paid) || 0) - (parseFloat(r.b2bPaid) || 0);
+      if (r.type === 'PAYMENT') income += parseFloat(r.paid) || 0;
+      if (r.type !== 'AMOUNT_IN') expenseDebit += m.debit;
+    });
+    const cashClosing = ledgerOpeningCashVal + (cashCredit - cashDebit);
+    const bankClosing = ledgerOpeningBankVal + (bankCredit - bankDebit);
+
+    document.getElementById('ledgerIncomeStat').textContent = acctFmt(income);
+    document.getElementById('ledgerExpenseStat').textContent = acctFmt(expenseDebit);
+    const cashEl = document.getElementById('ledgerCashClosingStat');
+    cashEl.textContent = acctFmt(cashClosing);
+    cashEl.style.color = cashClosing >= 0 ? 'var(--moss)' : 'var(--red)';
+    const bankEl = document.getElementById('ledgerBankClosingStat');
+    bankEl.textContent = acctFmt(bankClosing);
+    bankEl.style.color = bankClosing >= 0 ? 'var(--moss)' : 'var(--red)';
+  }
+
+  function ledgerRenderTable(rows){
+    const body = document.getElementById('ledgerAllBody');
+    const footer = document.getElementById('ledgerFooter');
+
+    if (!rows || rows.length === 0){
+      body.innerHTML = '<tr><td colspan="10" class="empty">No records match this filter.</td></tr>';
+      footer.innerHTML = '';
+      return;
+    }
+
+    const sums = { total:0, discount:0, paid:0, pending:0, b2bPaid:0, expense:0, credit:0, debit:0, holding:0, cashCredit:0, cashDebit:0, bankCredit:0, bankDebit:0 };
+
+    body.innerHTML = rows.map((r, idx) => {
+      const m = ledgerRowMetrics(r);
+      sums.total += parseFloat(r.total) || 0;
+      sums.discount += parseFloat(r.discount) || 0;
+      sums.paid += parseFloat(r.paid) || 0;
+      sums.pending += m.pending;
+      sums.b2bPaid += parseFloat(r.b2bPaid) || 0;
+      sums.expense += m.expenseAmt;
+      sums.credit += m.credit;
+      sums.debit += m.debit;
+      sums.holding += m.holding;
+      if (r.mode === 'Cash'){ sums.cashCredit += m.credit; sums.cashDebit += m.debit; }
+      else { sums.bankCredit += m.credit; sums.bankDebit += m.debit; }
+
+      const typeColor = r.type === 'EXPENSE' ? 'var(--red)' : (r.type === 'AMOUNT_IN' ? 'var(--amber)' : (r.type === 'PAYMENT' ? '#5c8ba8' : 'var(--moss)'));
+      const canRemove = r.type === 'EXPENSE' || r.type === 'AMOUNT_IN';
+      const canCollect = r.type === 'INVOICE' && m.pending > 0.009;
+      const rowId = 'ledger-row-' + idx;
+
+      const mainRow = `
+      <tr data-invoice="${escapeHtml(r.invoiceNumber)}" data-pending="${m.pending}" data-exp-id="${r._expenseId || ''}" data-row-type="${r.type}">
+        <td class="cust-meta" style="color:${typeColor};">${r.type}</td>
+        <td class="cust-meta">${escapeHtml(r.date)}</td>
+        <td class="cust-meta">${escapeHtml(r.invoiceNumber)}</td>
+        <td>${escapeHtml(r.customer)}</td>
+        <td class="cust-meta">${escapeHtml(r.mode)}</td>
+        <td class="cust-meta">${acctFmt(r.paid)}</td>
+        <td style="color:${m.pending > 0.009 ? 'var(--red)' : 'var(--moss)'};" class="ledger-pending-cell">
+          ${canCollect ? `<button class="btn moss btn-sm ledger-collect-open">Collect ₹${m.pending.toFixed(2)}</button>` : acctFmt(m.pending)}
+        </td>
+        <td style="font-weight:600;">${acctFmt(m.holding)}</td>
+        <td><button class="ledger-expand-btn" data-target="${rowId}" type="button">▼</button></td>
+        <td>${canRemove ? '<button class="emp-del ledger-remove">Remove</button>' : ''}</td>
+      </tr>`;
+
+      const detailRow = `
+      <tr class="ledger-detail-row" id="${rowId}" style="display:none;">
+        <td colspan="10">
+          <div class="ledger-detail-grid">
+            <div class="ledger-detail-item"><div class="dlabel">Patient ID</div><div class="dvalue">${escapeHtml(r.patientId || '—')}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Total</div><div class="dvalue">${acctFmt(r.total)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Discount</div><div class="dvalue">${acctFmt(r.discount)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">B2B Name</div><div class="dvalue">${escapeHtml(r.b2bName || '—')}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">B2B Paid</div><div class="dvalue">${acctFmt(r.b2bPaid)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Expense</div><div class="dvalue">${acctFmt(m.expenseAmt)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Credit</div><div class="dvalue" style="color:var(--moss);">${acctFmt(m.credit)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Debit</div><div class="dvalue" style="color:var(--red);">${acctFmt(m.debit)}</div></div>
+          </div>
+        </td>
+      </tr>`;
+
+      return mainRow + detailRow;
+    }).join('');
+
+    footer.innerHTML = `
+      <tr class="total-row">
+        <td colspan="5" style="text-align:right; font-weight:600;">Totals:</td>
+        <td>${acctFmt(sums.paid)}</td>
+        <td style="color:var(--red);">${acctFmt(sums.pending)}</td>
+        <td style="font-weight:700;">${acctFmt(sums.holding)}</td>
+        <td colspan="2">
+          <button class="btn ghost btn-sm" id="ledgerToggleFullTotalsBtn" type="button">▼ Full breakdown</button>
+        </td>
+      </tr>
+      <tr class="total-row" id="ledgerFullTotalsRow" style="display:none;">
+        <td colspan="10">
+          <div class="ledger-detail-grid">
+            <div class="ledger-detail-item"><div class="dlabel">Total</div><div class="dvalue">${acctFmt(sums.total)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Discount</div><div class="dvalue">${acctFmt(sums.discount)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">B2B Paid</div><div class="dvalue">${acctFmt(sums.b2bPaid)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Expense</div><div class="dvalue">${acctFmt(sums.expense)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Credit</div><div class="dvalue" style="color:var(--moss);">${acctFmt(sums.credit)}</div></div>
+            <div class="ledger-detail-item"><div class="dlabel">Debit</div><div class="dvalue" style="color:var(--red);">${acctFmt(sums.debit)}</div></div>
+          </div>
+        </td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="9" style="text-align:right; font-weight:700; color:var(--amber);">Cash Closing Balance (Opening Cash + Cash Credit − Cash Debit):</td>
+        <td style="font-weight:700; color:var(--amber);">${acctFmt(ledgerOpeningCashVal + (sums.cashCredit - sums.cashDebit))}</td>
+      </tr>
+      <tr class="total-row">
+        <td colspan="9" style="text-align:right; font-weight:700; color:var(--amber);">Bank Closing Balance (Opening Bank + Bank Credit − Bank Debit):</td>
+        <td style="font-weight:700; color:var(--amber);">${acctFmt(ledgerOpeningBankVal + (sums.bankCredit - sums.bankDebit))}</td>
+      </tr>`;
+
+    document.getElementById('ledgerToggleFullTotalsBtn').addEventListener('click', (e) => {
+      const row = document.getElementById('ledgerFullTotalsRow');
+      const show = row.style.display === 'none';
+      row.style.display = show ? 'table-row' : 'none';
+      e.target.textContent = show ? '▲ Hide breakdown' : '▼ Full breakdown';
+    });
+
+    body.querySelectorAll('.ledger-expand-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.dataset.target);
+        const show = target.style.display === 'none';
+        target.style.display = show ? 'table-row' : 'none';
+        btn.textContent = show ? '▲' : '▼';
+      });
+    });
+
+    // Remove (AMOUNT_IN / EXPENSE only)
+    body.querySelectorAll('.ledger-remove').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tr = btn.closest('tr');
+        showConfirm('Remove this entry permanently?', async () => {
+          if (tr.dataset.rowType === 'EXPENSE'){
+            await sb.from('expenses').delete().eq('id', tr.dataset.expId);
+          } else {
+            await sb.from('ledger').delete().eq('invoiceNumber', tr.dataset.invoice);
+          }
+          await acctLoadLedgerAll();
+          await acctLoadBalances();
+          await expLoad();
+        });
+      });
+    });
+
+    // Collect (reuses the payment_clearances flow)
+    body.querySelectorAll('.ledger-collect-open').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tr = btn.closest('tr');
+        const pending = parseFloat(tr.dataset.pending);
+        const cell = tr.querySelector('.ledger-pending-cell');
+        cell.innerHTML = `
+          <div class="clear-form">
+            <input type="number" class="clear-amount-input" value="${pending.toFixed(2)}" step="0.01" />
+            <div class="mode-pills">
+              <button type="button" class="mode-pill selected" data-mode="Cash">Cash</button>
+              <button type="button" class="mode-pill" data-mode="UPI">UPI</button>
+              <button type="button" class="mode-pill" data-mode="Card">Card</button>
+            </div>
+            <button class="btn moss btn-sm ledger-collect-confirm">Confirm</button>
+            <button class="btn ghost btn-sm ledger-collect-cancel">Cancel</button>
+          </div>`;
+
+        cell.querySelectorAll('.mode-pill').forEach(p => p.addEventListener('click', () => {
+          cell.querySelectorAll('.mode-pill').forEach(x => x.classList.remove('selected'));
+          p.classList.add('selected');
+        }));
+        cell.querySelector('.ledger-collect-cancel').addEventListener('click', () => ledgerApplyFilters());
+
+        cell.querySelector('.ledger-collect-confirm').addEventListener('click', async () => {
+          const amount = parseFloat(cell.querySelector('.clear-amount-input').value);
+          const mode = cell.querySelector('.mode-pill.selected').dataset.mode;
+          if (isNaN(amount) || amount <= 0) return;
+
+          const custNameCell = tr.querySelector('td:nth-child(4)').textContent;
+          const sourceRow = ledgerAllRows.find(r => r.invoiceNumber === tr.dataset.invoice && r.type === 'INVOICE');
+          await sb.from('payment_clearances').insert({
+            invoiceNumber: tr.dataset.invoice, customerName: custNameCell,
+            patientId: sourceRow ? (sourceRow.patientId || null) : null,
+            amount: parseFloat(amount.toFixed(2)), paymentMode: mode, clearedDate: acctToday()
+          });
+          await acctLoadClearances();
+          await acctLoadLedgerAll();
+          await acctLoadBalances();
+        });
+      });
+    });
+  }
+
+  ['ledgerSearch','ledgerPatientIdFilter','ledgerMonthFilter','ledgerModeFilter','ledgerStartDate','ledgerEndDate'].forEach(id => {
+    document.getElementById(id).addEventListener('input', ledgerApplyFilters);
+    document.getElementById(id).addEventListener('change', ledgerApplyFilters);
+  });
+
+  document.getElementById('ledgerSaveOpeningBtn').addEventListener('click', async () => {
+    const cashVal = parseFloat(document.getElementById('ledgerOpeningCash').value) || 0;
+    const bankVal = parseFloat(document.getElementById('ledgerOpeningBank').value) || 0;
+    const msgEl = document.getElementById('ledgerOpeningMsg');
+
+    const { data } = await sb.from('ledger_settings').select('id').limit(1);
+    if (data && data.length > 0){
+      const { error } = await sb.from('ledger_settings').update({ opening_cash: cashVal, opening_bank: bankVal }).eq('id', data[0].id);
+      if (error){ showMsg(msgEl, error.message, 'err'); return; }
+    }
+
+    ledgerOpeningCashVal = cashVal;
+    ledgerOpeningBankVal = bankVal;
+    showMsg(msgEl, 'Opening balances saved.', 'ok');
+    ledgerApplyFilters();
+  });
+
+  // ---------- Add Amount (manual cash-in) ----------
+  // ---------- Generic modal helpers ----------
+  function openModal(id){ document.getElementById(id).classList.add('open'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+  function wireModePills(containerId){
+    document.querySelectorAll(`#${containerId} .mode-pill`).forEach(p => {
+      p.addEventListener('click', () => {
+        document.querySelectorAll(`#${containerId} .mode-pill`).forEach(x => x.classList.remove('selected'));
+        p.classList.add('selected');
+      });
+    });
+  }
+  function getSelectedMode(containerId){
+    return document.querySelector(`#${containerId} .mode-pill.selected`).dataset.mode;
+  }
+  wireModePills('addAmountModePills');
+  wireModePills('addExpenseModePills');
+
+  // ---------- Generic confirm modal (replaces browser confirm()) ----------
+  let confirmModalCallback = null;
+  function showConfirm(message, onConfirm){
+    document.getElementById('confirmModalTitle').textContent = message;
+    confirmModalCallback = onConfirm;
+    openModal('confirmModal');
+  }
+  document.getElementById('confirmModalCancelBtn').addEventListener('click', () => {
+    confirmModalCallback = null;
+    closeModal('confirmModal');
+  });
+  document.getElementById('confirmModalOkBtn').addEventListener('click', () => {
+    const cb = confirmModalCallback;
+    confirmModalCallback = null;
+    closeModal('confirmModal');
+    if (cb) cb();
+  });
+
+  // ---------- Add Amount (manual cash-in) ----------
+  document.getElementById('ledgerAddAmountBtn').addEventListener('click', () => {
+    document.getElementById('addAmountValue').value = '';
+    document.getElementById('addAmountReason').value = 'Manual Cash Input';
+    clearMsg(document.getElementById('addAmountMsg'));
+    openModal('addAmountModal');
+  });
+  document.getElementById('addAmountCancelBtn').addEventListener('click', () => closeModal('addAmountModal'));
+
+  document.getElementById('addAmountSaveBtn').addEventListener('click', async () => {
+    const msgEl = document.getElementById('addAmountMsg');
+    const amount = parseFloat(document.getElementById('addAmountValue').value);
+    const reason = document.getElementById('addAmountReason').value.trim() || 'Manual Cash Input';
+    const mode = getSelectedMode('addAmountModePills');
+
+    if (isNaN(amount) || amount <= 0){
+      showMsg(msgEl, 'Enter a valid amount.', 'err');
+      return;
+    }
+
+    const ts = nowIST();
+    const record = {
+      invoiceNumber: `CASH-${Date.now()}`,
+      invoiceDate: istDateStr(ts),
+      customerId: null,
+      customerName: reason,
+      b2bName: '',
+      customerPaymentMode: mode,
+      paymentType: 'Full',
+      invoiceTotal: 0,
+      grandTotal: amount,
+      customerPaidAmount: amount,
+      balanceDue: 0,
+      paidAmountToB2B: 0,
+      discount: 0,
+      otherCharges: 0,
+      testsCount: 0,
+      type: 'AMOUNT_IN'
+    };
+    const { error } = await sb.from('ledger').insert(record);
+    if (error){ showMsg(msgEl, 'Could not save: ' + error.message, 'err'); return; }
+
+    closeModal('addAmountModal');
+    await acctLoadLedgerAll();
+    await acctLoadBalances();
+  });
+
+  // ---------- Add Expense ----------
+  document.getElementById('ledgerAddExpenseBtn').addEventListener('click', () => {
+    document.getElementById('addExpenseValue').value = '';
+    document.getElementById('addExpenseDescription').value = '';
+    document.getElementById('addExpenseCategory').value = 'Other';
+    clearMsg(document.getElementById('addExpenseMsg'));
+    openModal('addExpenseModal');
+  });
+  document.getElementById('addExpenseCancelBtn').addEventListener('click', () => closeModal('addExpenseModal'));
+
+  document.getElementById('addExpenseSaveBtn').addEventListener('click', async () => {
+    const msgEl = document.getElementById('addExpenseMsg');
+    const amount = parseFloat(document.getElementById('addExpenseValue').value);
+    const description = document.getElementById('addExpenseDescription').value.trim();
+    const category = document.getElementById('addExpenseCategory').value;
+    const mode = getSelectedMode('addExpenseModePills');
+
+    if (isNaN(amount) || amount <= 0){
+      showMsg(msgEl, 'Enter a valid amount.', 'err');
+      return;
+    }
+
+    const { error } = await sb.from('expenses').insert({
+      date: acctToday(), category, description, amount, source: mode
+    });
+    if (error){ showMsg(msgEl, 'Could not save: ' + error.message, 'err'); return; }
+
+    closeModal('addExpenseModal');
+    await acctLoadLedgerAll();
+    await acctLoadBalances();
+    await expLoad();
+  });
+
+  // ---------- CSV export ----------
+  document.getElementById('ledgerExportCsvBtn').addEventListener('click', () => {
+    const headers = ['Type','Date','Invoice','Customer/Reason','Patient ID','Mode','Total','Discount','Received','Pending','B2B','B2B Paid','Expense','Credit','Debit','Holding'];
+    const csvCell = v => `"${String(v === null || v === undefined ? '' : v).replace(/"/g,'""').trim()}"`;
+    const rows = ledgerAllRows.map(r => {
+      const m = ledgerRowMetrics(r);
+      return [
+        r.type, r.date, r.invoiceNumber, r.customer, r.patientId || '', r.mode,
+        (parseFloat(r.total)||0).toFixed(2), (parseFloat(r.discount)||0).toFixed(2), (parseFloat(r.paid)||0).toFixed(2),
+        m.pending.toFixed(2), r.b2bName || '', (parseFloat(r.b2bPaid)||0).toFixed(2),
+        m.expenseAmt.toFixed(2), m.credit.toFixed(2), m.debit.toFixed(2), m.holding.toFixed(2)
+      ].map(csvCell).join(',');
+    });
+    const csv = [headers.map(csvCell).join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `ledger_export_${acctToday()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  const ledgerImportBtn = document.getElementById('ledgerImportBtn');
+  const ledgerImportFile = document.getElementById('ledgerImportFile');
+  ledgerImportBtn.addEventListener('click', () => ledgerImportFile.click());
+
+  ledgerImportFile.addEventListener('change', async () => {
+    const file = ledgerImportFile.files[0];
+    if (!file) return;
+    const msgEl = document.getElementById('ledgerImportMsg');
+    ledgerImportBtn.disabled = true;
+    showMsg(msgEl, 'Reading file…', 'ok');
+
+    try{
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const records = Array.isArray(parsed) ? parsed : (parsed.transactions || []);
+
+      const invoiceRecords = records
+        .filter(t => (t.type || 'INVOICE') === 'INVOICE')
+        .map(t => ({
+          invoiceNumber: t.invoiceNumber, invoiceDate: t.date, customerId: t.customerID || null,
+          patientId: t.customerID || null,
+          customerName: t.customerName, b2bName: t.b2bName || '', customerPaymentMode: t.customerPaymentMode,
+          paymentType: t.paymentType, invoiceTotal: t.invoiceTotal, grandTotal: t.grandTotal,
+          customerPaidAmount: t.customerPaidAmount, balanceDue: t.balanceDue, paidAmountToB2B: t.paidAmountToB2B,
+          discount: t.discount, otherCharges: t.otherCharges, testsCount: t.testsCount,
+          timestamp: t.timestamp, type: 'INVOICE'
+        }));
+
+      const amountInRecords = records
+        .filter(t => t.type === 'AMOUNT_IN')
+        .map(t => ({
+          invoiceNumber: t.invoiceNumber, invoiceDate: t.date, customerId: null,
+          customerName: t.customerName || 'MANUAL ENTRY', b2bName: '', customerPaymentMode: t.paymentMode,
+          paymentType: 'Full', invoiceTotal: 0, grandTotal: t.amountIn || t.grandTotal,
+          customerPaidAmount: t.amountIn || t.receivedAmount, balanceDue: 0, paidAmountToB2B: 0,
+          discount: 0, otherCharges: 0, testsCount: 0, timestamp: t.timestamp, type: 'AMOUNT_IN'
+        }));
+
+      const expenseRecords = records
+        .filter(t => t.type === 'EXPENSE')
+        .map(t => ({
+          date: t.date, category: 'Imported', description: t.reason || '', amount: t.expenseAmount,
+          source: ['Cash','UPI','Card','Bank'].includes(t.paymentMode) ? t.paymentMode : 'Cash',
+          import_ref: t.invoiceNumber, timestamp: t.timestamp
+        }));
+
+      const allLedgerRecords = [...invoiceRecords, ...amountInRecords];
+      let ledgerError = null, expError = null;
+      if (allLedgerRecords.length > 0){
+        const { error } = await sb.from('ledger').upsert(allLedgerRecords, { onConflict: 'invoiceNumber' });
+        ledgerError = error;
+      }
+      if (expenseRecords.length > 0){
+        const { error } = await sb.from('expenses').upsert(expenseRecords, { onConflict: 'import_ref' });
+        expError = error;
+      }
+
+      if (parsed.openingBalance !== undefined){
+        const { data: existing } = await sb.from('ledger_settings').select('id').limit(1);
+        if (existing && existing.length > 0){
+          await sb.from('ledger_settings').update({ opening_balance: parsed.openingBalance }).eq('id', existing[0].id);
+        }
+      }
+
+      if (ledgerError || expError){
+        showMsg(msgEl, 'Import finished with errors: ' + [ledgerError, expError].filter(Boolean).map(e => e.message).join(' | '), 'err');
+      } else {
+        showMsg(msgEl, `Imported ${invoiceRecords.length} invoice(s), ${amountInRecords.length} manual entry(ies), ${expenseRecords.length} expense(s), and the opening balance.`, 'ok');
+      }
+
+      await acctLoadLedgerAll();
+      await acctLoadBalances();
+      await expLoad();
+    } catch(e){
+      showMsg(msgEl, 'Invalid JSON file: ' + e.message, 'err');
+    }
+
+    ledgerImportFile.value = '';
+    ledgerImportBtn.disabled = false;
+  });
+
+  // ---------- Expenses ----------
+  async function expLoad(){
+    const { data, error } = await sb.from('expenses').select('*').order('date', { ascending: false }).limit(100);
+    const body = document.getElementById('expTableBody');
+    if (error || !data || data.length === 0){
+      body.innerHTML = '<tr><td colspan="5" class="empty">No expenses recorded yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = data.map(e => `
+      <tr>
+        <td class="cust-meta">${escapeHtml(e.date)}</td>
+        <td class="cust-meta">${escapeHtml(e.category)}</td>
+        <td>${escapeHtml(e.description)}</td>
+        <td style="color:var(--red); font-weight:600;">${acctFmt(e.amount)}</td>
+        <td class="cust-meta">${escapeHtml(e.source || 'Cash')}</td>
+        <td style="text-align:right;"><button class="emp-del exp-del" data-id="${e.id}">Remove</button></td>
+      </tr>`).join('');
+
+    body.querySelectorAll('.exp-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        showConfirm('Remove this expense?', async () => {
+          await sb.from('expenses').delete().eq('id', btn.dataset.id);
+          await expLoad();
+          await acctLoadBalances();
+        });
+      });
+    });
+  }
+
+  document.getElementById('expAddBtn').addEventListener('click', async () => {
+    const date = document.getElementById('expDate').value || acctToday();
+    const category = document.getElementById('expCategory').value;
+    const description = document.getElementById('expDescription').value.trim();
+    const amount = parseFloat(document.getElementById('expAmount').value);
+    const source = document.getElementById('expSource').value;
+
+    if (isNaN(amount) || amount <= 0){
+      showMsg(document.getElementById('expMsg'), 'Enter a valid amount.', 'err');
+      return;
+    }
+
+    const { error } = await sb.from('expenses').insert({ date, category, description, amount, source });
+    if (error){
+      showMsg(document.getElementById('expMsg'), error.message, 'err');
+      return;
+    }
+
+    showMsg(document.getElementById('expMsg'), 'Expense added.', 'ok');
+    document.getElementById('expDescription').value = '';
+    document.getElementById('expAmount').value = '';
+    await expLoad();
+    await acctLoadBalances();
+  });
+
+  // ---------- Closing check (live match/mismatch as you type) ----------
+  function acctUpdateClosingCheck(){
+    const cashInput = document.getElementById('acctActualCash').value;
+    const digitalInput = document.getElementById('acctActualDigital').value;
+    const cashDiffEl = document.getElementById('acctCashDiff');
+    const digitalDiffEl = document.getElementById('acctDigitalDiff');
+    const cashRow = document.getElementById('acctCashDiffRow');
+    const digitalRow = document.getElementById('acctDigitalDiffRow');
+
+    if (cashInput === ''){
+      cashDiffEl.textContent = 'Enter amount above';
+      cashDiffEl.style.color = 'var(--ink-dim)';
+      cashRow.style.borderTopColor = 'var(--rule)';
+    } else {
+      const diff = (parseFloat(cashInput) || 0) - acctClosingCashVal;
+      const ok = Math.abs(diff) < 0.01;
+      cashDiffEl.textContent = ok ? '✓ Matches' : `✗ Off by ${acctFmt(Math.abs(diff))}`;
+      cashDiffEl.style.color = ok ? 'var(--moss)' : 'var(--red)';
+      cashRow.style.borderTopColor = ok ? 'var(--moss)' : 'var(--red)';
+    }
+
+    if (digitalInput === ''){
+      digitalDiffEl.textContent = 'Enter amount above';
+      digitalDiffEl.style.color = 'var(--ink-dim)';
+      digitalRow.style.borderTopColor = 'var(--rule)';
+    } else {
+      const diff = (parseFloat(digitalInput) || 0) - acctClosingUpiVal;
+      const ok = Math.abs(diff) < 0.01;
+      digitalDiffEl.textContent = ok ? '✓ Matches' : `✗ Off by ${acctFmt(Math.abs(diff))}`;
+      digitalDiffEl.style.color = ok ? 'var(--moss)' : 'var(--red)';
+      digitalRow.style.borderTopColor = ok ? 'var(--moss)' : 'var(--red)';
+    }
+  }
+  ['acctActualCash','acctActualDigital'].forEach(id => {
+    document.getElementById(id).addEventListener('input', acctUpdateClosingCheck);
+  });
+
+  async function acctLoadHistory(){
+    const { data, error } = await sb
+      .from('account_closures')
+      .select('*')
+      .order('timestamp', { ascending: false })
+      .limit(10);
+
+    const body = document.getElementById('acctHistoryBody');
+    if (error || !data || data.length === 0){
+      body.innerHTML = '<tr><td colspan="4" class="empty">No closing reports yet.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = data.map(r => {
+      const cashOk = Math.abs(parseFloat(r.cashDifference) || 0) < 0.01;
+      const digOk = Math.abs(parseFloat(r.digitalDifference) || 0) < 0.01;
+      return `
+        <tr>
+          <td class="cust-meta">${escapeHtml(r.closureDate)}</td>
+          <td>${escapeHtml(r.employeeName)}</td>
+          <td style="color:${cashOk ? 'var(--moss)' : 'var(--red)'};">${cashOk ? '✓ Matched' : '✗ ' + acctFmt(r.cashDifference)}</td>
+          <td style="color:${digOk ? 'var(--moss)' : 'var(--red)'};">${digOk ? '✓ Matched' : '✗ ' + acctFmt(r.digitalDifference)}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('acctSubmitBtn').addEventListener('click', async () => {
+    const actualCashRaw = document.getElementById('acctActualCash').value;
+    const actualDigitalRaw = document.getElementById('acctActualDigital').value;
+
+    if (actualCashRaw === '' || actualDigitalRaw === ''){
+      showMsg(document.getElementById('acctMsg'), 'Enter actual cash counted and actual UPI received before closing.', 'err');
+      return;
+    }
+
+    const actualCash = parseFloat(actualCashRaw) || 0;
+    const actualDigital = parseFloat(actualDigitalRaw) || 0;
+
+    const record = {
+      closureDate: acctToday(),
+      employeeName: currentEmployee ? (currentEmployee.name || currentEmployee.username) : 'Unknown',
+      calculatedCash: acctClosingCashVal,
+      actualCash,
+      cashDifference: parseFloat((actualCash - acctClosingCashVal).toFixed(2)),
+      calculatedDigital: acctClosingUpiVal,
+      actualDigital,
+      digitalDifference: parseFloat((actualDigital - acctClosingUpiVal).toFixed(2))
+    };
+
+    const { error } = await sb.from('account_closures').insert(record);
+    if (error){
+      showMsg(document.getElementById('acctMsg'), error.message, 'err');
+      return;
+    }
+
+    const bothMatch = Math.abs(record.cashDifference) < 0.01 && Math.abs(record.digitalDifference) < 0.01;
+    showMsg(document.getElementById('acctMsg'),
+      bothMatch ? 'Everything matches — report saved.' : 'Mismatch found — report saved with the difference recorded.',
+      bothMatch ? 'ok' : 'err');
+
+    document.getElementById('acctActualCash').value = '';
+    document.getElementById('acctActualDigital').value = '';
+    acctUpdateClosingCheck();
+    await acctLoadHistory();
+  });
+
+  // ---------- Pending payments (net of any clearances already recorded) ----------
+  async function acctLoadPending(){
+    const { data, error } = await sb
+      .from('ledger')
+      .select('invoiceNumber, customerName, balanceDue, "patientId"')
+      .gt('balanceDue', 0)
+      .order('invoiceDate', { ascending: false })
+      .limit(100);
+
+    const body = document.getElementById('acctPendingBody');
+    if (error || !data){
+      body.innerHTML = '<tr><td colspan="4" class="empty">Could not load pending payments.</td></tr>';
+      return;
+    }
+
+    const stillPending = data
+      .map(r => ({ ...r, netDue: parseFloat((parseFloat(r.balanceDue) - acctClearedTotalFor(r.invoiceNumber)).toFixed(2)) }))
+      .filter(r => r.netDue > 0.009);
+
+    if (stillPending.length === 0){
+      body.innerHTML = '<tr><td colspan="4" class="empty">No pending payments.</td></tr>';
+      return;
+    }
+
+    body.innerHTML = stillPending.map(r => `
+      <tr data-invoice="${escapeHtml(r.invoiceNumber)}" data-customer="${escapeHtml(r.customerName)}" data-balance="${r.netDue}" data-patient-id="${escapeHtml(r.patientId || '')}">
+        <td class="cust-meta">${escapeHtml(r.invoiceNumber)}</td>
+        <td>${escapeHtml(r.customerName)}</td>
+        <td style="color:var(--red); font-weight:600;">${acctFmt(r.netDue)}</td>
+        <td style="text-align:right;">
+          <button class="btn ghost btn-sm acct-clear-open">Clear payment</button>
+        </td>
+      </tr>`).join('');
+
+    body.querySelectorAll('.acct-clear-open').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tr = btn.closest('tr');
+        const balance = parseFloat(tr.dataset.balance);
+        const actionCell = tr.querySelector('td:last-child');
+        actionCell.innerHTML = `
+          <div class="clear-form">
+            <input type="number" class="clear-amount-input" value="${balance.toFixed(2)}" step="0.01" />
+            <div class="mode-pills">
+              <button type="button" class="mode-pill selected" data-mode="Cash">Cash</button>
+              <button type="button" class="mode-pill" data-mode="UPI">UPI</button>
+              <button type="button" class="mode-pill" data-mode="Card">Card</button>
+            </div>
+            <button class="btn moss btn-sm acct-clear-confirm">Confirm</button>
+            <button class="btn ghost btn-sm acct-clear-cancel">Cancel</button>
+          </div>`;
+
+        actionCell.querySelectorAll('.mode-pill').forEach(pill => {
+          pill.addEventListener('click', () => {
+            actionCell.querySelectorAll('.mode-pill').forEach(p => p.classList.remove('selected'));
+            pill.classList.add('selected');
+          });
+        });
+
+        actionCell.querySelector('.acct-clear-cancel').addEventListener('click', () => acctLoadPending());
+
+        actionCell.querySelector('.acct-clear-confirm').addEventListener('click', async () => {
+          const amount = parseFloat(actionCell.querySelector('.clear-amount-input').value);
+          const mode = actionCell.querySelector('.mode-pill.selected').dataset.mode;
+
+          if (isNaN(amount) || amount <= 0){
+            showMsg(document.getElementById('acctPendingMsg'), 'Enter a valid amount.', 'err');
+            return;
+          }
+
+          const { error } = await sb.from('payment_clearances').insert({
+            invoiceNumber: tr.dataset.invoice,
+            customerName: tr.dataset.customer,
+            patientId: tr.dataset.patientId || null,
+            amount: parseFloat(amount.toFixed(2)),
+            paymentMode: mode,
+            clearedDate: acctToday()
+          });
+
+          if (error){
+            showMsg(document.getElementById('acctPendingMsg'), error.message, 'err');
+            return;
+          }
+
+          showMsg(document.getElementById('acctPendingMsg'), `₹${amount.toFixed(2)} (${mode}) recorded for ${tr.dataset.invoice}.`, 'ok');
+          await acctLoadClearances();
+          await acctLoadPending();
+          await acctLoadClearedList();
+          await acctLoadBalances();
+          await acctLoadTodayClosingBalances();
+          await acctLoadTransactions();
+        });
+      });
+    });
+  }
+
+  async function acctLoadClearedList(){
+    const body = document.getElementById('acctClearedBody');
+    const recent = acctAllClearances.slice(0, 20);
+    if (recent.length === 0){
+      body.innerHTML = '<tr><td colspan="5" class="empty">No payments cleared yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = recent.map(c => `
+      <tr>
+        <td class="cust-meta">${escapeHtml(c.invoiceNumber)}</td>
+        <td>${escapeHtml(c.customerName)}</td>
+        <td style="color:var(--moss); font-weight:600;">${acctFmt(c.amount)}</td>
+        <td class="cust-meta">${escapeHtml(c.paymentMode)}</td>
+        <td class="cust-meta">${escapeHtml(c.clearedDate)}</td>
+      </tr>`).join('');
+  }
+
+  // ---------- Transactions history (invoices + pending-payment clearances, merged) ----------
+  let acctAllTransactions = [];
+
+  async function acctLoadTransactions(){
+    const { data: ledgerRows, error: ledgerErr } = await sb
+      .from('ledger')
+      .select('invoiceNumber, invoiceDate, customerName, customerPaymentMode, invoiceTotal, customerPaidAmount, balanceDue, timestamp, type')
+      .eq('type', 'INVOICE')
+      .order('timestamp', { ascending: false })
+      .limit(150);
+
+    const { data: clearanceRows, error: clearErr } = await sb
+      .from('payment_clearances')
+      .select('invoiceNumber, customerName, amount, paymentMode, clearedDate, timestamp')
+      .order('timestamp', { ascending: false })
+      .limit(150);
+
+    const invoiceEntries = (!ledgerErr && ledgerRows) ? ledgerRows.map(r => ({
+      type: 'invoice',
+      invoiceNumber: r.invoiceNumber,
+      date: r.invoiceDate,
+      customerName: r.customerName,
+      mode: r.customerPaymentMode,
+      total: r.invoiceTotal,
+      paid: parseFloat((parseFloat(r.customerPaidAmount) + acctClearedTotalFor(r.invoiceNumber)).toFixed(2)),
+      due: parseFloat((parseFloat(r.balanceDue) - acctClearedTotalFor(r.invoiceNumber)).toFixed(2)),
+      timestamp: r.timestamp
+    })) : [];
+
+    const paymentEntries = (!clearErr && clearanceRows) ? clearanceRows.map(c => ({
+      type: 'payment',
+      invoiceNumber: c.invoiceNumber,
+      date: c.clearedDate,
+      customerName: c.customerName,
+      mode: c.paymentMode,
+      total: null,
+      paid: c.amount,
+      due: null,
+      timestamp: c.timestamp
+    })) : [];
+
+    acctAllTransactions = [...invoiceEntries, ...paymentEntries]
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    acctRenderTransactions(acctAllTransactions);
+  }
+
+  function acctRenderTransactions(rows){
+    const body = document.getElementById('acctTxnBody');
+    if (!rows || rows.length === 0){
+      body.innerHTML = '<tr><td colspan="7" class="empty">No transactions yet.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => {
+      if (r.type === 'payment'){
+        return `
+        <tr>
+          <td class="cust-meta">${escapeHtml(r.invoiceNumber)}</td>
+          <td class="cust-meta">${escapeHtml(r.date)}</td>
+          <td>${escapeHtml(r.customerName)}</td>
+          <td class="cust-meta">${escapeHtml(r.mode)}</td>
+          <td class="cust-meta" style="font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--amber);">Pending payment</td>
+          <td style="color:var(--moss); font-weight:600;">${acctFmt(r.paid)}</td>
+          <td class="cust-meta">—</td>
+        </tr>`;
+      }
+      return `
+      <tr>
+        <td class="cust-meta">${escapeHtml(r.invoiceNumber)}</td>
+        <td class="cust-meta">${escapeHtml(r.date)}</td>
+        <td>${escapeHtml(r.customerName)}</td>
+        <td class="cust-meta">${escapeHtml(r.mode)}</td>
+        <td class="cust-meta">${acctFmt(r.total)}</td>
+        <td class="cust-meta">${acctFmt(r.paid)}</td>
+        <td style="color:${r.due > 0.009 ? 'var(--red)' : 'var(--moss)'}; font-weight:600;">${acctFmt(r.due)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('acctTxnSearch').addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    if (term === ''){ acctRenderTransactions(acctAllTransactions); return; }
+    acctRenderTransactions(acctAllTransactions.filter(r =>
+      (r.invoiceNumber || '').toLowerCase().includes(term) ||
+      (r.customerName || '').toLowerCase().includes(term)
+    ));
+  });
+
+  async function acctRefreshEmployeeAccounts(){
+    await acctLoadClearances();
+    await acctLoadBalances();
+    await acctLoadTodayClosingBalances();
+    await acctLoadHistory();
+    await acctLoadPending();
+    await acctLoadClearedList();
+    await acctLoadTransactions();
+    document.getElementById('expDate').value = acctToday();
+    await expLoad();
+  }
+
+  // ---------- Accounts sub-tabs ----------
+  document.querySelectorAll('.subtab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const container = btn.closest('.tab-panel');
+      container.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+      container.querySelectorAll('.subtab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      container.querySelector('#subtab-' + btn.dataset.subtab).classList.add('active');
+      if (btn.dataset.subtab === 'admin-ledger'){ acctLoadLedgerAll(); }
+      if (btn.dataset.subtab === 'svc-packages'){ pkgLoadServiceSelector(); pkgLoadList(); }
+    });
+  });
+
+  // ---------- Tabs (scoped per dashboard, so admin and employee tabs don't clash) ----------
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const container = btn.closest('.dash-wrap');
+      container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      container.querySelector('#tab-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'accounts'){ acctRefreshEmployeeAccounts(); }
+      if (btn.dataset.tab === 'admin-accounts'){ acctRefreshAdminOverview(); }
+      if (btn.dataset.tab === 'admin-customers'){ loadAdminCustomers(); }
+      if (btn.dataset.tab === 'admin-dashboard'){ loadDashboardAccountsCard(); }
+    });
+  });
+
+  // ---------- View mode (Mobile / PC) ----------
+  function applyViewMode(mode){
+    document.body.classList.toggle('pc-view', mode === 'pc');
+    document.getElementById('viewModeMobileBtn').classList.toggle('active', mode !== 'pc');
+    document.getElementById('viewModePcBtn').classList.toggle('active', mode === 'pc');
+    try{ localStorage.setItem('labAppViewMode', mode); }catch(e){}
+  }
+  document.getElementById('viewModeMobileBtn').addEventListener('click', () => applyViewMode('mobile'));
+  document.getElementById('viewModePcBtn').addEventListener('click', () => applyViewMode('pc'));
+
+  let savedViewMode = 'mobile';
+  try{ savedViewMode = localStorage.getItem('labAppViewMode') || 'mobile'; }catch(e){}
+  applyViewMode(savedViewMode);
+
+  // ---------- Init ----------
+  showScreen('auth');
+</script>
+</body>
+</html>

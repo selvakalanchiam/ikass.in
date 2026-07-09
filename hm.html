@@ -245,6 +245,25 @@
     border:1px solid var(--rule); background:#fff; color:var(--ink-dim); border-radius:6px; cursor:pointer;
   }
   .mode-pill.selected{ background:var(--amber); border-color:var(--amber); color:#fff; }
+
+  /* ---------- Multi-select category picker ---------- */
+  .category-picker{
+    display:flex; flex-wrap:wrap; gap:8px; padding:12px; border:1px solid var(--rule);
+    border-radius:8px; background:#fffdfa; max-height:160px; overflow-y:auto;
+  }
+  .category-pill{
+    font-family:var(--font-mono); font-size:11px; padding:7px 12px; border-radius:16px;
+    border:1px solid var(--rule); background:#fff; color:var(--ink-dim); cursor:pointer;
+  }
+  .category-pill.selected{ background:var(--amber); border-color:var(--amber); color:#fff; }
+  .category-pill:hover:not(.selected){ border-color:var(--amber); color:var(--amber); }
+
+  /* ---------- Date field: shows DD/MM/YYYY, opens the native picker underneath ---------- */
+  .date-display-wrap{ position:relative; }
+  .date-display-wrap input[type="text"]{ cursor:pointer; background:#fffdfa; }
+  .date-display-wrap input[type="date"]{
+    position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; border:none; padding:0;
+  }
   .btn-sm{ padding:8px 12px; font-size:10px; border-radius:6px; }
 
   /* ---------- Modal (replaces browser prompt/alert popups) ---------- */
@@ -394,14 +413,13 @@
         <div class="field"><label>Test name</label><input id="svcName" type="text" placeholder="e.g. CBC" /></div>
         <div class="field" style="max-width:160px;"><label>Price (₹)</label><input id="svcPrice" type="number" placeholder="e.g. 260" /></div>
       </div>
+      <div class="field">
+        <label>Categories (select one or more — a test can belong to several)</label>
+        <div class="category-picker" id="svcCategoryPicker"></div>
+      </div>
       <div class="form-row">
-        <div class="field"><label>Category</label>
-          <select class="field-select" id="svcCategory"></select>
-        </div>
-        <div class="field" id="svcNewCategoryWrap" style="display:none;">
-          <label>New category name</label>
-          <input id="svcNewCategory" type="text" placeholder="Type new category..." />
-        </div>
+        <div class="field"><input id="svcNewCategoryInput" type="text" placeholder="Add a new category..." /></div>
+        <div class="field" style="flex:0;"><button class="btn ghost" id="svcAddCategoryBtn" type="button" style="white-space:nowrap;">+ Add Category</button></div>
       </div>
       <button class="btn moss" id="createSvcBtn">Add service</button>
 
@@ -417,7 +435,7 @@
 
       <div class="table-wrap" style="margin-top:16px;">
         <table class="cust-table" id="svcTable">
-          <thead><tr><th>Name</th><th>Category</th><th>Price (₹)</th><th>Website</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Categories</th><th>Price (₹)</th><th>Website</th><th></th></tr></thead>
           <tbody id="svcTableBody"></tbody>
         </table>
       </div>
@@ -473,7 +491,10 @@
       <div class="form-row">
         <div class="field" id="acctDailyFieldWrap" style="max-width:220px;">
           <label>Date</label>
-          <input id="acctFilterDate" type="date" />
+          <div class="date-display-wrap">
+            <input id="acctFilterDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+            <input id="acctFilterDate" type="date" />
+          </div>
         </div>
         <div class="field" id="acctMonthlyFieldWrap" style="max-width:220px; display:none;">
           <label>Month</label>
@@ -539,8 +560,18 @@
           </select></div>
         </div>
         <div class="form-row">
-          <div class="field" style="max-width:170px;"><label>Start date</label><input id="ledgerStartDate" type="date" /></div>
-          <div class="field" style="max-width:170px;"><label>End date</label><input id="ledgerEndDate" type="date" /></div>
+          <div class="field" style="max-width:170px;"><label>Start date</label>
+            <div class="date-display-wrap">
+              <input id="ledgerStartDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+              <input id="ledgerStartDate" type="date" />
+            </div>
+          </div>
+          <div class="field" style="max-width:170px;"><label>End date</label>
+            <div class="date-display-wrap">
+              <input id="ledgerEndDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+              <input id="ledgerEndDate" type="date" />
+            </div>
+          </div>
           <div class="field" style="display:flex; align-items:flex-end;">
             <button class="btn moss" id="ledgerAddAmountBtn" type="button">+ Add Amount</button>
             <button class="btn red" id="ledgerAddExpenseBtn" type="button">+ Add Expense</button>
@@ -676,7 +707,10 @@
       <div class="form-row">
         <div class="field" style="max-width:200px;">
           <label>Invoice date</label>
-          <input id="invInvoiceDate" type="date" />
+          <div class="date-display-wrap">
+            <input id="invInvoiceDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+            <input id="invInvoiceDate" type="date" />
+          </div>
         </div>
         <div class="field inv-search-wrap">
           <label>Search patient</label>
@@ -866,7 +900,12 @@
         <div class="panel-title">Add expense</div>
         <div class="msg" id="expMsg"></div>
         <div class="form-row">
-          <div class="field" style="max-width:180px;"><label>Date</label><input id="expDate" type="date" /></div>
+          <div class="field" style="max-width:180px;"><label>Date</label>
+            <div class="date-display-wrap">
+              <input id="expDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+              <input id="expDate" type="date" />
+            </div>
+          </div>
           <div class="field" style="max-width:200px;"><label>Category</label>
             <select class="field-select" id="expCategory">
               <option>Rent</option><option>Salary</option><option>Supplies</option>
@@ -988,6 +1027,38 @@
     return `${h}${mi}${s}${ms}`;
   }
 
+  // ---------- Single shared date formatter — DD/MM/YYYY everywhere ----------
+  // Used for every date shown in the UI, printed invoices, and CSV exports.
+  function formatDMY(input){
+    if (!input) return '—';
+    if (typeof input === 'string'){
+      // Plain 'YYYY-MM-DD' (or 'YYYY-MM-DDTHH:mm...') text — convert directly,
+      // avoiding any timezone shift that new Date() could introduce.
+      const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(input);
+      if (isoMatch) return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
+    }
+    const d = (input instanceof Date) ? input : new Date(input);
+    if (isNaN(d.getTime())) return String(input);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    return `${day}/${month}/${d.getFullYear()}`;
+  }
+
+  // ---------- Wires a native date input to a read-only DD/MM/YYYY display ----------
+  // The native input stays functionally in control (its .value is still the
+  // ISO YYYY-MM-DD string every other function already reads) — this just
+  // fixes what the person actually SEES, since browsers render <input type=date>
+  // in their own locale format regardless of what we do.
+  function wireDateDisplay(nativeId, displayId){
+    const native = document.getElementById(nativeId);
+    const display = document.getElementById(displayId);
+    function sync(){ display.value = native.value ? formatDMY(native.value) : ''; }
+    native.addEventListener('change', sync);
+    native.addEventListener('input', sync);
+    sync();
+    return sync;
+  }
+
   // ---------- Screens ----------
   const authScreen = document.getElementById('authScreen');
   const adminWrap = document.getElementById('adminWrap');
@@ -1017,6 +1088,9 @@
   const authMsg = document.getElementById('authMsg');
 
   let currentEmployee = null;
+  let syncInvInvoiceDate = () => {};
+  let syncAcctFilterDate = () => {};
+  let syncExpDate = () => {};
   let openSession = null;
   let tickHandle = null;
 
@@ -1175,23 +1249,42 @@
     'Toxicology Screening','Prenatal / Screening Tests','Arthritis Profiles','Immunoglobulins Test',
     'Fluid Analysis','Flow Cytometry','Sepsis Markers','Neurological Biomarkers','Uncategorized'
   ];
-  const SVC_NEW_CATEGORY_VALUE = '__new__';
 
-  function svcPopulateCategoryDropdowns(extraCategories){
-    const allCats = Array.from(new Set([...SVC_PRESET_CATEGORIES, ...(extraCategories || [])])).sort();
+  let svcKnownCategories = [...SVC_PRESET_CATEGORIES];
+  let svcSelectedCategories = new Set();
 
-    const createSel = document.getElementById('svcCategory');
-    createSel.innerHTML = allCats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')
-      + `<option value="${SVC_NEW_CATEGORY_VALUE}">+ Add New Category...</option>`;
+  function svcRenderCategoryPicker(containerId, selectedSet){
+    const container = document.getElementById(containerId);
+    container.innerHTML = svcKnownCategories.map(c => `
+      <button type="button" class="category-pill ${selectedSet.has(c) ? 'selected' : ''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>
+    `).join('');
+    container.querySelectorAll('.category-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        const cat = pill.dataset.cat;
+        if (selectedSet.has(cat)) selectedSet.delete(cat); else selectedSet.add(cat);
+        pill.classList.toggle('selected');
+      });
+    });
+  }
+
+  function svcRefreshKnownCategories(extraCategories){
+    svcKnownCategories = Array.from(new Set([...SVC_PRESET_CATEGORIES, ...(extraCategories || [])])).sort();
+
+    svcRenderCategoryPicker('svcCategoryPicker', svcSelectedCategories);
 
     const filterSel = document.getElementById('svcCategoryFilter');
     const currentFilter = filterSel.value;
-    filterSel.innerHTML = '<option value="">All Categories</option>' + allCats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    filterSel.innerHTML = '<option value="">All Categories</option>' + svcKnownCategories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
     filterSel.value = currentFilter;
   }
 
-  document.getElementById('svcCategory').addEventListener('change', (e) => {
-    document.getElementById('svcNewCategoryWrap').style.display = e.target.value === SVC_NEW_CATEGORY_VALUE ? 'block' : 'none';
+  document.getElementById('svcAddCategoryBtn').addEventListener('click', () => {
+    const val = document.getElementById('svcNewCategoryInput').value.trim();
+    if (!val) return;
+    if (!svcKnownCategories.includes(val)) svcKnownCategories.push(val);
+    svcSelectedCategories.add(val);
+    document.getElementById('svcNewCategoryInput').value = '';
+    svcRenderCategoryPicker('svcCategoryPicker', svcSelectedCategories);
   });
 
   let svcAllRows = [];
@@ -1200,14 +1293,15 @@
     const showArchived = document.getElementById('svcShowArchived').checked;
     const categoryFilter = document.getElementById('svcCategoryFilter').value;
 
-    let query = sb.from('services').select('*').order('category', { ascending: true }).order('name', { ascending: true });
+    let query = sb.from('services').select('*').order('name', { ascending: true });
     query = showArchived ? query : query.eq('active', true);
-    if (categoryFilter) query = query.eq('category', categoryFilter);
+    if (categoryFilter) query = query.contains('categories', [categoryFilter]);
     const { data, error } = await query;
 
-    // Refresh category dropdowns with any custom categories already in use
-    const { data: allForCats } = await sb.from('services').select('category');
-    svcPopulateCategoryDropdowns((allForCats || []).map(r => r.category).filter(Boolean));
+    // Refresh category pickers/filters with any custom categories already in use
+    const { data: allForCats } = await sb.from('services').select('categories');
+    const extra = (allForCats || []).flatMap(r => Array.isArray(r.categories) ? r.categories : []).filter(Boolean);
+    svcRefreshKnownCategories(extra);
 
     svcAllRows = (!error && data) ? data : [];
     svcApplyFilter();
@@ -1228,13 +1322,13 @@
     svcTableBody.innerHTML = data.map(s => `
       <tr>
         <td>${escapeHtml(s.name)} ${s.active === false ? '<span class="cust-meta" style="color:var(--red);">(archived)</span>' : ''}</td>
-        <td class="cust-meta">${escapeHtml(s.category || 'Uncategorized')}</td>
+        <td class="cust-meta">${escapeHtml((Array.isArray(s.categories) && s.categories.length > 0) ? s.categories.join(', ') : 'Uncategorized')}</td>
         <td class="cust-meta">₹${escapeHtml(s.price)}</td>
         <td style="text-align:center;">
           <button class="svc-visibility-toggle" data-id="${s.id}" data-visible="${s.visible_external !== false}" title="${s.visible_external !== false ? 'Visible on linked website — click to hide' : 'Hidden from linked website — click to show'}" style="background:none; border:none; cursor:pointer; font-size:18px; color:${s.visible_external !== false ? 'var(--moss)' : 'var(--red)'}; text-decoration:${s.visible_external !== false ? 'none' : 'line-through'};">👁</button>
         </td>
         <td style="text-align:right; white-space:nowrap;">
-          <button class="emp-del svc-edit" data-id="${s.id}" data-name="${escapeHtml(s.name)}" data-price="${s.price}" data-category="${escapeHtml(s.category || 'Uncategorized')}" style="color:var(--moss); margin-right:14px;">Edit</button>
+          <button class="emp-del svc-edit" data-id="${s.id}" data-name="${escapeHtml(s.name)}" data-price="${s.price}" data-categories='${escapeHtml(JSON.stringify(Array.isArray(s.categories) ? s.categories : []))}' style="color:var(--moss); margin-right:14px;">Edit</button>
           <button class="emp-del svc-del" data-id="${s.id}" data-active="${s.active}" style="color:${s.active === false ? 'var(--moss)' : 'var(--red)'};">${s.active === false ? 'Restore' : 'Archive'}</button>
         </td>
       </tr>
@@ -1277,14 +1371,14 @@
         const tr = btn.closest('tr');
         const name = btn.dataset.name;
         const price = btn.dataset.price;
-        const category = btn.dataset.category;
-        const catOptions = SVC_PRESET_CATEGORIES.includes(category) ? SVC_PRESET_CATEGORIES : [category, ...SVC_PRESET_CATEGORIES];
+        let currentCategories = [];
+        try{ currentCategories = JSON.parse(btn.dataset.categories) || []; }catch(e){ currentCategories = []; }
+        const editSelectedCategories = new Set(currentCategories);
+        const pickerId = 'svc-edit-cat-picker-' + btn.dataset.id;
 
         tr.innerHTML = `
           <td><input type="text" class="svc-edit-name" value="${escapeHtml(name)}" style="width:100%; padding:8px 10px; font-size:13px; border:1px solid var(--rule); border-radius:6px; font-family:var(--font-body); background:#fffdfa; color:var(--ink);" /></td>
-          <td><select class="svc-edit-category field-select" style="padding:8px 10px; font-size:13px;">
-            ${catOptions.map(c => `<option value="${escapeHtml(c)}" ${c === category ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('')}
-          </select></td>
+          <td><div class="category-picker" id="${pickerId}" style="max-height:100px;"></div></td>
           <td><input type="number" class="svc-edit-price" value="${price}" step="0.01" style="width:100px; padding:8px 10px; font-size:13px; border:1px solid var(--rule); border-radius:6px; font-family:var(--font-mono); background:#fffdfa; color:var(--ink);" /></td>
           <td class="cust-meta" style="text-align:center;">—</td>
           <td style="text-align:right; white-space:nowrap;">
@@ -1292,18 +1386,20 @@
             <button class="btn ghost btn-sm svc-edit-cancel">Cancel</button>
           </td>`;
 
+        svcRenderCategoryPicker(pickerId, editSelectedCategories);
+
         tr.querySelector('.svc-edit-cancel').addEventListener('click', () => svcApplyFilter());
 
         tr.querySelector('.svc-edit-save').addEventListener('click', async () => {
           const newName = tr.querySelector('.svc-edit-name').value.trim().toUpperCase();
           const newPrice = parseFloat(tr.querySelector('.svc-edit-price').value);
-          const newCategory = tr.querySelector('.svc-edit-category').value;
+          const newCategories = editSelectedCategories.size > 0 ? Array.from(editSelectedCategories) : ['Uncategorized'];
           if (!newName || isNaN(newPrice)){
             showMsg(svcMsg, 'Enter a valid test name and price.', 'err');
             return;
           }
           const { error } = await sb.from('services')
-            .update({ name: newName, price: newPrice, category: newCategory })
+            .update({ name: newName, price: newPrice, categories: newCategories })
             .eq('id', btn.dataset.id);
           if (error){ showMsg(svcMsg, error.message, 'err'); return; }
           await loadServices();
@@ -1318,10 +1414,7 @@
     const name = document.getElementById('svcName').value.trim().toUpperCase();
     const priceRaw = document.getElementById('svcPrice').value;
     const price = parseFloat(priceRaw);
-    const categorySelect = document.getElementById('svcCategory').value;
-    const category = categorySelect === SVC_NEW_CATEGORY_VALUE
-      ? (document.getElementById('svcNewCategory').value.trim() || 'Uncategorized')
-      : categorySelect;
+    const categories = svcSelectedCategories.size > 0 ? Array.from(svcSelectedCategories) : ['Uncategorized'];
 
     if (!name || isNaN(price)){
       showMsg(svcMsg, 'Enter a test name and a valid price.', 'err');
@@ -1331,24 +1424,32 @@
     const { data: existing } = await sb.from('services').select('id').order('id', { ascending: false }).limit(1);
     const nextId = (existing && existing.length > 0) ? existing[0].id + 1 : 1;
 
-    const { error } = await sb.from('services').insert({ id: nextId, name, price, category });
+    const { error } = await sb.from('services').insert({ id: nextId, name, price, categories });
     if (error){ showMsg(svcMsg, error.message, 'err'); return; }
 
     showMsg(svcMsg, 'Service added.', 'ok');
     document.getElementById('svcName').value = '';
     document.getElementById('svcPrice').value = '';
-    document.getElementById('svcNewCategory').value = '';
-    document.getElementById('svcNewCategoryWrap').style.display = 'none';
+    svcSelectedCategories = new Set();
+    svcRenderCategoryPicker('svcCategoryPicker', svcSelectedCategories);
     await loadServices();
     await loadAdminStats();
   });
 
   function sanitizeServiceRecord(r){
+    let categories;
+    if (Array.isArray(r.categories) && r.categories.length > 0){
+      categories = r.categories.map(c => String(c).trim()).filter(Boolean);
+    } else if (r.category){
+      categories = [String(r.category).trim()];
+    } else {
+      categories = ['Uncategorized'];
+    }
     return {
       id: Number(r.id),
       name: String(r.name || '').trim().toUpperCase(),
       price: Number(r.price),
-      category: (r.category && String(r.category).trim()) || 'Uncategorized'
+      categories
     };
   }
 
@@ -1589,7 +1690,7 @@
 
     historyList.innerHTML = data.map(row => {
       const d = new Date(row.check_in);
-      const dateStr = d.toLocaleDateString('en-US', { month:'short', day:'2-digit' });
+      const dateStr = formatDMY(d);
       const inTime = d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
       const outTime = new Date(row.check_out).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
       return `
@@ -1658,7 +1759,7 @@
           <td class="cust-meta">${escapeHtml(c.phone || '—')}</td>
           <td class="cust-meta">${escapeHtml(c.patientId || '—')}</td>
           <td class="cust-meta">${escapeHtml(c.branch || '—')}</td>
-          <td class="cust-meta">${escapeHtml(c.dateAdded ? new Date(c.dateAdded).toLocaleDateString() : '—')}</td>
+          <td class="cust-meta">${formatDMY(c.dateAdded)}</td>
           <td style="text-align:right; white-space:nowrap;">
             <button class="pkg-expand-toggle cust-edit-toggle" data-target="${rowId}" style="margin-left:0; margin-right:10px;">Edit</button>
             <button class="emp-del cust-archive" data-id="${escapeHtml(c.id)}" data-active="${c.active}" style="color:${c.active === false ? 'var(--moss)' : 'var(--red)'};">${c.active === false ? 'Restore' : 'Archive'}</button>
@@ -1959,6 +2060,7 @@
     invAllPackages = packagesFromDb || [];
 
     document.getElementById('invInvoiceDate').value = istDateStr(nowIST());
+    syncInvInvoiceDate();
     invUpdateCustomerDisplay();
     invPopulateServiceSelector();
     invPopulatePackageSelector();
@@ -2466,7 +2568,7 @@
           <div style="flex:1;">
             <p style="margin:0;"><strong>INVOICE NO:</strong> ${invoiceNumber}</p>
             <p style="margin:5px 0 0 0;"><strong>PATIENT ID:</strong> ${customer.id}</p>
-            <p style="margin:5px 0 0 0;"><strong>DATE:</strong> ${data.invoiceDate}</p>
+            <p style="margin:5px 0 0 0;"><strong>DATE:</strong> ${formatDMY(data.invoiceDate)}</p>
           </div>
           <div style="flex:1; text-align:right;">
             <p style="margin:0; font-weight:bold;">BILL TO:</p>
@@ -2583,11 +2685,25 @@
       else digital -= amt; // UPI / Card / Bank all draw from the digital balance
     });
 
+    // Start from the admin-set opening balances (Ledger tab) so this figure
+    // matches what's shown there, in Overview, and on the Dashboard card.
+    cash += ledgerOpeningCashVal;
+    digital += ledgerOpeningBankVal;
+
     acctCashBalanceVal = cash;
     acctDigitalBalanceVal = digital;
 
     document.getElementById('acctCashBalanceOverview').textContent = acctFmt(cash);
     document.getElementById('acctDigitalBalanceOverview').textContent = acctFmt(digital);
+  }
+
+  // Loads just the opening balances (without the full ledger table) — used so
+  // Overview/Dashboard have the correct starting point even before the admin
+  // ever opens the Ledger tab in this session.
+  async function loadLedgerOpeningBalances(){
+    const { data } = await sb.from('ledger_settings').select('*').limit(1);
+    ledgerOpeningCashVal = (data && data[0]) ? parseFloat(data[0].opening_cash) || 0 : 0;
+    ledgerOpeningBankVal = (data && data[0]) ? parseFloat(data[0].opening_bank) || 0 : 0;
   }
 
   // ---------- Employee Daily Closing: TODAY's Cash & UPI only (not all-time balance) ----------
@@ -2635,7 +2751,7 @@
     } else {
       const dateVal = document.getElementById('acctFilterDate').value;
       if (!dateVal) return null;
-      return { start: dateVal, end: dateVal, label: dateVal === acctToday() ? 'today' : dateVal };
+      return { start: dateVal, end: dateVal, label: dateVal === acctToday() ? 'today' : formatDMY(dateVal) };
     }
   }
 
@@ -2718,6 +2834,8 @@
 
   async function acctRefreshAdminOverview(){
     document.getElementById('acctFilterDate').value = acctToday();
+    syncAcctFilterDate();
+    await loadLedgerOpeningBalances();
     await acctLoadClearances();
     await acctLoadBalances();
     await acctLoadOverviewStats();
@@ -2880,7 +2998,7 @@
       const mainRow = `
       <tr data-invoice="${escapeHtml(r.invoiceNumber)}" data-pending="${m.pending}" data-exp-id="${r._expenseId || ''}" data-row-type="${r.type}">
         <td class="cust-meta" style="color:${typeColor};">${r.type}</td>
-        <td class="cust-meta">${escapeHtml(r.date)}</td>
+        <td class="cust-meta">${formatDMY(r.date)}</td>
         <td class="cust-meta">${escapeHtml(r.invoiceNumber)}</td>
         <td>${escapeHtml(r.customer)}</td>
         <td class="cust-meta">${escapeHtml(r.mode)}</td>
@@ -3030,16 +3148,36 @@
     const bankVal = parseFloat(document.getElementById('ledgerOpeningBank').value) || 0;
     const msgEl = document.getElementById('ledgerOpeningMsg');
 
-    const { data } = await sb.from('ledger_settings').select('id').limit(1);
+    const { data, error: selectError } = await sb.from('ledger_settings').select('id').limit(1);
+    if (selectError){
+      showMsg(msgEl, 'Could not save: ' + selectError.message, 'err');
+      return;
+    }
+
+    let saveError = null;
     if (data && data.length > 0){
       const { error } = await sb.from('ledger_settings').update({ opening_cash: cashVal, opening_bank: bankVal }).eq('id', data[0].id);
-      if (error){ showMsg(msgEl, error.message, 'err'); return; }
+      saveError = error;
+    } else {
+      // No settings row exists yet — create one instead of silently doing nothing.
+      const { error } = await sb.from('ledger_settings').insert({ opening_cash: cashVal, opening_bank: bankVal });
+      saveError = error;
+    }
+
+    if (saveError){
+      showMsg(msgEl, 'Could not save: ' + saveError.message, 'err');
+      return;
     }
 
     ledgerOpeningCashVal = cashVal;
     ledgerOpeningBankVal = bankVal;
     showMsg(msgEl, 'Opening balances saved.', 'ok');
     ledgerApplyFilters();
+
+    // Keep Overview and the Dashboard card in sync immediately, without
+    // needing to log out and back in.
+    await acctLoadBalances();
+    await loadDashboardAccountsCard();
   });
 
   // ---------- Add Amount (manual cash-in) ----------
@@ -3165,7 +3303,7 @@
     const rows = ledgerAllRows.map(r => {
       const m = ledgerRowMetrics(r);
       return [
-        r.type, r.date, r.invoiceNumber, r.customer, r.patientId || '', r.mode,
+        r.type, formatDMY(r.date), r.invoiceNumber, r.customer, r.patientId || '', r.mode,
         (parseFloat(r.total)||0).toFixed(2), (parseFloat(r.discount)||0).toFixed(2), (parseFloat(r.paid)||0).toFixed(2),
         m.pending.toFixed(2), r.b2bName || '', (parseFloat(r.b2bPaid)||0).toFixed(2),
         m.expenseAmt.toFixed(2), m.credit.toFixed(2), m.debit.toFixed(2), m.holding.toFixed(2)
@@ -3371,7 +3509,7 @@
       const digOk = Math.abs(parseFloat(r.digitalDifference) || 0) < 0.01;
       return `
         <tr>
-          <td class="cust-meta">${escapeHtml(r.closureDate)}</td>
+          <td class="cust-meta">${formatDMY(r.closureDate)}</td>
           <td>${escapeHtml(r.employeeName)}</td>
           <td style="color:${cashOk ? 'var(--moss)' : 'var(--red)'};">${cashOk ? '✓ Matched' : '✗ ' + acctFmt(r.cashDifference)}</td>
           <td style="color:${digOk ? 'var(--moss)' : 'var(--red)'};">${digOk ? '✓ Matched' : '✗ ' + acctFmt(r.digitalDifference)}</td>
@@ -3527,7 +3665,7 @@
         <td>${escapeHtml(c.customerName)}</td>
         <td style="color:var(--moss); font-weight:600;">${acctFmt(c.amount)}</td>
         <td class="cust-meta">${escapeHtml(c.paymentMode)}</td>
-        <td class="cust-meta">${escapeHtml(c.clearedDate)}</td>
+        <td class="cust-meta">${formatDMY(c.clearedDate)}</td>
       </tr>`).join('');
   }
 
@@ -3589,7 +3727,7 @@
         return `
         <tr>
           <td class="cust-meta">${escapeHtml(r.invoiceNumber)}</td>
-          <td class="cust-meta">${escapeHtml(r.date)}</td>
+          <td class="cust-meta">${formatDMY(r.date)}</td>
           <td>${escapeHtml(r.customerName)}</td>
           <td class="cust-meta">${escapeHtml(r.mode)}</td>
           <td class="cust-meta" style="font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--amber);">Pending payment</td>
@@ -3600,7 +3738,7 @@
       return `
       <tr>
         <td class="cust-meta">${escapeHtml(r.invoiceNumber)}</td>
-        <td class="cust-meta">${escapeHtml(r.date)}</td>
+        <td class="cust-meta">${formatDMY(r.date)}</td>
         <td>${escapeHtml(r.customerName)}</td>
         <td class="cust-meta">${escapeHtml(r.mode)}</td>
         <td class="cust-meta">${acctFmt(r.total)}</td>
@@ -3628,6 +3766,7 @@
     await acctLoadClearedList();
     await acctLoadTransactions();
     document.getElementById('expDate').value = acctToday();
+    syncExpDate();
     await expLoad();
   }
 
@@ -3674,6 +3813,11 @@
   applyViewMode(savedViewMode);
 
   // ---------- Init ----------
+  syncInvInvoiceDate = wireDateDisplay('invInvoiceDate', 'invInvoiceDateDisplay');
+  syncAcctFilterDate = wireDateDisplay('acctFilterDate', 'acctFilterDateDisplay');
+  wireDateDisplay('ledgerStartDate', 'ledgerStartDateDisplay');
+  wireDateDisplay('ledgerEndDate', 'ledgerEndDateDisplay');
+  syncExpDate = wireDateDisplay('expDate', 'expDateDisplay');
   showScreen('auth');
 </script>
 </body>

@@ -156,16 +156,15 @@
                     </div>
                     <button onclick="clearSubFilter()" class="text-xs text-slate-400 hover:text-red-500 font-bold cursor-pointer bg-slate-50 hover:bg-red-50 px-2 py-1 rounded border border-slate-200 transition-colors">Reset Selection ×</button>
                 </div>
-                <div id="subFilterPillsWrapper" class="flex items-center gap-2.5 overflow-x-auto py-1 no-scrollbar min-h-[46px]">
-                    </div>
+                <div id="subFilterPillsWrapper" class="flex items-center gap-2.5 overflow-x-auto py-1 no-scrollbar min-h-[46px]"></div>
             </div>
         </div>
         
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm grayscale-target focus-transition">
             <div class="flex items-start gap-3">
-                <div class="p-2 bg-amber-500 text-white rounded-lg mt-0.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                <div class="p-2 bg-orange-600 text-white rounded-lg mt-0.5 shrink-0 shadow-sm animate-bounce">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                     </svg>
                 </div>
                 <div>
@@ -180,12 +179,11 @@
 
         <div id="catalogTargetHeader" class="flex justify-between items-center mb-4 grayscale-target focus-transition scroll-mt-28">
             <h3 id="tableHeadlineText" class="text-sm font-bold text-slate-500 uppercase tracking-wider">Official Service Catalog</h3>
-            <span id="testCount" class="bg-orange-100 text-orange-800 text-xs font-bold px-3 py-1 rounded-full">Loading master list...</span>
         </div>
 
         <div id="loadingElement" class="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-orange-100 shadow-sm grayscale-target focus-transition">
             <div class="loader mb-3"></div>
-            <p class="text-slate-500 text-sm font-medium">Fetching public catalog securely from Supabase...</p>
+            <p class="text-slate-500 text-sm font-medium">Fetching public catalog securely...</p>
         </div>
 
         <div id="errorElement" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-4 rounded-xl text-center my-6 max-w-xl mx-auto shadow-sm">
@@ -198,12 +196,9 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr id="tableHeaderRow" class="bg-orange-50/60 border-b border-orange-100 text-orange-950 text-xs uppercase font-bold tracking-wider">
-                            <th class="py-3.5 px-4 w-16 text-center">S.No</th>
-                            <th class="py-3.5 px-4 w-28">Code/ID</th>
-                            <th class="py-3.5 px-4">Description Name</th>
-                            <th class="py-3.5 px-4 w-32">Type / Tag</th>
-                            <th class="py-3.5 px-4 w-44 text-right">Pricing (INR)</th>
-                            <th class="py-3.5 px-4 w-24 text-center">Select</th>
+                            <th class="py-3.5 px-6">Description Name</th>
+                            <th class="py-3.5 px-6 w-44 text-right">Pricing (INR)</th>
+                            <th class="py-3.5 px-6 w-24 text-center">Select</th>
                         </tr>
                     </thead>
                     <tbody id="testTableBody" class="text-sm divide-y divide-slate-100"></tbody>
@@ -304,20 +299,18 @@
             const errorElement = document.getElementById('errorElement');
             const errorMessage = document.getElementById('errorMessage');
             const tableContainer = document.getElementById('tableContainer');
-            const testCount = document.getElementById('testCount');
 
             try {
-                // 1. Fetch individual test items
                 const { data: testData, error: testError } = await sb
                     .from('services')
-                    .select('id, name, price, active, category')
+                    .select('id, name, price, active, category, visible_external')
                     .eq('active', true)
+                    .eq('visible_external', true)
                     .order('name', { ascending: true });
 
                 if (testError) throw testError;
                 allTests = testData;
 
-                // 2. Fetch package setups
                 const { data: pkgData, error: pkgError } = await sb
                     .from('packages')
                     .select('id, name, test_ids, mrp, rate, active')
@@ -327,8 +320,6 @@
                 if (!pkgError && pkgData) {
                     allPackages = pkgData;
                 }
-
-                testCount.innerText = `${allTests.length} Tests Live`;
 
                 const uniqueCats = new Set();
                 allTests.forEach(t => {
@@ -378,7 +369,6 @@
             currentTopTab = tabId;
             currentSubFilterValue = ''; 
 
-            // IF "ALL TESTS" OR "PACKAGES" IS SELECTED: Force full-color mode directly
             if (tabId === 'all' || tabId === 'packages') {
                 document.getElementById('mainBody').classList.remove('grayscale-focus-mode');
                 
@@ -406,7 +396,6 @@
                 return;
             }
 
-            // FOR SUB SELECTION BASED TAB CARDS: Focus Mode Trigger
             document.getElementById('mainBody').classList.add('grayscale-focus-mode');
 
             const tabs = ['all', 'packages', 'category', 'work', 'location', 'hobby'];
@@ -537,14 +526,10 @@
             const noResultsElement = document.getElementById('noResultsElement');
             const tableContainer = document.getElementById('tableContainer');
             
-            // Set uniform header title parameters
             document.getElementById('tableHeaderRow').innerHTML = `
-                <th class="py-3.5 px-4 w-16 text-center">S.No</th>
-                <th class="py-3.5 px-4 w-28">Test Code</th>
-                <th class="py-3.5 px-4">Test Description</th>
-                <th class="py-3.5 px-4 w-32">Database Category</th>
-                <th class="py-3.5 px-4 w-36 text-right">Price (INR)</th>
-                <th class="py-3.5 px-4 w-24 text-center">Select</th>
+                <th class="py-3.5 px-6">Test Description</th>
+                <th class="py-3.5 px-6 w-44 text-right">Price (INR)</th>
+                <th class="py-3.5 px-6 w-24 text-center">Select</th>
             `;
 
             tableBody.innerHTML = "";
@@ -558,21 +543,17 @@
                 tableContainer.classList.remove('hidden');
             }
 
-            tests.forEach((test, index) => {
+            tests.forEach((test) => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-orange-50/40 transition-colors odd:bg-white even:bg-orange-50/10";
                 
                 const cartKey = `test-${test.id}`;
                 const isChecked = selectedCart[cartKey] ? 'checked' : '';
-                const displayCategory = test.category ? test.category : 'Uncategorized';
 
                 row.innerHTML = `
-                    <td class="py-3 px-4 text-center font-medium text-slate-400 text-xs">${index + 1}</td>
-                    <td class="py-3 px-4 font-mono text-xs text-slate-400">#${test.id}</td>
-                    <td class="py-3 px-4 font-semibold text-slate-800 tracking-wide capitalize">${escapeHtml(test.name)}</td>
-                    <td class="py-3 px-4 text-xs font-medium text-slate-500"><span class="bg-slate-100 px-2 py-1 rounded text-slate-700 border border-slate-200">${escapeHtml(displayCategory)}</span></td>
-                    <td class="py-3 px-4 text-right font-bold text-orange-600 text-base">₹${parseFloat(test.price).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td class="py-3 px-4 text-center">
+                    <td class="py-4 px-6 font-semibold text-slate-800 tracking-wide capitalize text-base">${escapeHtml(test.name)}</td>
+                    <td class="py-4 px-6 text-right font-bold text-orange-600 text-base">₹${parseFloat(test.price).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="py-4 px-6 text-center">
                         <input type="checkbox" ${isChecked} onchange="toggleCartItem('test', '${test.id}', '${escapeHtml(test.name)}', ${test.price}, this.checked)" class="w-4 h-4 text-orange-600 border-orange-300 rounded focus:ring-orange-500 accent-orange-600 cursor-pointer">
                     </td>
                 `;
@@ -580,19 +561,16 @@
             });
         }
 
-        // RENDER METHOD DEDICATED FOR SYSTEM PACKAGES WITH DISCOUNT METRICS
         function displayPackagesInTable(pkgs) {
             const tableBody = document.getElementById('testTableBody');
             const noResultsElement = document.getElementById('noResultsElement');
             const tableContainer = document.getElementById('tableContainer');
 
             document.getElementById('tableHeaderRow').innerHTML = `
-                <th class="py-3.5 px-4 w-16 text-center">S.No</th>
-                <th class="py-3.5 px-4 w-24">Package Type</th>
-                <th class="py-3.5 px-4">Health Package Name</th>
-                <th class="py-3.5 px-4 w-32 text-center">Original MRP</th>
-                <th class="py-3.5 px-4 w-36 text-right">Special Rate</th>
-                <th class="py-3.5 px-4 w-24 text-center">Select</th>
+                <th class="py-3.5 px-6">Health Package Name</th>
+                <th class="py-3.5 px-6 w-32 text-center">Original MRP</th>
+                <th class="py-3.5 px-6 w-44 text-right">Special Rate</th>
+                <th class="py-3.5 px-6 w-24 text-center">Select</th>
             `;
 
             tableBody.innerHTML = "";
@@ -606,7 +584,7 @@
                 tableContainer.classList.remove('hidden');
             }
 
-            pkgs.forEach((pkg, index) => {
+            pkgs.forEach((pkg) => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-amber-50/40 transition-colors odd:bg-white even:bg-orange-50/10";
                 
@@ -623,15 +601,13 @@
                 }
 
                 row.innerHTML = `
-                    <td class="py-4 px-4 text-center font-medium text-slate-400 text-xs">${index + 1}</td>
-                    <td class="py-4 px-4 text-xs font-bold text-amber-700 uppercase tracking-wider"><span class="bg-amber-100 px-2 py-0.5 rounded border border-amber-200">💎 BUNDLE</span></td>
-                    <td class="py-4 px-4 font-black text-slate-800 tracking-wide capitalize">
+                    <td class="py-4 px-6 font-black text-slate-800 tracking-wide capitalize text-base">
                         ${escapeHtml(pkg.name)}
                         ${savingsBadge}
                     </td>
-                    <td class="py-4 px-4 text-center text-xs line-through text-slate-400 font-medium">₹${mrpVal.toLocaleString('en-IN')}</td>
-                    <td class="py-4 px-4 text-right font-black text-emerald-600 text-base">₹${rateVal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td class="py-4 px-4 text-center">
+                    <td class="py-4 px-6 text-center text-xs line-through text-slate-400 font-medium">₹${mrpVal.toLocaleString('en-IN')}</td>
+                    <td class="py-4 px-6 text-right font-black text-emerald-600 text-base">₹${rateVal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="py-4 px-6 text-center">
                         <input type="checkbox" ${isChecked} onchange="toggleCartItem('pkg', '${pkg.id}', '${escapeHtml(pkg.name)}', ${rateVal}, this.checked)" class="w-4 h-4 text-emerald-600 border-amber-300 rounded focus:ring-emerald-500 accent-emerald-600 cursor-pointer">
                     </td>
                 `;
@@ -699,7 +675,6 @@
                         div.innerHTML = `
                             <div>
                                 <h5 class="font-bold text-slate-800 capitalize text-sm">${badgeHtml}${item.name}</h5>
-                                <span class="text-xs text-slate-400 font-mono">ID: ${item.id}</span>
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="font-bold text-orange-600 text-sm">₹${parseFloat(item.price).toLocaleString('en-IN')}</span>

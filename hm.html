@@ -219,7 +219,11 @@
     z-index:1000; color:#fff; font-family:var(--font-body); font-size:14px; transition:opacity .3s;
     box-shadow:0 6px 16px rgba(46,36,28,0.18);
   }
-  #invInvoicePrintArea{ display:none; }
+  #invInvoicePrintArea, #bmiPrintArea{ display:none; }
+  .health-badge{
+    display:inline-block; padding:5px 12px; border-radius:20px; font-family:var(--font-mono);
+    font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#fff;
+  }
 
   /* ---------- Accounts sub-tabs ---------- */
   .subtabs{ display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
@@ -297,9 +301,9 @@
   .ledger-detail-item .dvalue{ font-size:14px; font-weight:600; color:var(--ink); }
 
   @media print {
-    body > *:not(#invInvoicePrintArea){ display:none !important; }
+    body > *:not(#invInvoicePrintArea):not(#bmiPrintArea){ display:none !important; }
     body{ background:none; padding:0; margin:0; justify-content:flex-start; }
-    #invInvoicePrintArea{ display:block !important; width:100%; margin:0; }
+    #invInvoicePrintArea, #bmiPrintArea{ display:block !important; width:100%; margin:0; }
   }
 
   @media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
@@ -642,6 +646,7 @@
     <button class="tab-btn" data-tab="inventory">Inventory Update</button>
     <button class="tab-btn" data-tab="timelog">Time Log History</button>
     <button class="tab-btn" data-tab="accounts">Accounts</button>
+    <button class="tab-btn" data-tab="bmi">BMI Report</button>
   </div>
 
   <div class="tab-panel active" id="tab-customer">
@@ -942,9 +947,74 @@
     </div>
   </div>
 
+  <div class="tab-panel" id="tab-bmi">
+    <div class="panel">
+      <div class="panel-title">Select patient</div>
+      <div class="field inv-search-wrap">
+        <label>Search patient</label>
+        <input id="bmiPatientSearch" type="text" placeholder="Search by name, ID, or phone..." autocomplete="off" />
+        <div class="inv-results-list" id="bmiPatientResultsList" style="display:none;"></div>
+      </div>
+      <div class="inv-selected-customer" id="bmiSelectedPatientDisplay">Select a patient above to record their health report.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Height &amp; weight (BMI)</div>
+      <div class="form-row">
+        <div class="field"><label>Height (cm)</label><input id="bmiHeight" type="number" placeholder="e.g. 165" /></div>
+        <div class="field"><label>Weight (kg)</label><input id="bmiWeight" type="number" placeholder="e.g. 60" /></div>
+      </div>
+      <div class="inv-summary-row total" id="bmiResultRow" style="display:none;">
+        <span>BMI</span>
+        <strong><span id="bmiValueDisplay">—</span> &nbsp; <span class="health-badge" id="bmiCategoryBadge"></span></strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Blood pressure</div>
+      <div class="form-row">
+        <div class="field"><label>Systolic (mmHg)</label><input id="bmiBpSystolic" type="number" placeholder="e.g. 120" /></div>
+        <div class="field"><label>Diastolic (mmHg)</label><input id="bmiBpDiastolic" type="number" placeholder="e.g. 80" /></div>
+      </div>
+      <div class="inv-summary-row total" id="bpResultRow" style="display:none;">
+        <span>Blood Pressure</span>
+        <strong><span id="bpValueDisplay">—</span> &nbsp; <span class="health-badge" id="bpCategoryBadge"></span></strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Blood sugar (One Touch / glucometer)</div>
+      <div class="form-row">
+        <div class="field"><label>Sugar (mg/dL)</label><input id="bmiSugarValue" type="number" placeholder="e.g. 110" /></div>
+        <div class="field"><label>Test type</label>
+          <select class="field-select" id="bmiSugarType">
+            <option>Random</option><option>Fasting</option><option>Post-Prandial</option>
+          </select>
+        </div>
+      </div>
+      <div class="inv-summary-row total" id="sugarResultRow" style="display:none;">
+        <span>Blood Sugar</span>
+        <strong><span id="sugarValueDisplay">—</span> &nbsp; <span class="health-badge" id="sugarCategoryBadge"></span></strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="msg" id="bmiMsg"></div>
+      <button class="btn full" id="bmiGeneratePrintBtn" style="margin-bottom:12px;">Generate &amp; Print Report</button>
+      <p class="ph-sub" style="text-align:center;">This is a free wellness reference report — it is never added to any invoice, ledger, or account balance.</p>
+    </div>
+
+    <div class="panel">
+      <div class="history-title">Recent reports for this patient</div>
+      <div id="bmiHistoryList"></div>
+    </div>
+  </div>
+
 </div>
 
 <div id="invInvoicePrintArea"></div>
+
+<div id="bmiPrintArea"></div>
 
 <!-- Add Amount modal -->
 <div class="modal-overlay" id="addAmountModal">
@@ -1744,6 +1814,20 @@
   function makeCustomerListController(ids){
     let allRows = [];
 
+    // Sorts by Patient ID, highest first — numeric-aware so "0193" correctly
+    // sorts above "0140" (not just lexicographically), with non-numeric IDs
+    // pushed to the end.
+    function comparePatientIdDesc(a, b){
+      const aId = (a.patientId || '').trim();
+      const bId = (b.patientId || '').trim();
+      const aNum = /^\d+$/.test(aId) ? parseInt(aId, 10) : null;
+      const bNum = /^\d+$/.test(bId) ? parseInt(bId, 10) : null;
+      if (aNum !== null && bNum !== null) return bNum - aNum;
+      if (aNum !== null) return -1;
+      if (bNum !== null) return 1;
+      return bId.localeCompare(aId);
+    }
+
     function matchesSearch(c, term){
       return (c.name || '').toLowerCase().includes(term) ||
         (c.phone || '').toLowerCase().includes(term) ||
@@ -1752,7 +1836,24 @@
 
     function applyFilter(){
       const term = document.getElementById(ids.searchId).value.toLowerCase().trim();
-      render(term ? allRows.filter(c => matchesSearch(c, term)) : allRows);
+      if (!term){
+        render([...allRows].sort(comparePatientIdDesc));
+        return;
+      }
+      // Search the FULL customers table directly — don't rely on the capped
+      // local cache, or customers outside that window would never be
+      // findable via search either.
+      (async () => {
+        const showArchived = document.getElementById(ids.archiveId).checked;
+        const safeTerm = term.replace(/[,()%]/g, '');
+        let query = sb.from('customers')
+          .select('*')
+          .or(`name.ilike.%${safeTerm}%,phone.ilike.%${safeTerm}%,patientId.ilike.%${safeTerm}%`)
+          .limit(500);
+        query = showArchived ? query : query.eq('active', true);
+        const { data, error } = await query;
+        render(((!error && data) ? data : []).sort(comparePatientIdDesc));
+      })();
     }
 
     function render(rows){
@@ -1870,7 +1971,7 @@
 
     async function load(){
       const showArchived = document.getElementById(ids.archiveId).checked;
-      let query = sb.from('customers').select('*').order('created_at', { ascending: false }).limit(200);
+      let query = sb.from('customers').select('*').limit(1000);
       query = showArchived ? query : query.eq('active', true);
       const { data, error } = await query;
       allRows = (!error && data) ? data : [];
@@ -2529,6 +2630,7 @@
       invAlertModal('Walk-in invoice generated (not saved to customer history).', 'info');
     }
 
+    document.getElementById('bmiPrintArea').innerHTML = '';
     document.getElementById('invInvoicePrintArea').innerHTML = invGenerateInvoiceHTML(window.invInvoiceData);
     window.print();
   }
@@ -2687,6 +2789,269 @@
     document.body.appendChild(div);
     setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 4000);
   }
+
+  // ============================================================
+  // BMI / HEALTH REPORT — completely separate from billing.
+  // Reference ranges: WHO (World Health Organization) BMI
+  // classification; WHO/ISH blood pressure categories; WHO/IDF
+  // (International Diabetes Federation) blood glucose ranges.
+  // This is informational only — not a medical diagnosis.
+  // ============================================================
+  let bmiSelectedPatient = null;
+
+  function classifyBMI(bmi){
+    if (bmi < 18.5) return { label: 'Underweight', color: '#3b82f6' };
+    if (bmi < 25)   return { label: 'Normal weight', color: 'var(--moss)' };
+    if (bmi < 30)   return { label: 'Overweight', color: '#d99a3e' };
+    return { label: 'Obese', color: 'var(--red)' };
+  }
+
+  function classifyBP(sys, dia){
+    if (sys < 90 || dia < 60) return { label: 'Low', color: '#3b82f6' };
+    if (sys < 120 && dia < 80) return { label: 'Normal', color: 'var(--moss)' };
+    if (sys < 130 && dia < 80) return { label: 'Elevated', color: '#d99a3e' };
+    if (sys < 140 || dia < 90) return { label: 'High — Stage 1', color: '#e0793a' };
+    if (sys < 180 && dia < 120) return { label: 'High — Stage 2', color: 'var(--red)' };
+    return { label: 'Hypertensive Crisis', color: '#8b0000' };
+  }
+
+  function classifySugar(value, type){
+    const fastingLike = (type === 'Fasting');
+    if (value < 70) return { label: 'Low', color: '#3b82f6' };
+    if (fastingLike){
+      if (value < 100) return { label: 'Normal', color: 'var(--moss)' };
+      if (value < 126) return { label: 'Prediabetes range', color: '#d99a3e' };
+      return { label: 'Diabetes range', color: 'var(--red)' };
+    } else {
+      if (value < 140) return { label: 'Normal', color: 'var(--moss)' };
+      if (value < 200) return { label: 'Prediabetes range', color: '#d99a3e' };
+      return { label: 'Diabetes range', color: 'var(--red)' };
+    }
+  }
+
+  function bmiSetBadge(badgeId, cat){
+    const el = document.getElementById(badgeId);
+    el.textContent = cat.label;
+    el.style.backgroundColor = cat.color;
+  }
+
+  function bmiRecalcAll(){
+    const h = parseFloat(document.getElementById('bmiHeight').value);
+    const w = parseFloat(document.getElementById('bmiWeight').value);
+    if (h > 0 && w > 0){
+      const bmi = w / ((h / 100) ** 2);
+      const cat = classifyBMI(bmi);
+      document.getElementById('bmiValueDisplay').textContent = bmi.toFixed(1);
+      bmiSetBadge('bmiCategoryBadge', cat);
+      document.getElementById('bmiResultRow').style.display = 'flex';
+    } else {
+      document.getElementById('bmiResultRow').style.display = 'none';
+    }
+
+    const sys = parseFloat(document.getElementById('bmiBpSystolic').value);
+    const dia = parseFloat(document.getElementById('bmiBpDiastolic').value);
+    if (sys > 0 && dia > 0){
+      const cat = classifyBP(sys, dia);
+      document.getElementById('bpValueDisplay').textContent = `${sys}/${dia} mmHg`;
+      bmiSetBadge('bpCategoryBadge', cat);
+      document.getElementById('bpResultRow').style.display = 'flex';
+    } else {
+      document.getElementById('bpResultRow').style.display = 'none';
+    }
+
+    const sugar = parseFloat(document.getElementById('bmiSugarValue').value);
+    if (sugar > 0){
+      const type = document.getElementById('bmiSugarType').value;
+      const cat = classifySugar(sugar, type);
+      document.getElementById('sugarValueDisplay').textContent = `${sugar} mg/dL (${type})`;
+      bmiSetBadge('sugarCategoryBadge', cat);
+      document.getElementById('sugarResultRow').style.display = 'flex';
+    } else {
+      document.getElementById('sugarResultRow').style.display = 'none';
+    }
+  }
+  ['bmiHeight','bmiWeight','bmiBpSystolic','bmiBpDiastolic','bmiSugarValue','bmiSugarType'].forEach(id => {
+    document.getElementById(id).addEventListener('input', bmiRecalcAll);
+    document.getElementById(id).addEventListener('change', bmiRecalcAll);
+  });
+
+  // ---------- Patient search (reuses the same customer list as Invoice Generator) ----------
+  function bmiFilterPatients(term){
+    const resultsDiv = document.getElementById('bmiPatientResultsList');
+    const lower = term.toLowerCase().trim();
+    resultsDiv.innerHTML = '';
+    resultsDiv.style.display = 'block';
+
+    const list = lower === '' ? invAllCustomers : invAllCustomers.filter(c =>
+      (c.name || '').toLowerCase().includes(lower) ||
+      (c.patientId && String(c.patientId).toLowerCase().includes(lower)) ||
+      (c.phone && String(c.phone).toLowerCase().includes(lower))
+    );
+
+    if (list.length === 0){
+      resultsDiv.innerHTML = '<div class="inv-result-item" style="color:var(--red);">No matching patients found.</div>';
+      return;
+    }
+
+    list.slice(0, 30).forEach(c => {
+      const displayId = c.patientId || c.id;
+      resultsDiv.innerHTML += `
+        <div class="inv-result-item" onclick="bmiSelectPatient('${escapeHtml(c.id)}')">
+          ${escapeHtml(c.name)} (ID: ${escapeHtml(displayId)}) — Ph: ${escapeHtml(c.phone || '—')}
+        </div>`;
+    });
+  }
+  document.getElementById('bmiPatientSearch').addEventListener('input', (e) => bmiFilterPatients(e.target.value));
+  document.getElementById('bmiPatientSearch').addEventListener('focus', (e) => bmiFilterPatients(e.target.value));
+  document.getElementById('bmiPatientSearch').addEventListener('blur', () => {
+    setTimeout(() => { document.getElementById('bmiPatientResultsList').style.display = 'none'; }, 200);
+  });
+
+  function bmiSelectPatient(customerId){
+    const c = invAllCustomers.find(x => x.id == customerId);
+    if (!c) return;
+    bmiSelectedPatient = c;
+    document.getElementById('bmiPatientResultsList').style.display = 'none';
+    document.getElementById('bmiPatientSearch').value = '';
+    document.getElementById('bmiSelectedPatientDisplay').innerHTML = `
+      <strong>Patient ID:</strong> ${escapeHtml(c.patientId || c.id)}<br>
+      <strong>Name:</strong> ${escapeHtml(c.name)}<br>
+      <strong>Age:</strong> ${escapeHtml(c.age || 'N/A')} &nbsp;&nbsp; <strong>Sex:</strong> ${escapeHtml(c.sex || 'N/A')}`;
+    bmiLoadHistory();
+  }
+
+  async function bmiLoadHistory(){
+    const listEl = document.getElementById('bmiHistoryList');
+    if (!bmiSelectedPatient){ listEl.innerHTML = '<div class="empty">Select a patient to see their past reports.</div>'; return; }
+
+    const { data } = await sb
+      .from('health_reports')
+      .select('*')
+      .eq('customerId', String(bmiSelectedPatient.id))
+      .order('timestamp', { ascending: false })
+      .limit(5);
+
+    if (!data || data.length === 0){
+      listEl.innerHTML = '<div class="empty">No past reports for this patient yet.</div>';
+      return;
+    }
+
+    listEl.innerHTML = data.map(r => `
+      <div class="row">
+        <div>
+          <div class="row-date">${formatDMY(r.recordedDate)}</div>
+          <div class="row-time">BMI ${r.bmi} (${r.bmiCategory}) &nbsp;·&nbsp; BP ${r.bpSystolic}/${r.bpDiastolic} &nbsp;·&nbsp; Sugar ${r.sugarValue} mg/dL</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function bmiGenerateReportHTML(rec){
+    const bmiCat = classifyBMI(rec.bmi);
+    const bpCat = classifyBP(rec.bpSystolic, rec.bpDiastolic);
+    const sugarCat = classifySugar(rec.sugarValue, rec.sugarType);
+
+    const metricRow = (label, value, cat) => `
+      <tr>
+        <td style="padding:12px; border:1px solid #ccc; font-weight:bold;">${label}</td>
+        <td style="padding:12px; border:1px solid #ccc;">${value}</td>
+        <td style="padding:12px; border:1px solid #ccc;">
+          <span style="display:inline-block; padding:4px 12px; border-radius:14px; color:#fff; font-size:0.85em; background:${cat.color};">${cat.label}</span>
+        </td>
+      </tr>`;
+
+    return `
+      <div style="max-width:700px; margin:0 auto; padding:20px; border:1px solid #ccc; color:#000; font-size:11pt;">
+        <div style="border-bottom:2px solid #333; padding-bottom:10px; margin-bottom:20px; display:flex; align-items:center;">
+          <div style="flex-shrink:0; margin-right:16px;">
+            <img src="${LOGO_DATA_URI}" alt="Hattrick Diagnostic Lab" style="width:90px; height:90px; object-fit:contain;" />
+          </div>
+          <div style="flex-grow:1; text-align:center;">
+            <h1 style="margin:0; color:#000; font-size:1.8em;">HATTRICK DIAGNOSTIC LAB</h1>
+            <p style="margin:5px 0 0 0; font-size:0.9em;">35/18, Samy street, Egmore, Near by Childrens Hospotal, Chennai - 600 008.<br>Phone: 95 00 00 5061</p>
+          </div>
+        </div>
+
+        <h2 style="text-align:center; margin:0 0 20px 0; letter-spacing:0.05em;">WELLNESS / BMI REFERENCE REPORT</h2>
+
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+          <div style="flex:1;">
+            <p style="margin:0;"><strong>PATIENT ID:</strong> ${escapeHtml(rec.patientId)}</p>
+            <p style="margin:5px 0 0 0;"><strong>DATE:</strong> ${formatDMY(rec.recordedDate)}</p>
+          </div>
+          <div style="flex:1; text-align:right;">
+            <p style="margin:0; font-weight:bold;">${escapeHtml(rec.customerName)}</p>
+            <p style="margin:0; font-size:0.9em;">Age: ${escapeHtml(rec.age || 'N/A')} &nbsp;|&nbsp; Sex: ${escapeHtml(rec.sex || 'N/A')}</p>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+          <thead><tr>
+            <th style="padding:10px; border:1px solid #ccc; background:#f2f2f2; text-align:left;">Metric</th>
+            <th style="padding:10px; border:1px solid #ccc; background:#f2f2f2; text-align:left;">Reading</th>
+            <th style="padding:10px; border:1px solid #ccc; background:#f2f2f2; text-align:left;">Status</th>
+          </tr></thead>
+          <tbody>
+            ${metricRow('BMI (Body Mass Index)', `${rec.bmi} kg/m² &nbsp; (Height ${rec.height} cm, Weight ${rec.weight} kg)`, bmiCat)}
+            ${metricRow('Blood Pressure', `${rec.bpSystolic}/${rec.bpDiastolic} mmHg`, bpCat)}
+            ${metricRow(`Blood Sugar (${escapeHtml(rec.sugarType)})`, `${rec.sugarValue} mg/dL`, sugarCat)}
+          </tbody>
+        </table>
+
+        <div style="font-size:0.75em; color:#555; border-top:1px dashed #aaa; padding-top:12px; margin-top:10px;">
+          <p style="margin:0 0 6px 0;"><strong>Reference standards:</strong> BMI classification per WHO (World Health Organization). Blood pressure categories per WHO/ISH (International Society of Hypertension) guidelines. Blood glucose ranges per WHO/IDF (International Diabetes Federation).</p>
+          <p style="margin:0;"><em>This report is for general wellness reference only and does not constitute a medical diagnosis. Please consult a qualified physician for medical advice.</em></p>
+        </div>
+
+        <div style="border-top:1px dashed #aaa; margin-top:40px; padding-top:20px; text-align:right;">
+          <p style="margin:0; padding-top:30px; color:#000;">Authorized Signature</p>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('bmiGeneratePrintBtn').addEventListener('click', async () => {
+    const msgEl = document.getElementById('bmiMsg');
+    if (!bmiSelectedPatient){ showMsg(msgEl, 'Select a patient first.', 'err'); return; }
+
+    const height = parseFloat(document.getElementById('bmiHeight').value);
+    const weight = parseFloat(document.getElementById('bmiWeight').value);
+    const sys = parseFloat(document.getElementById('bmiBpSystolic').value);
+    const dia = parseFloat(document.getElementById('bmiBpDiastolic').value);
+    const sugar = parseFloat(document.getElementById('bmiSugarValue').value);
+    const sugarType = document.getElementById('bmiSugarType').value;
+
+    if (!(height > 0) || !(weight > 0) || !(sys > 0) || !(dia > 0) || !(sugar > 0)){
+      showMsg(msgEl, 'Enter height, weight, blood pressure, and sugar before generating.', 'err');
+      return;
+    }
+
+    const bmi = parseFloat((weight / ((height / 100) ** 2)).toFixed(1));
+    const bmiCat = classifyBMI(bmi);
+    const bpCat = classifyBP(sys, dia);
+    const sugarCat = classifySugar(sugar, sugarType);
+
+    const rec = {
+      customerId: String(bmiSelectedPatient.id),
+      patientId: bmiSelectedPatient.patientId || bmiSelectedPatient.id,
+      customerName: bmiSelectedPatient.name,
+      age: bmiSelectedPatient.age,
+      sex: bmiSelectedPatient.sex,
+      height, weight, bmi, bmiCategory: bmiCat.label,
+      bpSystolic: sys, bpDiastolic: dia, bpCategory: bpCat.label,
+      sugarValue: sugar, sugarType, sugarCategory: sugarCat.label,
+      recordedDate: istDateStr(nowIST()),
+      recordedBy: currentEmployee ? (currentEmployee.name || currentEmployee.username) : 'Unknown'
+    };
+
+    const { error } = await sb.from('health_reports').insert(rec);
+    if (error){ showMsg(msgEl, 'Could not save report: ' + error.message, 'err'); return; }
+
+    showMsg(msgEl, 'Report saved. Opening print preview…', 'ok');
+    document.getElementById('invInvoicePrintArea').innerHTML = '';
+    document.getElementById('bmiPrintArea').innerHTML = bmiGenerateReportHTML(rec);
+    window.print();
+
+    await bmiLoadHistory();
+  });
 
   // ============================================================
   // ACCOUNTS — live balances from ledger, pending payment history,

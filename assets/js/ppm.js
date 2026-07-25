@@ -359,6 +359,28 @@ async function deleteKadan(id){
   renderAll();
 }
 
+function kadanLinkStatusHtml(k){
+  const hasLinkedEntry = entries.some(e=>e.kadan_id===k.id);
+  if(hasLinkedEntry){
+    return `<div class="kadan-link ok">🔗 Linked to Entry tab</div>`;
+  }
+  if(Number(k.paid_amount)===0){
+    return `<div class="kadan-link warn">⚠️ Not visible in Entry tab yet — <button type="button" class="link-fix-btn" onclick="backfillKadanEntry('${k.id}')">Add Entry record</button></div>`;
+  }
+  return `<div class="kadan-link warn">⚠️ ${money(k.paid_amount)} already paid but not linked to any Entry — please review manually.</div>`;
+}
+async function backfillKadanEntry(id){
+  const k = kadans.find(x=>x.id===id);
+  if(!k) return;
+  await withSync(async ()=>{
+    const note = k.source==='sale' ? 'Full Kadan — nothing paid yet (linked later)' : 'Manual Kadan (linked later)';
+    const {error} = await sb.from('entries').insert({date:k.date, dealer:k.dealer, category:'Sell', mode:'Cash', amount:0, type:'credit', note, kadan_id:k.id});
+    if(error) throw error;
+    await fetchEntries();
+  });
+  showToast('✅ Now visible in Entry tab!');
+  renderAll();
+}
 function renderKadans(){
   const pending = kadans.filter(k=>k.status==='Pending');
   const cleared = kadans.filter(k=>k.status==='Cleared');
@@ -380,6 +402,7 @@ function renderKadans(){
           <span>Paid: <b>${money(k.paid_amount)}</b></span>
           <span>Remaining: <b style="color:var(--rust);">${money(remaining)}</b></span>
         </div>
+        ${kadanLinkStatusHtml(k)}
         <div class="pay-row">
           <input type="date" id="pay-date-${k.id}" value="${todayStr()}" style="flex:0 0 130px;">
           <input type="number" id="pay-${k.id}" placeholder="Payment amount">
@@ -403,6 +426,7 @@ function renderKadans(){
           <span class="kadan-badge cleared">CLEARED ✓</span>
         </div>
         <div class="kadan-amounts"><span>Total: <b>${money(k.total_amount)}</b></span></div>
+        ${kadanLinkStatusHtml(k)}
       </div>
     `).join('');
   }
@@ -849,6 +873,7 @@ function renderDealerDetail(d){
           <span>Paid: <b>${money(k.paid_amount)}</b></span>
           ${k.status==='Pending' ? `<span>Remaining: <b style="color:var(--rust);">${money(remaining)}</b></span>` : ''}
         </div>
+        ${kadanLinkStatusHtml(k)}
       </div>`;
     }).join('');
   }
@@ -1104,6 +1129,7 @@ loadAll();
   window.pinClear = pinClear;
   window.pinPress = pinPress;
   window.addPayment = addPayment;
+  window.backfillKadanEntry = backfillKadanEntry;
   window.deleteEntry = deleteEntry;
   window.deleteKadan = deleteKadan;
   window.deleteTask = deleteTask;

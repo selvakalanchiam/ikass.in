@@ -136,22 +136,26 @@
 
       <div id="full-amount-wrap">
         <label>Amount (₹)</label>
-        <input type="number" id="f-amount" placeholder="0">
+        <input type="number" id="f-amount" placeholder="0" min="0" step="0.01">
       </div>
 
       <div id="partial-amount-wrap" style="display:none;">
         <label>Total Sale Amount (₹)</label>
-        <input type="number" id="f-total-amount" placeholder="0">
+        <input type="number" id="f-total-amount" placeholder="0" min="0" step="0.01">
         <label>Amount Paid Now (₹)</label>
-        <input type="number" id="f-paid-now" placeholder="0">
+        <input type="number" id="f-paid-now" placeholder="0" min="0" step="0.01">
       </div>
 
-      <button class="btn" id="btn-save-entry">Save Entry</button>
+      <div class="form-actions">
+        <button class="btn" id="btn-save-entry">Save Entry</button>
+        <button class="btn ghost" id="btn-cancel-edit-entry" style="display:none;">Cancel Edit</button>
+      </div>
     </div>
 
     <div class="card">
       <h2>📋 Recent Entries</h2>
       <div id="entry-list"></div>
+      <div class="list-hint">Showing most recent 30 — see the Records tab (Data → Records) for full history with filters.</div>
     </div>
   </div>
 
@@ -213,7 +217,10 @@
           <div><label>Date Out</label><input type="date" id="t-date-out"></div>
           <div><label>Time Out</label><input type="time" id="t-time-out"></div>
         </div>
-        <button class="btn" id="btn-save-manual-time">Save Time Entry</button>
+        <div class="form-actions">
+          <button class="btn" id="btn-save-manual-time">Save Time Entry</button>
+          <button class="btn ghost" id="btn-cancel-edit-time" style="display:none;">Cancel Edit</button>
+        </div>
       </div>
       <div id="time-list"></div>
     </div>
@@ -240,7 +247,10 @@
           <option value="Pickup">📦 Pickup</option>
           <option value="Deliver">🚚 Deliver</option>
         </select>
-        <button class="btn" id="btn-save-task">Add Task</button>
+        <div class="form-actions">
+          <button class="btn" id="btn-save-task">Add Task</button>
+          <button class="btn ghost" id="btn-cancel-edit-task" style="display:none;">Cancel Edit</button>
+        </div>
       </div>
       <div class="tag-filter-bar" id="task-history-filter">
         <button type="button" class="tag-filter-chip active" data-tag="all">All</button>
@@ -263,8 +273,11 @@
         <div class="autocomplete-list" id="k-dealer-list"></div>
       </div>
       <label>Total Amount (₹)</label>
-      <input type="number" id="k-amount" placeholder="0">
-      <button class="btn secondary" id="btn-save-kadan">Add Kadan</button>
+      <input type="number" id="k-amount" placeholder="0" min="0" step="0.01">
+      <div class="form-actions">
+        <button class="btn secondary" id="btn-save-kadan">Add Kadan</button>
+        <button class="btn ghost" id="btn-cancel-edit-kadan" style="display:none;">Cancel Edit</button>
+      </div>
     </div>
 
     <div class="section-label" id="pending-label">Pending</div>
@@ -307,7 +320,7 @@
         <h2>💰 Salary Settings</h2>
         <label>Current Hourly Rate (₹)</label>
         <div class="pay-row" style="margin-top:0;">
-          <input type="number" id="settings-rate-input" placeholder="52">
+          <input type="number" id="settings-rate-input" placeholder="52" min="0" step="0.01">
           <button class="btn small" id="btn-save-rate">Update Rate</button>
         </div>
         <div style="font-size:11px;color:#999;margin-top:8px;">This only affects future Time Log sessions — already-logged sessions keep the rate that was active when they were recorded.</div>
@@ -374,6 +387,16 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn ghost" id="confirm-cancel">Cancel</button>
+      <button class="btn danger" id="confirm-ok">Delete</button>
+    </div>
+  </div>
+</div>
 
 <script src="assets/js/ppm.js"></script>
 </body>

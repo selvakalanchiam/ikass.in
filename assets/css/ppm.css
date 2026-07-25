@@ -584,3 +584,41 @@ input,
 @keyframes ppm-splashExit {
   to{opacity:0;visibility:hidden;transform:scale(1.04);}
 }
+
+/* =================== RESPONSIVE: TABLET / DESKTOP =================== */
+/* Mobile stays exactly as designed above (default, no media query). */
+/* These rules only widen things out on bigger screens so it doesn't */
+/* feel like a narrow mobile strip floating in the middle of a monitor. */
+@media (min-width: 700px) {
+  #page-ppm .content {
+    max-width: 680px;
+    padding: 28px 24px 100px;
+  }
+  #page-ppm .topbar {
+    padding-left: calc(50% - 316px);
+    padding-right: calc(50% - 316px);
+  }
+  #page-ppm .stat-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  #page-ppm .tabs {
+    overflow-x: visible;
+    flex-wrap: wrap;
+  }
+  #page-ppm .tab { flex: 0 1 auto; padding: 10px 20px; }
+}
+
+@media (min-width: 1000px) {
+  #page-ppm .content {
+    max-width: 860px;
+    padding: 32px 28px 100px;
+  }
+  #page-ppm .topbar {
+    padding-left: calc(50% - 402px);
+    padding-right: calc(50% - 402px);
+  }
+  #page-ppm .stat-grid {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+  #page-ppm .card { padding: 24px; }
+}

@@ -3,66 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IKASS | Precision Ecosystem</title>
+<title id="pageTitle">IKASS | Precision Ecosystem</title>
 
-<link rel="icon" type="image/png" href="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png">
+<link rel="icon" type="image/png" href="assets/img/logoikass.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
-
-:root { --accent: #60a5fa; }
-
-body {
-    font-family: 'Space Grotesk', sans-serif;
-    overflow-x: hidden;
-    background-color: #ffffff;
-    color: #1e293b;
-}
-
-.glass {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
-}
-
-.bg-glow {
-    position: fixed;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1000px;
-    height: 1000px;
-    background: var(--accent);
-    filter: blur(200px);
-    opacity: 0.15;
-    z-index: -1;
-}
-
-.sector-card {
-    cursor: pointer;
-    transition: all 0.3s;
-}
-.sector-card:hover {
-    transform: translateY(-10px);
-    border-color: var(--accent);
-    background: white;
-}
-</style>
+<link rel="stylesheet" href="assets/css/index.css">
+<link rel="stylesheet" href="assets/css/techrevamp.css">
+<link rel="stylesheet" href="assets/css/codings.css">
+<link rel="stylesheet" href="assets/css/education.css">
+<link rel="stylesheet" href="assets/css/paperproduct.css">
+<link rel="stylesheet" href="assets/css/ppm.css">
+<link rel="stylesheet" href="assets/css/hm.css">
+<link rel="stylesheet" href="assets/css/app.css">
 </head>
-
 <body>
 
+<section id="page-index" class="ikass-page" data-title="IKASS | Precision Ecosystem">
 <div class="bg-glow"></div>
 
 <header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
     <div class="flex items-center gap-3">
-        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-10 h-10">
+        <img src="assets/img/logoikass.png" class="w-10 h-10">
         <div class="text-3xl font-black tracking-tighter">
             IKASS<span style="color:#60a5fa;">.in</span>
         </div>
@@ -78,7 +48,7 @@ body {
 
         <div class="flex justify-center">
             <div class="w-64 h-64 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-[3rem] border-[10px] border-white shadow-2xl overflow-hidden">
-                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/selva.png" class="w-full h-full object-cover">
+                <img src="assets/img/selva.png" class="w-full h-full object-cover">
             </div>
         </div>
 
@@ -115,42 +85,42 @@ With a strong commitment to integrity, he believes that every service should be 
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
-        <a href="https://selvakalanchiam.github.io/ikass.in/TechRevamp.html" target="_blank" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-green-700">
+        <a href="#/techrevamp" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-green-700">
             <div class="w-40 h-40 mx-auto rounded-[2.5rem] flex items-center justify-center mb-6 bg-white shadow-2xl p-2 border border-slate-50 transition-transform duration-500 hover:scale-110">
-                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/logoikass.png" class="w-full h-full object-contain">
+                <img src="assets/img/logoikass.png" class="w-full h-full object-contain">
             </div>
             <h3 class="text-2xl font-black mb-1">TechRevamp</h3>
             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Precision Electronics</p>
         </a>
 
         <!-- Coding Tab -->
-<a href="https://ikass.in/Codings.html" target="_blank" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-violet-900">
+<a href="#/codings" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-violet-900">
     <div class="w-40 h-40 mx-auto rounded-[2.5rem] flex items-center justify-center mb-6 bg-white shadow-2xl p-2 border border-slate-50 transition-transform duration-500 hover:scale-110">
-        <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/Codings.png" class="w-full h-full object-contain">
+        <img src="assets/img/Codings.png" class="w-full h-full object-contain">
     </div>
     <h3 class="text-2xl font-black mb-1">Coding</h3>
     <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Software & Utilities</p>
 </a>
 
-        <a href="https://selvakalanchiam.github.io/ikass.in/education.html" target="_blank" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-red-500">
+        <a href="#/education" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-red-500">
             <div class="w-40 h-40 mx-auto rounded-[2.5rem] flex items-center justify-center mb-6 bg-white shadow-2xl p-2 border border-slate-50 transition-transform duration-500 hover:scale-110">
-                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/education.png" class="w-full h-full object-contain">
+                <img src="assets/img/education.png" class="w-full h-full object-contain">
             </div>
             <h3 class="text-2xl font-black mb-1">Education</h3>
             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Chip-Level Training</p>
         </a>
 
-        <a href="https://selvakalanchiam.github.io/ikass.in/paperproduct.html" target="_blank" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-emerald-500">
+        <a href="#/paperproduct" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-emerald-500">
             <div class="w-40 h-40 mx-auto rounded-[2.5rem] flex items-center justify-center mb-6 bg-white shadow-2xl p-2 border border-slate-50 transition-transform duration-500 hover:scale-110">
-                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/paperproduct.png" class="w-full h-full object-contain">
+                <img src="assets/img/paperproduct.png" class="w-full h-full object-contain">
             </div>
             <h3 class="text-2xl font-black mb-1">Paper Product</h3>
             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Sustainable Supply</p>
         </a>
 
-        <a href="https://selvakalanchiam.github.io/ikass.in/hattrick.html" target="_blank" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-orange-500">
+        <a href="https://harrickdiagnosticlab.github.io/Hattrick-db" class="glass p-6 rounded-[3.5rem] sector-card block text-center border-b-4 border-orange-500">
             <div class="w-40 h-40 mx-auto rounded-[2.5rem] flex items-center justify-center mb-6 bg-white shadow-2xl p-2 border border-slate-50 transition-transform duration-500 hover:scale-110">
-                <img src="https://raw.githubusercontent.com/selvakalanchiam/ikass.in/main/hattrick.png" class="w-full h-full object-contain">
+                <img src="assets/img/hattrick.png" class="w-full h-full object-contain">
             </div>
             <h3 class="text-2xl font-black mb-1">Hattrick Lab</h3>
             <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Advanced Diagnostics</p>
@@ -159,6 +129,1582 @@ With a strong commitment to integrity, he believes that every service should be 
     </div>
 </div>
 </main>
+</section>
 
+<section id="page-techrevamp" class="ikass-page" data-title="IKASS TechRevamp | Industrial Standard Diagnostics">
+<div class="bg-glow"></div>
+
+<!-- NAVIGATION -->
+<div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+    <a href="#/" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
+        <i class="fas fa-home"></i> Home
+    </a>
+</div>
+
+<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+        <img src="assets/img/logoikass.png" class="w-10 h-10" alt="IKASS Logo">
+        <div class="text-3xl font-black tracking-tighter">
+            IKASS<span style="color:#166534;">.in</span>
+        </div>
+    </div>
+</header>
+
+<!-- HERO SECTION -->
+<main class="max-w-7xl mx-auto pb-20 px-4">
+
+    <div class="text-center mb-24 max-w-4xl mx-auto pt-12">
+        <div class="w-24 h-24 mx-auto mb-8 bg-white p-1 rounded-3xl shadow-xl overflow-hidden">
+            <img src="assets/img/logoikass.png" alt="IKASS Logo large">
+        </div>
+
+        <span class="text-[11px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
+            Industrial Standard Diagnostics
+        </span>
+
+        <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+            IKASS TechRevamp
+        </h1>
+
+        <p class="text-xl text-slate-500 leading-relaxed font-light">
+            Bringing satellite-grade precision to consumer electronics. We specialize in advanced chip-level repairs and industrial safety standards.
+        </p>
+    </div>
+
+    <!-- SERVICES SECTION -->
+    <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-black">
+            What Makes Our Mobile Service the Best
+        </h2>
+        <div class="accent-line"></div>
+    </div>
+
+    <!-- FEATURES GRID -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+
+        <!-- 1: ESD Safety -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="assets/img/ESD.png" alt="ESD Protection" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">ESD Safety First</h4>
+            <p class="text-slate-500">Professional anti-static protocols ensure your motherboard remains safe from invisible electrical damage.</p>
+        </div>
+
+        <!-- 2: Clean Environment -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="assets/img/Clean.png" alt="Clean Environment" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">Clean Handling</h4>
+            <p class="text-slate-500">Every device is handled in a dust-free, organized environment to maintain industrial-grade cleanliness.</p>
+        </div>
+
+        <!-- 3: Doorstep Service -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="assets/img/Doorstep.png" alt="Doorstep Service" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">Doorstep Service</h4>
+            <p class="text-slate-500">We bring the lab to you. Convenient at-home repairs without compromising on technical quality.</p>
+        </div>
+
+        <!-- 4: Data Safety -->
+        <div class="glass p-6 rounded-[2.5rem] feature-card">
+            <img src="assets/img/Datapro.png" alt="Data Privacy" class="feature-img">
+            <h4 class="text-2xl font-black mb-3">Data Safety</h4>
+            <p class="text-slate-500">Your privacy is our priority. We implement strict data protection protocols during every repair phase.</p>
+        </div>
+
+    </div>
+
+</main>
+
+<footer class="text-center py-12 text-slate-400 text-sm border-t border-slate-100">
+    &copy; 2026 IKASS TechRevamp. All rights reserved.
+</footer>
+</section>
+
+<section id="page-codings" class="ikass-page" data-title="IKASS Codings | Software Solutions">
+    <div class="bg-glow"></div>
+
+    <!-- NAVIGATION -->
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+        <a href="#/" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-white hover:text-purple-300 transition">
+            <i class="fas fa-home"></i> Home
+        </a>
+    </div>
+
+    <!-- HEADER -->
+    <header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <img src="assets/img/logoikass.png" class="w-10 h-10" alt="IKASS Logo">
+            <div class="text-3xl font-black tracking-tighter text-white">
+                IKASS<span style="color:#a78bfa;">.in</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto pb-20 px-4">
+
+        <!-- HERO SECTION -->
+        <div class="text-center mb-24 max-w-4xl mx-auto mt-12">
+            <div class="w-32 h-32 mx-auto mb-8 bg-white p-2 rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden">
+                <img src="assets/img/Codings.png" alt="Coding Icon" class="w-full h-full object-contain">
+            </div>
+            
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-purple-400 mb-4 block">
+                Software Development & Deployment
+            </span>
+            <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter text-white">
+                IKASS Codings
+            </h1>
+            <p class="text-xl text-slate-400 leading-relaxed font-light">
+                Engineering high-performance utilities and educational scripts for the modern Windows environment.
+            </p>
+        </div>
+
+        <!-- SOFTWARE CATALOG -->
+        <div class="mb-32">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-black text-white">Software Catalog</h2>
+                <div class="h-1.5 w-24 mx-auto mt-4 rounded-full bg-white"></div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-12 max-w-5xl mx-auto">
+                
+                <!-- TAB 1: IKASS Utility Tool (ZIP VERSION) -->
+                <div class="glass p-10 rounded-[3rem] border-t-4 border-t-white">
+                    <div class="flex flex-col lg:flex-row gap-10">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="bg-white/10 p-4 rounded-2xl">
+                                    <i class="fas fa-file-zipper text-3xl text-white"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-black text-white leading-none">IKASS_Utility.zip</h3>
+                                    <span class="text-xs font-bold text-purple-400 uppercase tracking-widest mt-2 block">System Diagnostics & Performance Bundle</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-slate-300 leading-relaxed mb-8">
+                                A high-performance suite designed to accelerate your workstation and monitor hardware health in real-time. This tool analyzes system workflows to ensure your PC is optimized for professional coding and high-end gaming, offering data-driven suggestions for hardware improvements and performance upgrades.
+                            </p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> Performance Acceleration</div>
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> Hardware Health Monitor</div>
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> Coding & Gaming Analysis</div>
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> Improvement Suggestions</div>
+                            </div>
+
+                            <button onclick="downloadFile('IKASS_Utility.zip', 'IKASS_Utility.zip')" 
+                               class="btn-violet inline-flex items-center gap-3 px-10 py-4 rounded-2xl font-bold w-full md:w-auto justify-center">
+                                <i class="fas fa-download"></i> Download Zip Bundle
+                            </button>
+                        </div>
+
+                        <div class="lg:w-1/3 bg-white/5 rounded-[2rem] p-8 border border-white/10">
+                            <h4 class="font-bold text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-info-circle text-purple-400"></i> Quick Stats
+                            </h4>
+                            <div class="space-y-6">
+                                <div>
+                                    <p class="stat-label mb-1">File Size:</p>
+                                    <p class="text-lg font-black text-white">33.1 MB</p>
+                                </div>
+                                <div>
+                                    <p class="stat-label mb-1">Compatibility:</p>
+                                    <p class="text-lg font-black text-white">Windows 10/11</p>
+                                </div>
+                                <div>
+                                    <p class="stat-label mb-1">Status:</p>
+                                    <p class="text-lg font-black text-purple-400">Stable</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: System Config Suite -->
+                <div class="glass p-10 rounded-[3rem] border-t-4 border-t-purple-500">
+                    <div class="flex flex-col lg:flex-row gap-10">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="bg-purple-500/10 p-4 rounded-2xl">
+                                    <i class="fas fa-terminal text-3xl text-purple-300"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-black text-white leading-none">System Config Suite</h3>
+                                    <span class="text-xs font-bold text-purple-400 uppercase tracking-widest mt-2 block">Educational Configuration Scripts</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-slate-300 leading-relaxed mb-4">
+                                This suite provides educational demonstrations of Windows activation logic and OS configuration protocols. It is intended strictly for learning and research purposes to understand system environment management.
+                            </p>
+                            <p class="text-xs text-red-500 font-bold mb-8 italic">
+                                *Notice: For security and full feature support, we strongly suggest purchasing an official activation key from the Microsoft Windows store.
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> Activation Logic Demo</div>
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> Environment Scripting</div>
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> For Research Only</div>
+                                <div class="flex items-center gap-3 text-sm text-white/80"><i class="fas fa-check text-purple-400"></i> Non-Commercial</div>
+                            </div>
+
+                            <div class="flex flex-col xl:flex-row gap-4">
+                                <button onclick="downloadFile('IKASS_System_config_masterfile.zip', 'IKASS_System_config_masterfile.zip')"
+                                   class="btn-violet inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-bold flex-1 justify-center">
+                                    <i class="fas fa-box-archive"></i> Master Bundle
+                                </button>
+                                
+                                <button onclick="downloadFile('Separate-Files-Version.zip', 'Separate-Files-Version.zip')"
+                                   class="btn-outline inline-flex items-center gap-3 px-6 py-4 rounded-2xl font-bold flex-1 justify-center">
+                                    <i class="fas fa-file-zipper"></i> Separate Version
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="lg:w-1/3 bg-white/5 rounded-[2rem] p-8 border border-white/10">
+                            <h4 class="font-bold text-white mb-6 flex items-center gap-2">
+                                <i class="fas fa-info-circle text-purple-400"></i> Quick Stats
+                            </h4>
+                            <div class="space-y-6">
+                                <div>
+                                    <p class="stat-label mb-1">File Size:</p>
+                                    <p class="text-lg font-black text-white">1.2 MB</p>
+                                </div>
+                                <div>
+                                    <p class="stat-label mb-1">Compatibility:</p>
+                                    <p class="text-lg font-black text-white">Windows 10/11</p>
+                                </div>
+                                <div>
+                                    <p class="stat-label mb-1">Status:</p>
+                                    <p class="text-lg font-black text-purple-400">Educational</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="py-12 border-t border-white/10 text-center">
+        <p class="text-slate-500 text-xs font-bold tracking-widest uppercase">
+            © 2026 IKASS Codings • Professional Tools
+        </p>
+    </footer>
+
+    <!-- DOWNLOAD SCRIPT (loaded once, at end of document) -->
+</section>
+
+<section id="page-education" class="ikass-page" data-title="IKASS Education">
+<div class="bg-glow"></div>
+
+<!-- HOME BUTTON (TOP RIGHT) -->
+<div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+    <a href="#/" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
+        <i class="fas fa-home"></i> Home
+    </a>
+</div>
+
+<!-- HEADER -->
+<header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+        <img src="assets/img/logoikass.png" class="w-10 h-10">
+        <div class="text-3xl font-black tracking-tighter">
+            IKASS<span style="color:#f87171;">.in</span>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN -->
+<main class="max-w-4xl mx-auto py-10">
+
+    <!-- TOP SECTION -->
+    <div class="text-center mb-24 px-4">
+        <div class="w-24 h-24 mx-auto mb-8 bg-white p-1 rounded-3xl shadow-xl">
+            <img src="assets/img/education.png">
+        </div>
+
+        <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
+            Mastering Chip-Level Electronics
+        </span>
+
+        <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+            IKASS Education
+        </h1>
+
+        <p class="text-xl text-slate-500 leading-relaxed font-light">
+            Empowering the next generation of engineers with hands-on technical mastery. From software foundations to advanced hardware diagnostics, we bridge the gap between theory and industry expertise.
+        </p>
+    </div>
+
+    <!-- HEADING -->
+    <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-5xl font-black">
+            Training Events & Milestones
+        </h2>
+        <div class="h-1 w-20 mx-auto mt-4 rounded-full bg-red-400"></div>
+    </div>
+
+    <!-- EVENTS -->
+    <div class="space-y-6 px-4">
+
+        <!-- EVENT 1 -->
+        <div class="glass p-8 rounded-[2rem] flex flex-col md:flex-row justify-between items-center">
+            <div class="text-center md:text-left">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-green-600">
+                    Successfully Done
+                </span>
+                <h3 class="text-2xl md:text-3xl font-black mt-1">
+                    Diploma in Computer Application
+                </h3>
+                <p class="text-slate-500 mt-2">
+                    📍 Vengala Moorthy Nagar, Madurai
+                </p>
+            </div>
+            <span class="text-2xl font-black text-slate-300 mt-4 md:mt-0">
+                2018
+            </span>
+        </div>
+
+        <!-- EVENT 2 -->
+        <div class="glass p-8 rounded-[2rem] flex flex-col md:flex-row justify-between items-center">
+            <div class="text-center md:text-left">
+                <span class="text-[10px] font-bold uppercase tracking-widest text-blue-500">
+                    Upcoming Event
+                </span>
+                <h3 class="text-2xl md:text-3xl font-black mt-1">
+                    Mobile Laptop and Computer Service
+                </h3>
+                <p class="text-slate-500 mt-2">
+                    📍 Ambattur, Chennai
+                </p>
+            </div>
+            <span class="text-2xl font-black text-slate-300 mt-4 md:mt-0">
+                April 2, 2026
+            </span>
+        </div>
+
+    </div>
+
+</main>
+</section>
+
+<section id="page-paperproduct" class="ikass-page" data-title="IKASS Paper Products">
+    <div class="bg-glow"></div>
+
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 100;">
+        <a href="#/" class="glass px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 text-slate-700 hover:scale-105 transition">
+            <i class="fas fa-home"></i> Home
+        </a>
+    </div>
+
+    <header class="p-8 flex justify-between items-center max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <img src="assets/img/logoikass.png" class="w-10 h-10">
+            <div class="text-3xl font-black tracking-tighter">
+                IKASS<span style="color: var(--accent);">.in</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto pb-20">
+
+        <div class="text-center mb-16 max-w-4xl mx-auto px-4">
+            <div class="w-28 h-28 mx-auto mb-8 logo-box-formal p-1 rounded-[2.5rem] flex items-center justify-center">
+                <img src="assets/img/paperproduct.png" alt="IKASS Logo" class="w-full h-full object-contain">
+            </div>
+
+            <span class="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4 block">
+                Sustainable Packaging Solutions
+            </span>
+
+            <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+                IKASS Paper Products
+            </h1>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-24 px-4">
+            
+            <div class="flex justify-center">
+                <div class="w-64 h-64 md:w-80 md:h-80 lg:w-[420px] lg:h-[420px] rounded-[3rem] border-[10px] border-white shadow-2xl overflow-hidden">
+                    <img src="assets/img/Vishal.png" class="w-full h-full object-cover">
+                </div>
+            </div>
+
+            <div class="text-center lg:text-left">
+                <h1 class="text-4xl lg:text-6xl font-black mb-2 tracking-tight">Vishal</h1>
+                
+                <span class="text-xs font-black uppercase tracking-[0.4em] text-emerald-500 mb-6 block">
+                    CEO & Managing Director
+                </span>
+
+                <p class="text-xl text-slate-500 leading-relaxed font-light max-w-xl mx-auto lg:mx-0">
+                    Leading the way in inventory management and delivery operations. We provide high-quality sustainable packaging solutions for businesses across the region.
+                </p>
+            </div>
+
+        </div>
+
+        <hr class="border-slate-100 mb-20">
+
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-black">
+                Our Core Strengths
+            </h2>
+            <div class="h-1 w-20 mx-auto mt-4 rounded-full bg-emerald-500"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="assets/img/Eco.png" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Eco-Friendly Materials</h4>
+                <p class="text-slate-500 text-sm">Sustainably sourced paper products reducing environmental impact.</p>
+            </div>
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="assets/img/Bulk.png" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Bulk Supply Efficiency</h4>
+                <p class="text-slate-500 text-sm">Reliable large-scale supply for businesses and institutions.</p>
+            </div>
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="assets/img/Custom.png" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Custom Packaging</h4>
+                <p class="text-slate-500 text-sm">Flexible packaging solutions tailored to your needs.</p>
+            </div>
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="assets/img/Premium.png" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Premium Quality</h4>
+                <p class="text-slate-500 text-sm">High durability and finishing in all paper products.</p>
+            </div>
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="assets/img/Fast.png" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Fast Delivery</h4>
+                <p class="text-slate-500 text-sm">Efficient logistics ensuring timely product delivery.</p>
+            </div>
+            <div class="glass p-6 rounded-[2.5rem] feature-card">
+                <img src="assets/img/Cost.png" class="feature-img">
+                <h4 class="text-xl font-black mb-3">Cost Effective</h4>
+                <p class="text-slate-500 text-sm">Affordable pricing without compromising quality.</p>
+            </div>
+        </div>
+
+    </main>
+</section>
+
+<section id="page-ppm" class="ikass-page" data-title="Kadai Kanakku">
+<div id="splash-screen">
+  <div class="splash-glow"></div>
+  <div class="splash-content">
+    <div class="splash-icon">📒</div>
+    <div class="splash-text">Hi Vishal!</div>
+    <div class="splash-sub">THE CEO OF IKASS</div>
+    <div class="splash-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<div class="topbar">
+  <h1>📒 Kadai Kanakku</h1>
+  <div class="sub"><span class="sync-dot" id="sync-dot"></span><span id="sync-text">Connecting...</span></div>
+  <div class="sub" style="margin-top:4px;font-weight:700;">Welcome, Vishal 👋</div>
+  <div class="tabs">
+    <button class="tab active" data-tab="dash">🏠 Dashboard</button>
+    <button class="tab" data-tab="entry">➕ Entry</button>
+    <button class="tab" data-tab="kadan">⏳ Kadan</button>
+    <button class="tab" data-tab="accounts">📊 Accounts</button>
+    <button class="tab" data-tab="data">📂 Data</button>
+    <button class="tab" data-tab="settings">⚙️ Settings</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- WORKER DASHBOARD -->
+  <div class="tabpanel active" id="panel-dash">
+    <div id="dash-warning"></div>
+
+    <div class="card">
+      <h2>⏱️ Work Status</h2>
+      <div id="status-banner"></div>
+      <button class="btn" id="btn-charge-toggle">Loading...</button>
+    </div>
+
+    <div class="card">
+      <h2>✅ Today's Tasks</h2>
+      <div class="pay-row" style="margin-top:0;">
+        <input type="text" id="dash-task-input" placeholder="New task...">
+        <button class="btn small" id="dash-task-add">Add</button>
+      </div>
+      <div id="dash-today-tasks" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="section-label">Quick Stats (Today)</div>
+    <div class="stat-grid">
+      <div class="stat profit"><div class="label">Today Earnings</div><div class="value" id="dash-today-earn">₹0</div></div>
+      <div class="stat loss"><div class="label">Total Pending Kadan</div><div class="value" id="dash-pending">₹0</div></div>
+    </div>
+
+    <div class="section-label">💰 This Month's Salary</div>
+    <div class="card">
+      <div class="stat-grid">
+        <div class="stat"><div class="label">Hours This Month</div><div class="value" id="sal-hours">0h</div></div>
+        <div class="stat profit"><div class="label">Salary Earned</div><div class="value" id="sal-due">₹0</div></div>
+      </div>
+      <div style="font-size:11px;color:#999;margin-top:10px;text-align:center;">Rate: ₹52/hour · Auto-calculated from Time Log</div>
+    </div>
+  </div>
+
+  <!-- ENTRY -->
+  <div class="tabpanel" id="panel-entry">
+    <div class="card">
+      <h2>📝 New Entry</h2>
+      <label>Date</label>
+      <input type="date" id="f-date">
+
+      <div id="dealer-wrap">
+        <label>Dealer Name</label>
+        <input type="text" id="f-dealer" placeholder="e.g. Manoj, SKP Chat..." list="dealer-suggestions">
+        <datalist id="dealer-suggestions"></datalist>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Category</label>
+          <select id="f-category">
+            <option value="Sell">Sell (Earnings)</option>
+            <option value="Investment">Investment</option>
+            <option value="Expense">Expense</option>
+            <option value="Salary">Salary (to worker)</option>
+            <option value="Transfer">Transfer (Cash ↔ Digital)</option>
+            <option value="Personal">Personal Withdrawal</option>
+          </select>
+        </div>
+        <div id="mode-wrap">
+          <label>Mode</label>
+          <select id="f-mode">
+            <option value="Cash">Cash</option>
+            <option value="Digital">Digital</option>
+          </select>
+        </div>
+        <div id="direction-wrap" style="display:none;">
+          <label>Direction</label>
+          <select id="f-direction">
+            <option value="CashToDigital">Cash → Digital</option>
+            <option value="DigitalToCash">Digital → Cash</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="payment-type-wrap" style="display:none;">
+        <label>Payment Type</label>
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn active" id="toggle-full">Full Payment</button>
+          <button type="button" class="toggle-btn" id="toggle-partial">Partial (Kadan)</button>
+        </div>
+      </div>
+
+      <div id="full-amount-wrap">
+        <label>Amount (₹)</label>
+        <input type="number" id="f-amount" placeholder="0">
+      </div>
+
+      <div id="partial-amount-wrap" style="display:none;">
+        <label>Total Sale Amount (₹)</label>
+        <input type="number" id="f-total-amount" placeholder="0">
+        <label>Amount Paid Now (₹)</label>
+        <input type="number" id="f-paid-now" placeholder="0">
+      </div>
+
+      <button class="btn" id="btn-save-entry">Save Entry</button>
+    </div>
+
+    <div class="card">
+      <h2>📋 Recent Entries</h2>
+      <div id="entry-list"></div>
+    </div>
+  </div>
+
+  <!-- DATA (Records + Time Log + Dealers + Tasks combined) -->
+  <div class="tabpanel" id="panel-data">
+
+    <!-- Sub-tab bar -->
+    <div class="sub-tabs">
+      <button class="sub-tab active" data-sub="records">📋 Records</button>
+      <button class="sub-tab" data-sub="timelog">⏱️ Time Log</button>
+      <button class="sub-tab" data-sub="dealers">👤 Dealers</button>
+      <button class="sub-tab" data-sub="tasks">✅ Tasks</button>
+    </div>
+
+    <!-- RECORDS sub-page -->
+    <div class="subpanel active" id="sub-records">
+      <div class="card">
+        <div class="filter-bar">
+          <select id="rec-filter-type">
+            <option value="all">All Time</option>
+            <option value="month">Specific Month</option>
+            <option value="year">Specific Year</option>
+          </select>
+          <select id="rec-filter-month" style="display:none;"></select>
+          <select id="rec-filter-year" style="display:none;"></select>
+        </div>
+        <div class="totals-row" style="margin-top:10px;">
+          <span class="pill credit" id="rec-total-credit">Earnings: ₹0</span>
+          <span class="pill debit" id="rec-total-debit">Spent: ₹0</span>
+        </div>
+        <div id="records-list" style="margin-top:6px;"></div>
+      </div>
+    </div>
+
+    <!-- TIME LOG sub-page -->
+    <div class="subpanel" id="sub-timelog">
+      <div class="card">
+        <div class="filter-bar">
+          <select id="time-filter-type">
+            <option value="all">All Time</option>
+            <option value="month">Specific Month</option>
+            <option value="year">Specific Year</option>
+          </select>
+          <select id="time-filter-month" style="display:none;"></select>
+          <select id="time-filter-year" style="display:none;"></select>
+        </div>
+        <div class="kadan-amounts" style="margin-top:10px;font-size:13px;">
+          <span>Total: <b id="time-filtered-total">0 min</b></span>
+          <span>Salary: <b id="time-filtered-salary" style="color:var(--green-deep);">₹0</b></span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>🖊️ Add Manual Entry</h2>
+        <div class="row2">
+          <div><label>Date In</label><input type="date" id="t-date-in"></div>
+          <div><label>Time In</label><input type="time" id="t-time-in"></div>
+        </div>
+        <div class="row2">
+          <div><label>Date Out</label><input type="date" id="t-date-out"></div>
+          <div><label>Time Out</label><input type="time" id="t-time-out"></div>
+        </div>
+        <button class="btn" id="btn-save-manual-time">Save Time Entry</button>
+      </div>
+      <div id="time-list"></div>
+    </div>
+
+    <!-- DEALERS sub-page -->
+    <div class="subpanel" id="sub-dealers">
+      <div class="card">
+        <input type="text" id="dealer-search" placeholder="Search dealer name...">
+      </div>
+      <div id="dealers-list"></div>
+    </div>
+
+    <!-- TASKS sub-page -->
+    <div class="subpanel" id="sub-tasks">
+      <div class="card">
+        <h2>➕ Add Task</h2>
+        <label>Date</label>
+        <input type="date" id="task-date">
+        <label>Task</label>
+        <input type="text" id="task-text" placeholder="What needs to be done?">
+        <button class="btn" id="btn-save-task">Add Task</button>
+      </div>
+      <div id="task-history"></div>
+    </div>
+
+  </div>
+
+  <!-- KADAN -->
+  <div class="tabpanel" id="panel-kadan">
+    <div class="card">
+      <h2>➕ Add New Kadan</h2>
+      <label>Dealer Name</label>
+      <input type="text" id="k-dealer" placeholder="Who do you owe / who owes you?" list="dealer-suggestions">
+      <label>Total Amount (₹)</label>
+      <input type="number" id="k-amount" placeholder="0">
+      <button class="btn secondary" id="btn-save-kadan">Add Kadan</button>
+    </div>
+
+    <div class="section-label" id="pending-label">Pending</div>
+    <div id="pending-list"></div>
+
+    <div class="section-label" id="cleared-label" style="display:none;">Cleared</div>
+    <div id="cleared-list"></div>
+  </div>
+
+  <!-- SETTINGS (PIN protected) -->
+  <div class="tabpanel" id="panel-settings">
+    <div class="card" id="settings-locked-view">
+      <div class="pin-screen">
+        <div class="pin-icon">🔒</div>
+        <h2 style="margin-bottom:4px;">Admin Access Only</h2>
+        <div style="font-size:12px;color:#888;">Enter 4-digit PIN to continue</div>
+        <div class="pin-dots" id="pin-dots">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <div id="pin-error" style="color:var(--rust);font-size:12px;height:16px;"></div>
+        <div class="pin-pad">
+          <button class="pin-key" onclick="pinPress('1')">1</button>
+          <button class="pin-key" onclick="pinPress('2')">2</button>
+          <button class="pin-key" onclick="pinPress('3')">3</button>
+          <button class="pin-key" onclick="pinPress('4')">4</button>
+          <button class="pin-key" onclick="pinPress('5')">5</button>
+          <button class="pin-key" onclick="pinPress('6')">6</button>
+          <button class="pin-key" onclick="pinPress('7')">7</button>
+          <button class="pin-key" onclick="pinPress('8')">8</button>
+          <button class="pin-key" onclick="pinPress('9')">9</button>
+          <button class="pin-key wide" onclick="pinClear()">Clear</button>
+          <button class="pin-key" onclick="pinPress('0')">0</button>
+          <button class="pin-key wide" onclick="pinBackspace()">⌫</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="settings-unlocked-view" style="display:none;">
+      <div class="card">
+        <h2>💰 Salary Settings</h2>
+        <label>Current Hourly Rate (₹)</label>
+        <div class="pay-row" style="margin-top:0;">
+          <input type="number" id="settings-rate-input" placeholder="52">
+          <button class="btn small" id="btn-save-rate">Update Rate</button>
+        </div>
+        <div style="font-size:11px;color:#999;margin-top:8px;">This only affects future Time Log sessions — already-logged sessions keep the rate that was active when they were recorded.</div>
+      </div>
+
+      <div class="card">
+        <h2>🔑 Change Admin PIN</h2>
+        <label>New 4-digit PIN</label>
+        <input type="password" id="settings-new-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+        <button class="btn secondary" id="btn-save-pin">Update PIN</button>
+      </div>
+
+      <button class="btn" style="background:#888;" onclick="lockSettings()">🔒 Lock Settings</button>
+    </div>
+  </div>
+
+  <!-- ACCOUNTS / FINANCIAL DASHBOARD -->
+  <div class="tabpanel" id="panel-accounts">
+    <div class="card">
+      <h2>📅 Filter Period</h2>
+      <div class="filter-bar">
+        <select id="acc-filter-type">
+          <option value="all">All Time</option>
+          <option value="month">Specific Month</option>
+          <option value="year">Specific Year</option>
+        </select>
+        <select id="acc-filter-month" style="display:none;"></select>
+        <select id="acc-filter-year" style="display:none;"></select>
+      </div>
+    </div>
+
+    <div class="section-label">Profit & Loss</div>
+    <div class="stat-grid">
+      <div class="stat"><div class="label">Investment</div><div class="value" id="acc-investment">₹0</div></div>
+      <div class="stat"><div class="label">Earnings</div><div class="value" id="acc-earnings">₹0</div></div>
+      <div class="stat"><div class="label">Expenses</div><div class="value" id="acc-expenses">₹0</div></div>
+      <div class="stat"><div class="label">Salary Paid</div><div class="value" id="acc-salary">₹0</div></div>
+      <div class="stat" id="acc-profit-card"><div class="label" id="acc-profit-label">Profit</div><div class="value" id="acc-profit">₹0</div></div>
+      <div class="stat"><div class="label">Owner Withdrawals</div><div class="value" id="acc-personal">₹0</div></div>
+    </div>
+
+    <div class="section-label">Cash vs Digital</div>
+    <div class="stat-grid">
+      <div class="stat cash"><div class="label">Cash Balance (All Time)</div><div class="value" id="acc-cash">₹0</div></div>
+      <div class="stat digital"><div class="label">Digital Balance (All Time)</div><div class="value" id="acc-digital">₹0</div></div>
+    </div>
+
+    <div class="section-label">Kadan Overview</div>
+    <div class="card">
+      <div class="kadan-amounts" style="margin:0;font-size:14px;">
+        <span>Total Pending: <b style="color:var(--rust);font-size:18px;" id="acc-pending">₹0</b></span>
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:6px;" id="acc-pending-count">0 dealers pending</div>
+    </div>
+
+    <div class="section-label">Total Hours Worked</div>
+    <div class="card">
+      <div class="kadan-amounts" style="margin:0;font-size:14px;">
+        <span>All time: <b id="acc-total-hours" style="font-size:18px;">0h 0m</b></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+</section>
+
+<section id="page-hm" class="ikass-page" data-title="Shift Log">
+<!-- LOGIN -->
+<div class="center" id="authScreen">
+  <div class="auth-wrap">
+    <div class="eyebrow">Shift Log</div>
+    <h1 class="title">Sign in</h1>
+    <p class="sub">Admin or employee — same login screen.</p>
+    <div class="msg" id="authMsg"></div>
+    <div class="field">
+      <label for="username">Username</label>
+      <input id="username" type="text" autocomplete="username" placeholder="username" />
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+    </div>
+    <button class="btn full" id="authSubmit">Sign in</button>
+
+    <div class="view-toggle">
+      <button type="button" class="view-toggle-btn" id="viewModeMobileBtn">📱 Mobile View</button>
+      <button type="button" class="view-toggle-btn" id="viewModePcBtn">🖥️ PC View</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="dash-wrap" id="adminWrap">
+  <div class="dash-header">
+    <div>
+      <div class="greeting-eyebrow">Signed in as</div>
+      <div class="greeting">Admin</div>
+    </div>
+    <button class="btn ghost" id="adminLogout">Log out</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="admin-dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="admin-employees">Employee Management</button>
+    <button class="tab-btn" data-tab="admin-services">Services</button>
+    <button class="tab-btn" data-tab="admin-accounts">Accounts</button>
+    <button class="tab-btn" data-tab="admin-customers">Customers</button>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="tab-panel active" id="tab-admin-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card" id="statEmployeesCard" style="cursor:pointer;"><div class="stat-value" id="statEmployees">—</div><div class="stat-label">Employees ›</div></div>
+      <div class="stat-card" id="statCustomersCard" style="cursor:pointer;"><div class="stat-value" id="statCustomers">—</div><div class="stat-label">Customers ›</div></div>
+      <div class="stat-card" id="statServicesCard" style="cursor:pointer;"><div class="stat-value" id="statServices">—</div><div class="stat-label">Services ›</div></div>
+      <div class="stat-card"><div class="stat-value" id="statActive">—</div><div class="stat-label">On Shift Now</div></div>
+      <div class="stat-card" id="statAccountsCard" style="cursor:pointer; text-align:left; padding:20px 22px;">
+        <div class="stat-label" style="margin-bottom:12px;">Accounts ›</div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span class="cust-meta">Cash Balance</span><strong id="dashCashBalance">—</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span class="cust-meta">Digital Balance</span><strong id="dashDigitalBalance">—</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; padding:4px 0;"><span class="cust-meta">Today's Profit</span><strong id="dashTodayProfit">—</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Management -->
+  <div class="tab-panel" id="tab-admin-employees">
+    <div class="panel">
+      <div class="panel-title">Create employee</div>
+      <div class="msg" id="empMsg"></div>
+      <div class="form-row">
+        <div class="field"><label>Name</label><input id="empName" type="text" placeholder="Employee name" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Username</label><input id="empUsername" type="text" placeholder="e.g. rahul" /></div>
+        <div class="field"><label>Password</label><input id="empPassword" type="text" placeholder="Set a password" /></div>
+      </div>
+      <button class="btn moss" id="createEmpBtn">Add employee</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Employees</div>
+        <div class="inv-checkbox-row" style="margin-bottom:0;">
+          <input type="checkbox" id="empShowArchived" />
+          <label for="empShowArchived">Show archived</label>
+        </div>
+      </div>
+      <div id="empList"></div>
+    </div>
+  </div>
+
+  <!-- Services -->
+  <div class="tab-panel" id="tab-admin-services">
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="svc-tests">Tests</button>
+      <button class="subtab-btn" data-subtab="svc-packages">Packages</button>
+    </div>
+
+    <div class="subtab-panel active" id="subtab-svc-tests">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Services / Tests</div>
+        <div>
+          <input type="file" id="svcImportFile" class="import-input" accept="application/json,.json" />
+          <button class="btn ghost" id="svcImportBtn">Import Data</button>
+        </div>
+      </div>
+      <div class="msg" id="svcMsg"></div>
+      <div class="form-row">
+        <div class="field"><label>Test name</label><input id="svcName" type="text" placeholder="e.g. CBC" /></div>
+        <div class="field" style="max-width:160px;"><label>Price (₹)</label><input id="svcPrice" type="number" placeholder="e.g. 260" /></div>
+      </div>
+      <div class="field">
+        <label>Categories (select one or more — a test can belong to several)</label>
+        <div class="category-picker" id="svcCategoryPicker"></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><input id="svcNewCategoryInput" type="text" placeholder="Add a new category..." /></div>
+        <div class="field" style="flex:0;"><button class="btn ghost" id="svcAddCategoryBtn" type="button" style="white-space:nowrap;">+ Add Category</button></div>
+      </div>
+      <button class="btn moss" id="createSvcBtn">Add service</button>
+
+      <div class="inv-checkbox-row" style="margin-top:20px; margin-bottom:0;">
+        <input type="checkbox" id="svcShowArchived" />
+        <label for="svcShowArchived">Show archived</label>
+      </div>
+      <div class="field" style="margin-top:16px;">
+        <label>Filter by category</label>
+        <select class="field-select" id="svcCategoryFilter"><option value="">All Categories</option></select>
+      </div>
+      <div class="field" style="margin-top:16px;"><input id="svcSearchFilter" type="text" placeholder="Search by test name..." /></div>
+
+      <div class="table-wrap" style="margin-top:16px;">
+        <table class="cust-table" id="svcTable">
+          <thead><tr><th>Name</th><th>Categories</th><th>Price (₹)</th><th>Website</th><th></th></tr></thead>
+          <tbody id="svcTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    </div>
+
+    <div class="subtab-panel" id="subtab-svc-packages">
+      <div class="panel">
+        <div class="panel-title">Create package</div>
+        <div class="msg" id="pkgMsg"></div>
+        <div class="field"><label>Package name</label><input id="pkgName" type="text" placeholder="e.g. Full Body Checkup" /></div>
+        <div class="field"><label>Search tests</label><input id="pkgTestSearch" type="text" placeholder="Start typing test name..." /></div>
+        <div class="inv-service-list" id="pkgTestSelector" style="max-height:280px;"><p class="empty">Loading tests…</p></div>
+
+        <div class="inv-summary" style="margin-top:16px;">
+          <div class="inv-summary-row total"><span>Total MRP (sum of selected tests):</span><strong id="pkgMrpDisplay">₹0.00</strong></div>
+        </div>
+        <div class="field" style="max-width:220px; margin-top:12px;"><label>Published Package Rate (₹)</label><input id="pkgRate" type="number" placeholder="Discounted price" /></div>
+        <button class="btn moss" id="createPkgBtn" style="margin-top:16px;">Publish package</button>
+      </div>
+
+      <div class="panel">
+        <div class="inv-checkbox-row" style="margin-bottom:16px;">
+          <input type="checkbox" id="pkgShowArchived" />
+          <label for="pkgShowArchived">Show archived</label>
+        </div>
+        <div class="table-wrap">
+          <table class="cust-table" id="pkgTable">
+            <thead><tr><th>Package</th><th>Tests</th><th>MRP</th><th>Rate</th><th>Savings</th><th></th></tr></thead>
+            <tbody id="pkgTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accounts -->
+  <div class="tab-panel" id="tab-admin-accounts">
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="admin-overview">Overview</button>
+      <button class="subtab-btn" data-subtab="admin-ledger">Ledger</button>
+    </div>
+
+    <div class="subtab-panel active" id="subtab-admin-overview">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Filter</div>
+        <div class="mode-pills">
+          <button type="button" class="mode-pill selected" id="acctFilterDailyBtn" data-range="daily">Daily</button>
+          <button type="button" class="mode-pill" id="acctFilterMonthlyBtn" data-range="monthly">Monthly</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field" id="acctDailyFieldWrap" style="max-width:220px;">
+          <label>Date</label>
+          <div class="date-display-wrap">
+            <input id="acctFilterDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+            <input id="acctFilterDate" type="date" />
+          </div>
+        </div>
+        <div class="field" id="acctMonthlyFieldWrap" style="max-width:220px; display:none;">
+          <label>Month</label>
+          <input id="acctFilterMonth" type="month" />
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Collections — <span id="acctPeriodLabel">today</span></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="acctCashToday">—</div><div class="stat-label">Cash</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctUpiToday">—</div><div class="stat-label">UPI</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctCardToday">—</div><div class="stat-label">Card</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctCreditToday">—</div><div class="stat-label">Credit (new)</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctTotalToday">—</div><div class="stat-label">Total Revenue</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Profit &amp; loss — <span id="acctPeriodLabel2">today</span></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="acctRevenueStat">—</div><div class="stat-label">Revenue</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctExpenseStat">—</div><div class="stat-label">Expenses</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctProfitStat">—</div><div class="stat-label">Net Profit / Loss</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Current balances (all-time, from ledger)</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="acctCashBalanceOverview">—</div><div class="stat-label">Cash Balance</div></div>
+        <div class="stat-card"><div class="stat-value" id="acctDigitalBalanceOverview">—</div><div class="stat-label">Digital Balance</div></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="subtab-panel" id="subtab-admin-ledger">
+      <div class="panel">
+        <div class="panel-header-row">
+          <div class="panel-title" style="margin-bottom:0;">Full ledger (invoices + expenses + manual entries)</div>
+          <div>
+            <input type="file" id="ledgerImportFile" class="import-input" accept="application/json,.json" />
+            <button class="btn ghost" id="ledgerImportBtn">Import JSON backup</button>
+            <button class="btn ghost" id="ledgerExportCsvBtn">Export CSV</button>
+          </div>
+        </div>
+        <div class="msg" id="ledgerImportMsg"></div>
+
+        <div class="stats-grid" style="margin-bottom:20px;">
+          <div class="stat-card"><div class="stat-value" id="ledgerIncomeStat">—</div><div class="stat-label">Total Customer Income</div></div>
+          <div class="stat-card"><div class="stat-value" id="ledgerExpenseStat">—</div><div class="stat-label">Total Expenses (Debit)</div></div>
+          <div class="stat-card"><div class="stat-value" id="ledgerCashClosingStat">—</div><div class="stat-label">Cash Closing Balance</div></div>
+          <div class="stat-card"><div class="stat-value" id="ledgerBankClosingStat">—</div><div class="stat-label">Bank Closing Balance</div></div>
+        </div>
+
+        <div class="form-row">
+          <div class="field"><input id="ledgerSearch" type="text" placeholder="Search invoice / customer / B2B / reason..." /></div>
+          <div class="field" style="max-width:160px;"><input id="ledgerPatientIdFilter" type="text" placeholder="Patient ID" /></div>
+          <div class="field" style="max-width:170px;"><select class="field-select" id="ledgerMonthFilter"><option value="">All Months</option></select></div>
+          <div class="field" style="max-width:150px;"><select class="field-select" id="ledgerModeFilter">
+            <option value="">All Modes</option><option>Cash</option><option>UPI</option><option>Card</option><option>Credit</option><option>Bank</option>
+          </select></div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="max-width:170px;"><label>Start date</label>
+            <div class="date-display-wrap">
+              <input id="ledgerStartDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+              <input id="ledgerStartDate" type="date" />
+            </div>
+          </div>
+          <div class="field" style="max-width:170px;"><label>End date</label>
+            <div class="date-display-wrap">
+              <input id="ledgerEndDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+              <input id="ledgerEndDate" type="date" />
+            </div>
+          </div>
+          <div class="field" style="display:flex; align-items:flex-end;">
+            <button class="btn moss" id="ledgerAddAmountBtn" type="button">+ Add Amount</button>
+            <button class="btn red" id="ledgerAddExpenseBtn" type="button">+ Add Expense</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field" style="max-width:180px;"><label>Opening Cash Balance (₹)</label><input id="ledgerOpeningCash" type="number" step="0.01" /></div>
+          <div class="field" style="max-width:180px;"><label>Opening Bank Balance (₹)</label><input id="ledgerOpeningBank" type="number" step="0.01" /></div>
+          <div class="field" style="display:flex; align-items:flex-end;">
+            <button class="btn ghost" id="ledgerSaveOpeningBtn" type="button">Save Opening Balances</button>
+          </div>
+        </div>
+        <div class="msg" id="ledgerOpeningMsg"></div>
+
+        <div class="table-wrap" style="margin-top:16px;">
+          <table class="cust-table" id="ledgerAllTable">
+            <thead><tr>
+              <th>Type</th><th>Date</th><th>Invoice</th><th>Customer / Reason</th><th>Mode</th>
+              <th>Received</th><th>Pending</th><th>Holding</th><th></th><th></th>
+            </tr></thead>
+            <tbody id="ledgerAllBody"></tbody>
+            <tfoot id="ledgerFooter"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customers -->
+  <div class="tab-panel" id="tab-admin-customers">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">All customers</div>
+        <div class="inv-checkbox-row" style="margin-bottom:0;">
+          <input type="checkbox" id="adminCustShowArchived" />
+          <label for="adminCustShowArchived">Show archived</label>
+        </div>
+      </div>
+      <div class="field"><input id="adminCustSearchFilter" type="text" placeholder="Search by name, phone, or Patient ID..." /></div>
+      <div class="table-wrap">
+        <table class="cust-table" id="adminCustTable">
+          <thead><tr><th>Name</th><th>Age / Sex</th><th>Phone</th><th>Patient ID</th><th>Branch</th><th>Added</th><th></th></tr></thead>
+          <tbody id="adminCustTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMPLOYEE DASHBOARD -->
+<div class="dash-wrap" id="empWrap">
+  <div class="dash-header">
+    <div>
+      <div class="greeting-eyebrow">Signed in as</div>
+      <div class="greeting" id="empGreeting"></div>
+      <div class="mini-clock">
+        <div class="status-tag" id="statusTag"><span class="status-dot"></span><span id="statusText">Off shift</span></div>
+        <div class="timer idle" id="timer">00:00:00</div>
+        <button class="punch-btn in" id="punchBtn">Check In</button>
+      </div>
+    </div>
+    <button class="btn ghost" id="empLogout">Log out</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="customer">Customer Registration</button>
+    <button class="tab-btn" data-tab="invoice">Invoice Generator</button>
+    <button class="tab-btn" data-tab="inventory">Inventory Update</button>
+    <button class="tab-btn" data-tab="timelog">Time Log History</button>
+    <button class="tab-btn" data-tab="accounts">Accounts</button>
+    <button class="tab-btn" data-tab="bmi">BMI Report</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-customer">
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Register new customer</div>
+        <div>
+          <input type="file" id="importFile" class="import-input" accept="application/json,.json" />
+          <button class="btn ghost" id="importBtn">Import Data</button>
+        </div>
+      </div>
+      <div class="msg" id="custMsg"></div>
+      <div class="form-row">
+        <div class="field"><label>Title</label>
+          <select class="field-select" id="custTitle">
+            <option>Mr.</option><option>Mrs.</option><option>Ms.</option><option>Miss.</option>
+            <option>Master.</option><option>Baby.</option><option>Child.</option><option>Dr.</option>
+          </select>
+        </div>
+        <div class="field"><label>Name</label><input id="custName" type="text" placeholder="Full name" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Age</label><input id="custAge" type="text" placeholder="e.g. 34" /></div>
+        <div class="field"><label>Sex</label>
+          <select class="field-select" id="custSex">
+            <option>Male</option><option>Female</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Patient ID</label><input id="custPatientId" type="text" placeholder="optional" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Phone</label><input id="custPhone" type="text" placeholder="Phone number" /></div>
+        <div class="field"><label>Email</label><input id="custEmail" type="text" placeholder="optional" /></div>
+      </div>
+      <div class="form-row">
+        <div class="field" style="flex:2;"><label>Address</label><input id="custAddress" type="text" placeholder="optional" /></div>
+        <div class="field"><label>Branch / Spot</label><input id="custBranch" type="text" placeholder="e.g. Egmore" /></div>
+      </div>
+      <button class="btn moss" id="createCustBtn">Add customer</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">All customers</div>
+        <div class="inv-checkbox-row" style="margin-bottom:0;">
+          <input type="checkbox" id="custShowArchived" />
+          <label for="custShowArchived">Show archived</label>
+        </div>
+      </div>
+      <div class="field"><input id="custSearchFilter" type="text" placeholder="Search by name, phone, or Patient ID..." /></div>
+      <div class="table-wrap">
+        <table class="cust-table" id="custTable">
+          <thead><tr><th>Name</th><th>Age / Sex</th><th>Phone</th><th>Patient ID</th><th>Branch</th><th>Added</th><th></th></tr></thead>
+          <tbody id="custTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-invoice">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:8px;">
+      <img id="invLogoDisplay" alt="Hattrick Diagnostic Lab" style="width:56px; height:56px; object-fit:contain; border-radius:8px;" />
+      <div>
+        <div style="font-family:var(--font-display); font-weight:600; font-size:16px; color:var(--ink);">Hattrick Diagnostic Lab</div>
+        <div class="cust-meta" style="font-size:11px;">Logo ready — will appear on every printed invoice</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Patient details</div>
+      <div class="form-row">
+        <div class="field" style="max-width:200px;">
+          <label>Invoice date</label>
+          <div class="date-display-wrap">
+            <input id="invInvoiceDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+            <input id="invInvoiceDate" type="date" />
+          </div>
+        </div>
+        <div class="field inv-search-wrap">
+          <label>Search patient</label>
+          <input id="invCustomerSearch" type="text" placeholder="Search by name, ID, or phone..." autocomplete="off" />
+          <div class="inv-results-list" id="invCustomerResultsList" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="inv-selected-customer" id="invSelectedCustomerDisplay">Select or type a patient name above.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <div class="panel-title" style="margin-bottom:0;">Select tests / packages</div>
+        <div class="mode-pills" id="invModePills">
+          <button type="button" class="mode-pill selected" data-mode="tests">Tests <span id="invTestsSelectedBadge"></span></button>
+          <button type="button" class="mode-pill" data-mode="packages">Packages <span id="invPackagesSelectedBadge"></span></button>
+        </div>
+      </div>
+
+      <div id="invTestsModeWrap">
+        <div class="field">
+          <label>Search test</label>
+          <input id="invServiceSearch" type="text" placeholder="Start typing test name..." />
+        </div>
+        <div class="inv-service-list" id="invServiceSelectorContainer"><p class="empty">Loading services…</p></div>
+      </div>
+
+      <div id="invPackagesModeWrap" style="display:none;">
+        <div class="field">
+          <label>Search package</label>
+          <input id="invPackageSearch" type="text" placeholder="Start typing package name..." />
+        </div>
+        <div class="inv-service-list" id="invPackageSelectorContainer"><p class="empty">Loading packages…</p></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Charges &amp; discount</div>
+      <div class="form-row">
+        <div class="field"><label>Discount (₹)</label><input id="invDiscountInput" type="number" value="0" min="0" /></div>
+        <div class="field"><label>Other charges (₹)</label><input id="invOtherChargesInput" type="number" value="0" /></div>
+      </div>
+      <div class="field"><label>Charges note (optional)</label><input id="invOtherChargesNote" type="text" placeholder="e.g. Home Collection Fee" /></div>
+      <div class="inv-summary">
+        <div class="inv-summary-row"><span>Subtotal:</span><strong id="invSubTotalDisplay">₹0.00</strong></div>
+        <div class="inv-summary-row" style="color:var(--red);"><span>Discount:</span><strong id="invDiscountDisplay">- ₹0.00</strong></div>
+        <div class="inv-summary-row"><span>Other charges:</span><strong id="invChargesDisplay">+ ₹0.00</strong></div>
+        <div class="inv-summary-row total"><span>GRAND TOTAL:</span><strong id="invGrandTotalDisplay">₹0.00</strong></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Customer payment</div>
+      <div class="field">
+        <label>Customer payment mode</label>
+        <select class="field-select" id="invPaymentMode">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Card">Card</option>
+          <option value="Credit">Credit (Outstanding)</option>
+        </select>
+      </div>
+      <div class="inv-checkbox-row">
+        <input type="checkbox" id="invFullPaymentCheckbox" checked />
+        <label for="invFullPaymentCheckbox">Full payment received</label>
+      </div>
+      <div id="invAdvancePaymentSection" style="display:none;">
+        <div class="field"><label>Advance / partial amount paid (₹)</label><input id="invAdvancePaidAmountInput" type="number" value="0" min="0" /></div>
+      </div>
+      <div class="inv-summary-row total" style="margin-top:6px;"><span>Balance due:</span><strong id="invBalanceDueDisplay">₹0.00</strong></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">B2B / ledger info</div>
+      <div class="field">
+        <label>Business / hospital name (B2B)</label>
+        <select class="field-select" id="invB2bNameSelect">
+          <option value="">Quotation only</option>
+          <option value="SRM">SRM</option>
+          <option value="Tyrocare">Tyrocare</option>
+        </select>
+      </div>
+      <div class="field"><label>Paid amount to B2B (₹)</label><input id="invPaidAmountToB2B" type="number" value="0" min="0" placeholder="Enter amount paid to B2B" /></div>
+      <button class="btn ghost full" id="invSaveLedgerBtn">Save to Transaction Ledger</button>
+    </div>
+
+    <div class="panel">
+      <button class="btn full" id="invPrintBtn" style="margin-bottom:12px;">Generate &amp; Print Invoice</button>
+      <button class="btn ghost full" id="invSaveHtmlBtn">Save Invoice as HTML</button>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-timelog">
+    <div class="panel">
+      <div class="history-title">Recent sessions (your check-ins only)</div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-accounts">
+    <div class="subtabs">
+      <button class="subtab-btn active" data-subtab="transactions">Transactions History</button>
+      <button class="subtab-btn" data-subtab="pending">Pending Payments</button>
+      <button class="subtab-btn" data-subtab="closing">Daily Closing</button>
+      <button class="subtab-btn" data-subtab="expenses">Expenses</button>
+    </div>
+
+    <!-- TRANSACTIONS HISTORY -->
+    <div class="subtab-panel active" id="subtab-transactions">
+      <div class="panel">
+        <div class="panel-header-row">
+          <div class="panel-title" style="margin-bottom:0;">All transactions</div>
+        </div>
+        <div class="field"><input id="acctTxnSearch" type="text" placeholder="Search by invoice number or customer name..." /></div>
+        <div class="table-wrap" style="margin-top:16px;">
+          <table class="cust-table" id="acctTxnTable">
+            <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Mode</th><th>Total</th><th>Paid</th><th>Due</th></tr></thead>
+            <tbody id="acctTxnBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING PAYMENTS -->
+    <div class="subtab-panel" id="subtab-pending">
+      <div class="panel">
+        <div class="panel-title">Pending payments (credit / outstanding)</div>
+        <div class="msg" id="acctPendingMsg"></div>
+        <div class="table-wrap">
+          <table class="cust-table" id="acctPendingTable">
+            <thead><tr><th>Invoice</th><th>Customer</th><th>Balance Due</th><th></th></tr></thead>
+            <tbody id="acctPendingBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Recently cleared payments</div>
+        <div class="table-wrap">
+          <table class="cust-table" id="acctClearedTable">
+            <thead><tr><th>Invoice</th><th>Customer</th><th>Amount</th><th>Mode</th><th>Date</th></tr></thead>
+            <tbody id="acctClearedBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY CLOSING -->
+    <div class="subtab-panel" id="subtab-closing">
+      <div class="panel">
+        <div class="panel-title">Today's collections (Cash &amp; UPI only)</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value" id="acctCashBalance">—</div><div class="stat-label">Today's Cash Balance</div></div>
+          <div class="stat-card"><div class="stat-value" id="acctDigitalBalance">—</div><div class="stat-label">Today's UPI Balance</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Closing check — does today's actual cash/UPI match?</div>
+        <div class="msg" id="acctMsg"></div>
+
+        <div class="form-row">
+          <div class="field"><label>Actual cash counted (₹)</label><input id="acctActualCash" type="number" placeholder="Count the cash drawer" /></div>
+          <div class="field"><label>Actual UPI received (₹)</label><input id="acctActualDigital" type="number" placeholder="Check UPI app" /></div>
+        </div>
+
+        <div class="inv-summary-row total" id="acctCashDiffRow"><span>Cash — matches?</span><strong id="acctCashDiff">Enter amount above</strong></div>
+        <div class="inv-summary-row total" id="acctDigitalDiffRow"><span>UPI — matches?</span><strong id="acctDigitalDiff">Enter amount above</strong></div>
+
+        <button class="btn moss full" id="acctSubmitBtn" style="margin-top:20px;">Close &amp; Save Today's Report</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Recent closing reports</div>
+        <div class="table-wrap">
+          <table class="cust-table" id="acctHistoryTable">
+            <thead><tr><th>Date</th><th>Employee</th><th>Cash</th><th>UPI</th></tr></thead>
+            <tbody id="acctHistoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div class="subtab-panel" id="subtab-expenses">
+      <div class="panel">
+        <div class="panel-title">Add expense</div>
+        <div class="msg" id="expMsg"></div>
+        <div class="form-row">
+          <div class="field" style="max-width:180px;"><label>Date</label>
+            <div class="date-display-wrap">
+              <input id="expDateDisplay" type="text" readonly placeholder="DD/MM/YYYY" />
+              <input id="expDate" type="date" />
+            </div>
+          </div>
+          <div class="field" style="max-width:200px;"><label>Category</label>
+            <select class="field-select" id="expCategory">
+              <option>Rent</option><option>Salary</option><option>Supplies</option>
+              <option>Electricity</option><option>Maintenance</option><option>Other</option>
+            </select>
+          </div>
+          <div class="field"><label>Description</label><input id="expDescription" type="text" placeholder="e.g. Reagent stock" /></div>
+          <div class="field" style="max-width:150px;"><label>Amount (₹)</label><input id="expAmount" type="number" placeholder="0.00" /></div>
+          <div class="field" style="max-width:150px;"><label>Paid from</label>
+            <select class="field-select" id="expSource">
+              <option>Cash</option><option>UPI</option><option>Card</option><option>Bank</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn moss" id="expAddBtn">Add expense</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">All expenses</div>
+        <div class="table-wrap">
+          <table class="cust-table" id="expTable">
+            <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Paid from</th><th></th></tr></thead>
+            <tbody id="expTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-bmi">
+    <div class="panel">
+      <div class="panel-title">Select patient</div>
+      <div class="field inv-search-wrap">
+        <label>Search patient</label>
+        <input id="bmiPatientSearch" type="text" placeholder="Search by name, ID, or phone..." autocomplete="off" />
+        <div class="inv-results-list" id="bmiPatientResultsList" style="display:none;"></div>
+      </div>
+      <div class="inv-selected-customer" id="bmiSelectedPatientDisplay">Select a patient above to record their health report.</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Height &amp; weight (BMI)</div>
+      <div class="form-row">
+        <div class="field"><label>Height (cm)</label><input id="bmiHeight" type="number" placeholder="e.g. 165" /></div>
+        <div class="field"><label>Weight (kg)</label><input id="bmiWeight" type="number" placeholder="e.g. 60" /></div>
+      </div>
+      <div class="inv-summary-row total" id="bmiResultRow" style="display:none;">
+        <span>BMI</span>
+        <strong><span id="bmiValueDisplay">—</span> &nbsp; <span class="health-badge" id="bmiCategoryBadge"></span></strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Blood pressure</div>
+      <div class="form-row">
+        <div class="field"><label>Systolic (mmHg)</label><input id="bmiBpSystolic" type="number" placeholder="e.g. 120" /></div>
+        <div class="field"><label>Diastolic (mmHg)</label><input id="bmiBpDiastolic" type="number" placeholder="e.g. 80" /></div>
+      </div>
+      <div class="inv-summary-row total" id="bpResultRow" style="display:none;">
+        <span>Blood Pressure</span>
+        <strong><span id="bpValueDisplay">—</span> &nbsp; <span class="health-badge" id="bpCategoryBadge"></span></strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Blood sugar (One Touch / glucometer)</div>
+      <div class="form-row">
+        <div class="field"><label>Sugar (mg/dL)</label><input id="bmiSugarValue" type="number" placeholder="e.g. 110" /></div>
+        <div class="field"><label>Test type</label>
+          <select class="field-select" id="bmiSugarType">
+            <option>Random</option><option>Fasting</option><option>Post-Prandial</option>
+          </select>
+        </div>
+      </div>
+      <div class="inv-summary-row total" id="sugarResultRow" style="display:none;">
+        <span>Blood Sugar</span>
+        <strong><span id="sugarValueDisplay">—</span> &nbsp; <span class="health-badge" id="sugarCategoryBadge"></span></strong>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="msg" id="bmiMsg"></div>
+      <button class="btn full" id="bmiGeneratePrintBtn" style="margin-bottom:12px;">Generate &amp; Print Report</button>
+      <p class="ph-sub" style="text-align:center;">This is a free wellness reference report — it is never added to any invoice, ledger, or account balance.</p>
+    </div>
+
+    <div class="panel">
+      <div class="history-title">Recent reports for this patient</div>
+      <div id="bmiHistoryList"></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="invInvoicePrintArea"></div>
+
+<div id="bmiPrintArea"></div>
+
+<!-- Add Amount modal -->
+<div class="modal-overlay" id="addAmountModal">
+  <div class="modal-card">
+    <div class="modal-title">Add Amount</div>
+    <div class="msg" id="addAmountMsg"></div>
+    <div class="field"><label>Amount received (₹)</label><input id="addAmountValue" type="number" placeholder="0.00" /></div>
+    <div class="field"><label>Reason</label><input id="addAmountReason" type="text" value="Manual Cash Input" /></div>
+    <div class="field"><label>Payment mode</label>
+      <div class="mode-pills" id="addAmountModePills">
+        <button type="button" class="mode-pill selected" data-mode="Cash">Cash</button>
+        <button type="button" class="mode-pill" data-mode="UPI">UPI</button>
+        <button type="button" class="mode-pill" data-mode="Card">Card</button>
+        <button type="button" class="mode-pill" data-mode="Bank">Bank</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="addAmountCancelBtn" type="button">Cancel</button>
+      <button class="btn moss" id="addAmountSaveBtn" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Expense modal -->
+<div class="modal-overlay" id="addExpenseModal">
+  <div class="modal-card">
+    <div class="modal-title">Add Expense</div>
+    <div class="msg" id="addExpenseMsg"></div>
+    <div class="field"><label>Amount (₹)</label><input id="addExpenseValue" type="number" placeholder="0.00" /></div>
+    <div class="field"><label>Description</label><input id="addExpenseDescription" type="text" placeholder="e.g. Reagent stock" /></div>
+    <div class="field"><label>Category</label>
+      <select class="field-select" id="addExpenseCategory">
+        <option>Rent</option><option>Salary</option><option>Supplies</option>
+        <option>Electricity</option><option>Maintenance</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>Paid from</label>
+      <div class="mode-pills" id="addExpenseModePills">
+        <button type="button" class="mode-pill selected" data-mode="Cash">Cash</button>
+        <button type="button" class="mode-pill" data-mode="UPI">UPI</button>
+        <button type="button" class="mode-pill" data-mode="Card">Card</button>
+        <button type="button" class="mode-pill" data-mode="Bank">Bank</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="addExpenseCancelBtn" type="button">Cancel</button>
+      <button class="btn moss" id="addExpenseSaveBtn" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic confirm modal -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-card">
+    <div class="modal-title" id="confirmModalTitle">Are you sure?</div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="confirmModalCancelBtn" type="button">Cancel</button>
+      <button class="btn red" id="confirmModalOkBtn" type="button">Confirm</button>
+    </div>
+  </div>
+</div>
+
+
+</section>
+
+<script src="assets/js/app.js"></script>
+<script src="assets/js/codings.js"></script>
+<script src="assets/js/ppm.js"></script>
+<script src="assets/js/hm.js"></script>
 </body>
 </html>

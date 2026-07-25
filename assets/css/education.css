@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+#page-education { --accent: #f87171; }
+#page-education {
+    font-family: 'Space Grotesk', sans-serif;
+    background: #ffffff;
+    color: #1e293b;
+}
+#page-education .glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
+}
+#page-education .bg-glow {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 1000px;
+    background: var(--accent);
+    filter: blur(200px);
+    opacity: 0.15;
+    z-index: -1;
+}

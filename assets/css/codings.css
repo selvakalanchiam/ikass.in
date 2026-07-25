@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700;900&display=swap');
+#page-codings {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #1a0b2e; /* Dark Violet Background */
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+#page-codings .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+#page-codings .btn-violet {
+            background: #ffffff;
+            color: #1a0b2e;
+            transition: all 0.3s ease;
+        }
+#page-codings .btn-violet:hover {
+            background: #a78bfa;
+            color: #ffffff;
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+        }
+#page-codings .btn-outline {
+            background: transparent;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+#page-codings .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ffffff;
+        }
+#page-codings .bg-glow {
+            position: fixed;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1200px;
+            height: 1200px;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.1) 0%, rgba(26, 11, 46, 0) 70%);
+            z-index: -1;
+        }
+#page-codings .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 900;
+        }

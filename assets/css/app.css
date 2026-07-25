@@ -1,0 +1,12 @@
+/* ---- IKASS single-page shell: page switching ---- */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+.ikass-page {
+  display: none;
+}
+.ikass-page.active {
+  display: block;
+  min-height: 100vh;
+}

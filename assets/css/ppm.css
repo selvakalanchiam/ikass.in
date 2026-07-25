@@ -246,6 +246,21 @@ input,
 #page-ppm .pay-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
 #page-ppm .pay-row input { flex: 1; min-width: 100px; padding: 10px; font-size: 14px;}
 #page-ppm .pay-row select { flex: 0 0 100px; padding: 10px; font-size: 14px;}
+#page-ppm .kadan-link { font-size: 12px; margin-top: 2px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+#page-ppm .kadan-link.ok { color: var(--green-deep); }
+#page-ppm .kadan-link.warn { color: var(--warn); }
+#page-ppm .link-fix-btn {
+  border: 1px solid var(--warn);
+  background: #fff;
+  color: var(--warn);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+}
+#page-ppm .link-fix-btn:active { background: var(--warn-light); }
 #page-ppm .empty { text-align: center; color: #718096; font-size: 13.5px; padding: 32px 12px; }
 #page-ppm /* Beautiful Entry Rows */
 .entry-row {

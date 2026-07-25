@@ -7,6 +7,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let entries = [];
 let kadans = [];
+let kadanById = new Map();
 let timelogs = [];
 let tasks = [];
 let activeSession = null; // {date, in_datetime, is_active}
@@ -69,6 +70,65 @@ function formatDateTime(iso){
   return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 
+// ---------- Custom confirm modal (replaces native browser confirm()) ----------
+function confirmDialog(message, okLabel){
+  return new Promise((resolve)=>{
+    const overlay = document.getElementById('confirm-overlay');
+    const msgEl = document.getElementById('confirm-msg');
+    const okBtn = document.getElementById('confirm-ok');
+    const cancelBtn = document.getElementById('confirm-cancel');
+    msgEl.textContent = message;
+    okBtn.textContent = okLabel || 'Delete';
+    overlay.classList.add('show');
+    function cleanup(result){
+      overlay.classList.remove('show');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      overlay.removeEventListener('click', onOverlay);
+      resolve(result);
+    }
+    function onOk(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    function onOverlay(e){ if(e.target===overlay) cleanup(false); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    overlay.addEventListener('click', onOverlay);
+  });
+}
+
+// ---------- Inline validation feedback (red border + shake instead of just a toast) ----------
+function flagInvalid(el){
+  if(!el) return;
+  el.classList.remove('input-error');
+  // force reflow so the shake animation replays if triggered twice in a row
+  void el.offsetWidth;
+  el.classList.add('input-error');
+  el.focus();
+  setTimeout(()=>el.classList.remove('input-error'), 500);
+}
+
+// ---------- Double-submit guard: disables a button + shows a busy label while an async action runs ----------
+async function withBtnLock(btn, busyLabel, fn){
+  if(!btn || btn.disabled) return; // already running — ignore extra clicks
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  if(busyLabel) btn.textContent = busyLabel;
+  try{
+    await fn();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
+// ---------- Dealer name normalization: prevents "Manoj" / "manoj" becoming two dealers ----------
+function normalizeDealerName(name){
+  const trimmed = (name||'').trim();
+  if(!trimmed) return trimmed;
+  const existing = dealerNamesList.find(n=>n.toLowerCase()===trimmed.toLowerCase());
+  return existing || trimmed;
+}
+
 // ---------- Tabs ----------
 document.querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -90,6 +150,7 @@ async function fetchKadans(){
   const {data, error} = await sb.from('kadans').select('*').order('date', {ascending:false}).order('created_at', {ascending:false});
   if(error) throw error;
   kadans = data || [];
+  kadanById = new Map(kadans.map(k=>[k.id, k]));
 }
 async function fetchTimelogs(){
   const {data, error} = await sb.from('timelogs').select('*').order('date', {ascending:false}).order('created_at', {ascending:false});
@@ -154,85 +215,156 @@ document.getElementById('toggle-partial').addEventListener('click', ()=>{
   document.getElementById('partial-amount-wrap').style.display='block';
 });
 
+let editingEntryId = null;
+
+function cancelEditEntry(){
+  editingEntryId = null;
+  document.getElementById('btn-save-entry').textContent = 'Save Entry';
+  document.getElementById('btn-cancel-edit-entry').style.display = 'none';
+  document.getElementById('f-amount').value='';
+  document.getElementById('f-dealer').value='';
+  document.getElementById('f-category').value='Sell';
+  updateCategoryUI();
+}
+document.getElementById('btn-cancel-edit-entry').addEventListener('click', cancelEditEntry);
+
+function editEntry(id){
+  const entry = entries.find(e=>e.id===id);
+  if(!entry) return;
+  if(entry.kadan_id){
+    showToast('This entry is linked to a Kadan — delete it instead (the Kadan updates automatically).', true);
+    return;
+  }
+  if(entry.category==='Transfer'){
+    showToast('Transfer entries are recorded in a linked pair — delete and re-enter if this needs fixing.', true);
+    return;
+  }
+  editingEntryId = id;
+  document.querySelector('.tab[data-tab="entry"]').click();
+  document.getElementById('f-category').value = entry.category;
+  updateCategoryUI();
+  document.getElementById('toggle-full').click(); // always edit as a full amount, not partial
+  document.getElementById('f-date').value = entry.date;
+  document.getElementById('f-dealer').value = entry.dealer==='Self' ? '' : entry.dealer;
+  document.getElementById('f-mode').value = entry.mode;
+  document.getElementById('f-amount').value = entry.amount;
+  document.getElementById('btn-save-entry').textContent = 'Update Entry';
+  document.getElementById('btn-cancel-edit-entry').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
 document.getElementById('btn-save-entry').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btn-save-entry');
+  if(btn.disabled) return;
   const category = document.getElementById('f-category').value;
   const date = document.getElementById('f-date').value || todayStr();
   const isTransfer = category==='Transfer';
   const isPersonal = category==='Personal';
-  const dealer = (isTransfer || isPersonal) ? 'Self' : document.getElementById('f-dealer').value.trim();
+  const dealerRaw = (isTransfer || isPersonal) ? 'Self' : document.getElementById('f-dealer').value.trim();
+  const dealer = (isTransfer || isPersonal) ? 'Self' : normalizeDealerName(dealerRaw);
   const mode = document.getElementById('f-mode').value;
   const isPartial = category==='Sell' && document.getElementById('toggle-partial').classList.contains('active');
 
-  if(!isTransfer && !isPersonal && !dealer){ showToast('Please enter dealer name', true); return; }
+  if(!isTransfer && !isPersonal && !dealer){ flagInvalid(document.getElementById('f-dealer')); showToast('Please enter dealer name', true); return; }
+
+  // ---- EDIT MODE: update an existing simple entry (not kadan-linked, not Transfer) ----
+  if(editingEntryId){
+    if(isTransfer || isPartial){
+      showToast('Cancel edit first before switching to Transfer or Partial Kadan mode.', true);
+      return;
+    }
+    const amount = Number(document.getElementById('f-amount').value);
+    if(!amount || amount<=0){ flagInvalid(document.getElementById('f-amount')); showToast('Please enter amount', true); return; }
+    const typeMap = {Sell:'credit', Investment:'debit', Expense:'debit', Salary:'debit', Personal:'debit'};
+    await withBtnLock(btn, 'Updating...', async ()=>{
+      await withSync(async ()=>{
+        const {error} = await sb.from('entries').update({date, dealer, category, mode, amount, type:typeMap[category]}).eq('id', editingEntryId);
+        if(error) throw error;
+        await fetchEntries();
+      });
+      showToast('✅ Entry updated!');
+      cancelEditEntry();
+      renderAll();
+    });
+    return;
+  }
 
   if(isTransfer){
     const amount = Number(document.getElementById('f-amount').value);
-    if(!amount || amount<=0){ showToast('Please enter amount', true); return; }
+    if(!amount || amount<=0){ flagInvalid(document.getElementById('f-amount')); showToast('Please enter amount', true); return; }
     const direction = document.getElementById('f-direction').value;
     const fromMode = direction==='CashToDigital' ? 'Cash' : 'Digital';
     const toMode = direction==='CashToDigital' ? 'Digital' : 'Cash';
-    await withSync(async ()=>{
-      const {error:e1} = await sb.from('entries').insert({date, dealer:'Self', category:'Transfer', mode:fromMode, amount, type:'debit', note:'Transfer to '+toMode});
-      if(e1) throw e1;
-      const {error:e2} = await sb.from('entries').insert({date, dealer:'Self', category:'Transfer', mode:toMode, amount, type:'credit', note:'Transfer from '+fromMode});
-      if(e2) throw e2;
-      await fetchEntries();
+    await withBtnLock(btn, 'Saving...', async ()=>{
+      await withSync(async ()=>{
+        const {error:e1} = await sb.from('entries').insert({date, dealer:'Self', category:'Transfer', mode:fromMode, amount, type:'debit', note:'Transfer to '+toMode});
+        if(e1) throw e1;
+        const {error:e2} = await sb.from('entries').insert({date, dealer:'Self', category:'Transfer', mode:toMode, amount, type:'credit', note:'Transfer from '+fromMode});
+        if(e2) throw e2;
+        await fetchEntries();
+      });
+      document.getElementById('f-amount').value='';
+      showToast('✅ Transfer recorded!');
+      renderAll();
     });
-    document.getElementById('f-amount').value='';
-    showToast('✅ Transfer recorded!');
   } else if(isPartial){
     const total = Number(document.getElementById('f-total-amount').value);
     const paidNowRaw = document.getElementById('f-paid-now').value;
     const paidNow = paidNowRaw==='' ? NaN : Number(paidNowRaw);
-    if(!total || total<=0){ showToast('Enter the total sale amount', true); return; }
-    if(isNaN(paidNow) || paidNow<0){ showToast('Enter amount paid now (0 or more)', true); return; }
-    if(paidNow>total){ showToast('Paid amount cannot be more than total', true); return; }
-    await withSync(async ()=>{
-      // Kadan always stores the FULL sale amount, so it always reflects the true total owed.
-      const {data:kadanRow, error:eK} = await sb.from('kadans')
-        .insert({dealer, total_amount:total, paid_amount:0, date, status:'Pending', payments:[], source:'sale'})
-        .select().single();
-      if(eK) throw eK;
-      // Always create a linked entry — even when paidNow is 0 — so every sale is
-      // visible in Entry/Records, not just buried in the Kadan tab.
-      const note = paidNow>0 ? 'Partial payment' : 'Full Kadan — nothing paid yet';
-      const {data:entryRow, error:e1} = await sb.from('entries')
-        .insert({date, dealer, category:'Sell', mode, amount:paidNow, type:'credit', note, kadan_id:kadanRow.id})
-        .select().single();
-      if(e1) throw e1;
-      if(paidNow>0){
-        const newStatus = paidNow>=total ? 'Cleared' : 'Pending';
-        const {error:e2} = await sb.from('kadans')
-          .update({paid_amount:paidNow, status:newStatus, payments:[{date, amount:paidNow, entryId:entryRow.id, mode}]})
-          .eq('id', kadanRow.id);
-        if(e2) throw e2;
-      }
-      await Promise.all([fetchEntries(), fetchKadans()]);
+    if(!total || total<=0){ flagInvalid(document.getElementById('f-total-amount')); showToast('Enter the total sale amount', true); return; }
+    if(isNaN(paidNow) || paidNow<0){ flagInvalid(document.getElementById('f-paid-now')); showToast('Enter amount paid now (0 or more)', true); return; }
+    if(paidNow>total){ flagInvalid(document.getElementById('f-paid-now')); showToast('Paid amount cannot be more than total', true); return; }
+    await withBtnLock(btn, 'Saving...', async ()=>{
+      await withSync(async ()=>{
+        // Kadan always stores the FULL sale amount, so it always reflects the true total owed.
+        const {data:kadanRow, error:eK} = await sb.from('kadans')
+          .insert({dealer, total_amount:total, paid_amount:0, date, status:'Pending', payments:[], source:'sale'})
+          .select().single();
+        if(eK) throw eK;
+        // Always create a linked entry — even when paidNow is 0 — so every sale is
+        // visible in Entry/Records, not just buried in the Kadan tab.
+        const note = paidNow>0 ? 'Partial payment' : 'Full Kadan — nothing paid yet';
+        const {data:entryRow, error:e1} = await sb.from('entries')
+          .insert({date, dealer, category:'Sell', mode, amount:paidNow, type:'credit', note, kadan_id:kadanRow.id})
+          .select().single();
+        if(e1) throw e1;
+        if(paidNow>0){
+          const newStatus = paidNow>=total ? 'Cleared' : 'Pending';
+          const {error:e2} = await sb.from('kadans')
+            .update({paid_amount:paidNow, status:newStatus, payments:[{date, amount:paidNow, entryId:entryRow.id, mode}]})
+            .eq('id', kadanRow.id);
+          if(e2) throw e2;
+        }
+        await Promise.all([fetchEntries(), fetchKadans()]);
+      });
+      document.getElementById('f-total-amount').value='';
+      document.getElementById('f-paid-now').value='';
+      showToast(paidNow>0 ? '✅ Saved! Remaining amount added to Kadan.' : '✅ Saved as full Kadan — nothing paid yet.');
+      renderAll();
     });
-    document.getElementById('f-total-amount').value='';
-    document.getElementById('f-paid-now').value='';
-    showToast(paidNow>0 ? '✅ Saved! Remaining amount added to Kadan.' : '✅ Saved as full Kadan — nothing paid yet.');
   } else {
     const amount = Number(document.getElementById('f-amount').value);
-    if(!amount || amount<=0){ showToast('Please enter amount', true); return; }
+    if(!amount || amount<=0){ flagInvalid(document.getElementById('f-amount')); showToast('Please enter amount', true); return; }
     const typeMap = {Sell:'credit', Investment:'debit', Expense:'debit', Salary:'debit', Personal:'debit'};
-    await withSync(async ()=>{
-      const {error} = await sb.from('entries').insert({date, dealer, category, mode, amount, type:typeMap[category]});
-      if(error) throw error;
-      await fetchEntries();
+    await withBtnLock(btn, 'Saving...', async ()=>{
+      await withSync(async ()=>{
+        const {error} = await sb.from('entries').insert({date, dealer, category, mode, amount, type:typeMap[category]});
+        if(error) throw error;
+        await fetchEntries();
+      });
+      document.getElementById('f-amount').value='';
+      showToast('✅ Entry saved!');
+      renderAll();
     });
-    document.getElementById('f-amount').value='';
-    showToast('✅ Entry saved!');
   }
   document.getElementById('f-dealer').value='';
-  renderAll();
 });
 
 function entryAmountHtml(e){
   // Marker entries (a full-Kadan sale where nothing was paid yet) carry amount=0
   // and a kadan_id — show the live Kadan status instead of a meaningless "+₹0".
   if(Number(e.amount)===0 && e.kadan_id){
-    const k = kadans.find(x=>x.id===e.kadan_id);
+    const k = kadanById.get(e.kadan_id);
     if(!k) return `<span class="kadan-badge">KADAN (deleted)</span>`;
     const remaining = Number(k.total_amount) - Number(k.paid_amount);
     return k.status==='Cleared'
@@ -244,18 +376,21 @@ function entryAmountHtml(e){
 function renderEntries(){
   const wrap = document.getElementById('entry-list');
   if(entries.length===0){ wrap.innerHTML = '<div class="empty">No entries yet.</div>'; return; }
-  wrap.innerHTML = entries.slice(0,30).map(e=>`
+  wrap.innerHTML = entries.slice(0,30).map(e=>{
+    const editable = !e.kadan_id && e.category!=='Transfer';
+    return `
     <div class="entry-row">
       <div>
-        <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+e.note+')':''}</div>
+        <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+escapeHtml(e.note)+')':''}</div>
         <div class="meta">${e.date} · ${e.mode}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
         ${entryAmountHtml(e)}
+        ${editable ? `<button class="edit-btn" onclick="editEntry('${e.id}')">Edit</button>` : ''}
         <button class="del-btn" onclick="deleteEntry('${e.id}')">✕</button>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 }
 async function deleteEntry(id){
   const entry = entries.find(e=>e.id===id);
@@ -263,7 +398,7 @@ async function deleteEntry(id){
   let k = null;
   let isPaymentEntry = false;
   if(entry && entry.kadan_id){
-    k = kadans.find(x=>x.id===entry.kadan_id);
+    k = kadanById.get(entry.kadan_id);
     if(k){
       isPaymentEntry = (k.payments||[]).some(p=>p.entryId===id);
       confirmMsg = isPaymentEntry
@@ -271,7 +406,8 @@ async function deleteEntry(id){
         : `Delete this record? The Kadan for ${k.dealer} (${money(Number(k.total_amount)-Number(k.paid_amount))} pending) will stay — manage it from the Kadan tab.`;
     }
   }
-  if(!confirm(confirmMsg)) return;
+  const ok = await confirmDialog(confirmMsg);
+  if(!ok) return;
   await withSync(async ()=>{
     if(entry && entry.kadan_id && k){
       const remainingPayments = (k.payments||[]).filter(p=>p.entryId!==id);
@@ -284,61 +420,128 @@ async function deleteEntry(id){
     if(error) throw error;
     await Promise.all([fetchEntries(), fetchKadans()]);
   });
+  if(editingEntryId===id) cancelEditEntry();
   showToast('🗑️ Entry deleted' + (isPaymentEntry ? ' — Kadan updated back to Pending' : ''));
   renderAll();
 }
 
 // =================== KADAN TAB ===================
+let editingKadanId = null;
+
+function cancelEditKadan(){
+  editingKadanId = null;
+  document.getElementById('btn-save-kadan').textContent = 'Add Kadan';
+  document.getElementById('btn-cancel-edit-kadan').style.display = 'none';
+  document.getElementById('k-dealer').value='';
+  document.getElementById('k-amount').value='';
+  document.getElementById('k-amount').disabled = false;
+}
+document.getElementById('btn-cancel-edit-kadan').addEventListener('click', cancelEditKadan);
+
+function editKadan(id){
+  const k = kadanById.get(id);
+  if(!k) return;
+  if(Number(k.paid_amount) > 0){
+    showToast('Amount can\'t be edited once a payment has been recorded — only the dealer name can be. Rename it from here, or delete & re-add for amount changes.', true);
+  }
+  editingKadanId = id;
+  document.querySelector('.tab[data-tab="kadan"]').click();
+  document.getElementById('k-dealer').value = k.dealer;
+  document.getElementById('k-amount').value = k.total_amount;
+  document.getElementById('k-amount').disabled = Number(k.paid_amount) > 0;
+  document.getElementById('btn-save-kadan').textContent = 'Update Kadan';
+  document.getElementById('btn-cancel-edit-kadan').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
 document.getElementById('btn-save-kadan').addEventListener('click', async ()=>{
-  const dealer = document.getElementById('k-dealer').value.trim();
-  const amount = Number(document.getElementById('k-amount').value);
-  if(!dealer || !amount || amount<=0){ showToast('Please enter dealer & amount', true); return; }
-  await withSync(async ()=>{
-    const {error} = await sb.from('kadans').insert({dealer, total_amount:amount, paid_amount:0, date:todayStr(), status:'Pending', payments:[], source:'manual'});
-    if(error) throw error;
-    await fetchKadans();
+  const btn = document.getElementById('btn-save-kadan');
+  if(btn.disabled) return;
+  const dealerInput = document.getElementById('k-dealer');
+  const amountInput = document.getElementById('k-amount');
+  const dealerRaw = dealerInput.value.trim();
+  const amount = Number(amountInput.value);
+  if(!dealerRaw){ flagInvalid(dealerInput); showToast('Please enter dealer name', true); return; }
+  if(!amount || amount<=0){ flagInvalid(amountInput); showToast('Please enter a valid amount', true); return; }
+  const dealer = normalizeDealerName(dealerRaw);
+
+  if(editingKadanId){
+    const k = kadanById.get(editingKadanId);
+    if(!k) { cancelEditKadan(); return; }
+    const update = { dealer };
+    if(Number(k.paid_amount)===0) update.total_amount = amount;
+    await withBtnLock(btn, 'Updating...', async ()=>{
+      await withSync(async ()=>{
+        const {error:eK} = await sb.from('kadans').update(update).eq('id', editingKadanId);
+        if(eK) throw eK;
+        // Keep any linked entries' dealer name in sync so Entry/Records/Dealers stay consistent.
+        if(dealer !== k.dealer){
+          const {error:eE} = await sb.from('entries').update({dealer}).eq('kadan_id', editingKadanId);
+          if(eE) throw eE;
+        }
+        await Promise.all([fetchKadans(), fetchEntries()]);
+      });
+      showToast('✅ Kadan updated!');
+      cancelEditKadan();
+      renderAll();
+    });
+    return;
+  }
+
+  await withBtnLock(btn, 'Saving...', async ()=>{
+    await withSync(async ()=>{
+      const {error} = await sb.from('kadans').insert({dealer, total_amount:amount, paid_amount:0, date:todayStr(), status:'Pending', payments:[], source:'manual'});
+      if(error) throw error;
+      await fetchKadans();
+    });
+    dealerInput.value=''; amountInput.value='';
+    showToast('✅ Kadan added!');
+    renderAll();
   });
-  document.getElementById('k-dealer').value=''; document.getElementById('k-amount').value='';
-  showToast('✅ Kadan added!');
-  renderAll();
 });
 
 async function addPayment(id){
   const dateInput = document.getElementById('pay-date-'+id);
   const amtInput = document.getElementById('pay-'+id);
   const modeInput = document.getElementById('pay-mode-'+id);
+  const payBtn = document.getElementById('pay-btn-'+id);
   const val = Number(amtInput.value);
   const mode = modeInput.value;
   const payDate = dateInput.value || todayStr();
-  if(!val || val<=0){ showToast('Please enter amount', true); return; }
-  const k = kadans.find(x=>x.id===id);
+  const k = kadanById.get(id);
   if(!k) return;
+  const remaining = Number(k.total_amount) - Number(k.paid_amount);
+  if(!val || val<=0){ flagInvalid(amtInput); showToast('Please enter amount', true); return; }
+  if(val > remaining){ flagInvalid(amtInput); showToast(`Payment can't exceed the remaining ${money(remaining)}`, true); return; }
   const newPaid = Number(k.paid_amount) + val;
   const newStatus = newPaid >= k.total_amount ? 'Cleared' : 'Pending';
 
-  await withSync(async ()=>{
-    // Always record an entry for money actually collected — regardless of whether the
-    // Kadan came from a sale or was added manually — so Cash/Digital totals stay accurate.
-    const {data, error:e2} = await sb.from('entries')
-      .insert({date:payDate, dealer:k.dealer, category:'Sell', mode, amount:val, type:'credit', note:'Kadan payment', kadan_id:k.id})
-      .select().single();
-    if(e2) throw e2;
-    const newPayments = [...(k.payments||[]), {date:payDate, amount:val, entryId:data.id}];
-    const {error:e1} = await sb.from('kadans').update({paid_amount:newPaid, status:newStatus, payments:newPayments}).eq('id', id);
-    if(e1) throw e1;
-    await Promise.all([fetchKadans(), fetchEntries()]);
+  await withBtnLock(payBtn, 'Saving...', async ()=>{
+    await withSync(async ()=>{
+      // Always record an entry for money actually collected — regardless of whether the
+      // Kadan came from a sale or was added manually — so Cash/Digital totals stay accurate.
+      const {data, error:e2} = await sb.from('entries')
+        .insert({date:payDate, dealer:k.dealer, category:'Sell', mode, amount:val, type:'credit', note:'Kadan payment', kadan_id:k.id})
+        .select().single();
+      if(e2) throw e2;
+      const newPayments = [...(k.payments||[]), {date:payDate, amount:val, entryId:data.id}];
+      const {error:e1} = await sb.from('kadans').update({paid_amount:newPaid, status:newStatus, payments:newPayments}).eq('id', id);
+      if(e1) throw e1;
+      await Promise.all([fetchKadans(), fetchEntries()]);
+    });
+    showToast(newStatus==='Cleared' ? '🎉 Fully cleared!' : '✅ Payment added!');
+    renderAll();
   });
-  showToast(newStatus==='Cleared' ? '🎉 Fully cleared!' : '✅ Payment added!');
-  renderAll();
 }
 async function deleteKadan(id){
-  const k = kadans.find(x=>x.id===id);
+  const k = kadanById.get(id);
   if(!k) return;
   const remaining = Number(k.total_amount) - Number(k.paid_amount);
   const confirmMsg = remaining>0
     ? `Delete this Kadan? ${money(remaining)} pending will be removed. Any money already collected stays in your Entry records.`
     : 'Delete this Kadan record? This cannot be undone.';
-  if(!confirm(confirmMsg)) return;
+  const ok = await confirmDialog(confirmMsg);
+  if(!ok) return;
   await withSync(async ()=>{
     const linkedEntries = entries.filter(e=>e.kadan_id===id);
     // Pure marker entries (₹0, no real money) are only a reference to this Kadan — remove them too.
@@ -355,6 +558,7 @@ async function deleteKadan(id){
     if(error) throw error;
     await Promise.all([fetchKadans(), fetchEntries()]);
   });
+  if(editingKadanId===id) cancelEditKadan();
   showToast('🗑️ Kadan deleted');
   renderAll();
 }
@@ -370,7 +574,7 @@ function kadanLinkStatusHtml(k){
   return `<div class="kadan-link warn">⚠️ ${money(k.paid_amount)} already paid but not linked to any Entry — please review manually.</div>`;
 }
 async function backfillKadanEntry(id){
-  const k = kadans.find(x=>x.id===id);
+  const k = kadanById.get(id);
   if(!k) return;
   await withSync(async ()=>{
     const note = k.source==='sale' ? 'Full Kadan — nothing paid yet (linked later)' : 'Manual Kadan (linked later)';
@@ -405,9 +609,10 @@ function renderKadans(){
         ${kadanLinkStatusHtml(k)}
         <div class="pay-row">
           <input type="date" id="pay-date-${k.id}" value="${todayStr()}" style="flex:0 0 130px;">
-          <input type="number" id="pay-${k.id}" placeholder="Payment amount">
+          <input type="number" id="pay-${k.id}" placeholder="Max ${money(remaining)}" min="0" max="${remaining}" step="0.01">
           <select id="pay-mode-${k.id}"><option value="Cash">Cash</option><option value="Digital">Digital</option></select>
-          <button class="btn small" onclick="addPayment('${k.id}')">Add Payment</button>
+          <button class="btn small" id="pay-btn-${k.id}" onclick="addPayment('${k.id}')">Add Payment</button>
+          <button class="edit-btn" onclick="editKadan('${k.id}')">Edit</button>
           <button class="del-btn" onclick="deleteKadan('${k.id}')">✕</button>
         </div>
       </div>`;
@@ -436,7 +641,35 @@ function renderKadans(){
 document.getElementById('t-date-in').value = todayStr();
 document.getElementById('t-date-out').value = todayStr();
 
+let editingTimelogId = null;
+
+function cancelEditTimelog(){
+  editingTimelogId = null;
+  document.getElementById('btn-save-manual-time').textContent = 'Save Time Entry';
+  document.getElementById('btn-cancel-edit-time').style.display = 'none';
+  document.getElementById('t-date-in').value = todayStr();
+  document.getElementById('t-date-out').value = todayStr();
+  document.getElementById('t-time-in').value = '';
+  document.getElementById('t-time-out').value = '';
+}
+document.getElementById('btn-cancel-edit-time').addEventListener('click', cancelEditTimelog);
+
+function editTimelog(id){
+  const t = timelogs.find(x=>x.id===id);
+  if(!t) return;
+  editingTimelogId = id;
+  document.getElementById('t-date-in').value = t.date;
+  document.getElementById('t-time-in').value = t.in_time;
+  document.getElementById('t-date-out').value = t.out_date || t.date;
+  document.getElementById('t-time-out').value = t.out_time;
+  document.getElementById('btn-save-manual-time').textContent = 'Update Time Entry';
+  document.getElementById('btn-cancel-edit-time').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
 document.getElementById('btn-save-manual-time').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btn-save-manual-time');
+  if(btn.disabled) return;
   const dIn = document.getElementById('t-date-in').value;
   const tIn = document.getElementById('t-time-in').value;
   const dOut = document.getElementById('t-date-out').value;
@@ -446,13 +679,29 @@ document.getElementById('btn-save-manual-time').addEventListener('click', async 
   const outDT = new Date(dOut+'T'+tOut);
   const minutes = (outDT - inDT) / 60000;
   if(minutes<=0){ showToast('Charge Out must be after Charge In', true); return; }
-  await withSync(async ()=>{
-    const {error} = await sb.from('timelogs').insert({date:dIn, in_time:tIn, out_date:dOut, out_time:tOut, minutes, manual:true, hourly_rate:currentHourlyRate});
-    if(error) throw error;
-    await fetchTimelogs();
+
+  if(editingTimelogId){
+    await withBtnLock(btn, 'Updating...', async ()=>{
+      await withSync(async ()=>{
+        const {error} = await sb.from('timelogs').update({date:dIn, in_time:tIn, out_date:dOut, out_time:tOut, minutes}).eq('id', editingTimelogId);
+        if(error) throw error;
+        await fetchTimelogs();
+      });
+      showToast('✅ Time entry updated!');
+      cancelEditTimelog();
+      renderAll();
+    });
+    return;
+  }
+  await withBtnLock(btn, 'Saving...', async ()=>{
+    await withSync(async ()=>{
+      const {error} = await sb.from('timelogs').insert({date:dIn, in_time:tIn, out_date:dOut, out_time:tOut, minutes, manual:true, hourly_rate:currentHourlyRate});
+      if(error) throw error;
+      await fetchTimelogs();
+    });
+    showToast('✅ Time entry saved!');
+    renderAll();
   });
-  showToast('✅ Time entry saved!');
-  renderAll();
 });
 
 function renderTimeLog(){
@@ -471,7 +720,10 @@ function renderTimeLog(){
     <div class="time-item">
       <div class="time-top">
         <span class="kadan-name">${t.date}${t.out_date && t.out_date!==t.date ? ' → '+t.out_date : ''}</span>
-        <button class="del-btn" onclick="deleteTimelog('${t.id}')">✕</button>
+        <div style="display:flex;gap:6px;">
+          <button class="edit-btn" onclick="editTimelog('${t.id}')">Edit</button>
+          <button class="del-btn" onclick="deleteTimelog('${t.id}')">✕</button>
+        </div>
       </div>
       <div class="time-amounts">
         <span>In: <b>${t.in_time}</b></span>
@@ -484,30 +736,77 @@ function renderTimeLog(){
   }).join('');
 }
 async function deleteTimelog(id){
-  if(!confirm('Delete this time session? This cannot be undone.')) return;
+  const ok = await confirmDialog('Delete this time session? This cannot be undone.');
+  if(!ok) return;
   await withSync(async ()=>{
     const {error} = await sb.from('timelogs').delete().eq('id', id);
     if(error) throw error;
     await fetchTimelogs();
   });
+  if(editingTimelogId===id) cancelEditTimelog();
   renderAll();
 }
 
 // =================== TASKS TAB ===================
 document.getElementById('task-date').value = todayStr();
 
-document.getElementById('btn-save-task').addEventListener('click', async ()=>{
-  const date = document.getElementById('task-date').value || todayStr();
-  const text = document.getElementById('task-text').value.trim();
-  const tag = document.getElementById('task-tag').value || 'Other';
-  if(!text){ showToast('Please type a task', true); return; }
-  await withSync(async ()=>{
-    await insertTaskRow({date, text, done:false, tag});
-    await fetchTasks();
-  });
+let editingTaskId = null;
+
+function cancelEditTask(){
+  editingTaskId = null;
+  document.getElementById('btn-save-task').textContent = 'Add Task';
+  document.getElementById('btn-cancel-edit-task').style.display = 'none';
   document.getElementById('task-text').value='';
-  showToast('✅ Task added!');
-  renderAll();
+  document.getElementById('task-date').value = todayStr();
+  document.getElementById('task-tag').value = 'Other';
+}
+document.getElementById('btn-cancel-edit-task').addEventListener('click', cancelEditTask);
+
+function editTask(id){
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  editingTaskId = id;
+  document.querySelector('.tab[data-tab="data"]').click();
+  document.querySelector('.sub-tab[data-sub="tasks"]').click();
+  document.getElementById('task-date').value = t.date;
+  document.getElementById('task-text').value = t.text;
+  document.getElementById('task-tag').value = taskTag(t);
+  document.getElementById('btn-save-task').textContent = 'Update Task';
+  document.getElementById('btn-cancel-edit-task').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('btn-save-task').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btn-save-task');
+  if(btn.disabled) return;
+  const date = document.getElementById('task-date').value || todayStr();
+  const textInput = document.getElementById('task-text');
+  const text = textInput.value.trim();
+  const tag = document.getElementById('task-tag').value || 'Other';
+  if(!text){ flagInvalid(textInput); showToast('Please type a task', true); return; }
+
+  if(editingTaskId){
+    await withBtnLock(btn, 'Updating...', async ()=>{
+      await withSync(async ()=>{
+        const {error} = await sb.from('tasks').update({date, text, tag}).eq('id', editingTaskId);
+        if(error) throw error;
+        await fetchTasks();
+      });
+      showToast('✅ Task updated!');
+      cancelEditTask();
+      renderAll();
+    });
+    return;
+  }
+  await withBtnLock(btn, 'Saving...', async ()=>{
+    await withSync(async ()=>{
+      await insertTaskRow({date, text, done:false, tag});
+      await fetchTasks();
+    });
+    textInput.value='';
+    showToast('✅ Task added!');
+    renderAll();
+  });
 });
 
 // ---------- Task tag helpers ----------
@@ -560,12 +859,14 @@ async function toggleTask(id){
   renderAll();
 }
 async function deleteTask(id){
-  if(!confirm('Delete this task? This cannot be undone.')) return;
+  const ok = await confirmDialog('Delete this task? This cannot be undone.');
+  if(!ok) return;
   await withSync(async ()=>{
     const {error} = await sb.from('tasks').delete().eq('id', id);
     if(error) throw error;
     await fetchTasks();
   });
+  if(editingTaskId===id) cancelEditTask();
   renderAll();
 }
 
@@ -589,6 +890,7 @@ function renderTaskHistory(){
             </div>
             ${t.done && t.completed_at ? `<div class="meta" style="margin-top:2px;">✅ Completed: ${formatDateTime(t.completed_at)}</div>` : ''}
           </div>
+          <button class="edit-btn" onclick="editTask('${t.id}')">Edit</button>
           <button class="del-btn" onclick="deleteTask('${t.id}')">✕</button>
         </div>
       `).join('')}
@@ -619,15 +921,20 @@ function renderDashTasks(){
   `).join('');
 }
 document.getElementById('dash-task-add').addEventListener('click', async ()=>{
-  const text = document.getElementById('dash-task-input').value.trim();
+  const btn = document.getElementById('dash-task-add');
+  if(btn.disabled) return;
+  const input = document.getElementById('dash-task-input');
+  const text = input.value.trim();
   const tag = document.getElementById('dash-task-tag').value || 'Other';
-  if(!text){ showToast('Please type a task', true); return; }
-  await withSync(async ()=>{
-    await insertTaskRow({date:todayStr(), text, done:false, tag});
-    await fetchTasks();
+  if(!text){ flagInvalid(input); showToast('Please type a task', true); return; }
+  await withBtnLock(btn, '...', async ()=>{
+    await withSync(async ()=>{
+      await insertTaskRow({date:todayStr(), text, done:false, tag});
+      await fetchTasks();
+    });
+    input.value='';
+    renderAll();
   });
-  document.getElementById('dash-task-input').value='';
-  renderAll();
 });
 
 // =================== DASHBOARD: Charge In/Out ===================
@@ -793,18 +1100,21 @@ function renderRecords(){
 
   const wrap = document.getElementById('records-list');
   if(filtered.length===0){ wrap.innerHTML = '<div class="empty">No entries in this period.</div>'; return; }
-  wrap.innerHTML = filtered.map(e=>`
+  wrap.innerHTML = filtered.map(e=>{
+    const editable = !e.kadan_id && e.category!=='Transfer';
+    return `
     <div class="entry-row">
       <div>
-        <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+e.note+')':''}</div>
+        <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+escapeHtml(e.note)+')':''}</div>
         <div class="meta">${e.date} · ${e.mode}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
         ${entryAmountHtml(e)}
+        ${editable ? `<button class="edit-btn" onclick="editEntry('${e.id}')">Edit</button>` : ''}
         <button class="del-btn" onclick="deleteEntry('${e.id}')">✕</button>
       </div>
     </div>
-  `).join('');
+  `;}).join('');
 }
 
 // =================== DEALERS (Profile view) ===================
@@ -882,7 +1192,7 @@ function renderDealerDetail(d){
     html += d.entries.map(e=>`
       <div class="entry-row">
         <div>
-          <div>${e.category}${e.note?' ('+e.note+')':''}</div>
+          <div>${e.category}${e.note?' ('+escapeHtml(e.note)+')':''}</div>
           <div class="meta">${e.date} · ${e.mode}</div>
         </div>
         ${entryAmountHtml(e)}
@@ -1131,9 +1441,14 @@ loadAll();
   window.addPayment = addPayment;
   window.backfillKadanEntry = backfillKadanEntry;
   window.deleteEntry = deleteEntry;
+  window.editEntry = editEntry;
   window.deleteKadan = deleteKadan;
+  window.editKadan = editKadan;
   window.deleteTask = deleteTask;
+  window.editTask = editTask;
+  window.toggleTask = toggleTask;
   window.deleteTimelog = deleteTimelog;
+  window.editTimelog = editTimelog;
   window.fixActiveSession = fixActiveSession;
   window.toggleDealer = toggleDealer;
 })();

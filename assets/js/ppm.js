@@ -69,6 +69,30 @@ function formatDateTime(iso){
   const d = new Date(iso);
   return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
+function formatDateDDMonYY(ymd){
+  // ymd is 'YYYY-MM-DD'. Output: '07/Aug/26'
+  if(!ymd) return '';
+  const parts = String(ymd).split('-');
+  if(parts.length!==3) return ymd;
+  const [y,m,d] = parts;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mi = Number(m)-1;
+  if(mi<0 || mi>11 || !d) return ymd;
+  return `${d.padStart(2,'0')}/${months[mi]}/${y.slice(-2)}`;
+}
+function syncDateDisplay(inputId, displayId){
+  const input = document.getElementById(inputId);
+  const display = document.getElementById(displayId);
+  if(!input || !display) return;
+  display.textContent = input.value ? formatDateDDMonYY(input.value) : 'dd/mon/yy';
+}
+function wireDateField(inputId, displayId){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  input.addEventListener('input', ()=>syncDateDisplay(inputId, displayId));
+  input.addEventListener('change', ()=>syncDateDisplay(inputId, displayId));
+  syncDateDisplay(inputId, displayId);
+}
 
 // ---------- Custom confirm modal (replaces native browser confirm()) ----------
 function confirmDialog(message, okLabel){
@@ -121,7 +145,15 @@ async function withBtnLock(btn, busyLabel, fn){
   }
 }
 
-// ---------- Dealer name normalization: prevents "Manoj" / "manoj" becoming two dealers ----------
+// ---------- In-flight action guard: prevents duplicate rapid clicks on dynamically
+// rendered row actions (delete, toggle, etc.) where there's no single stable button
+// element to disable, unlike withBtnLock. ----------
+const inFlightActions = new Set();
+async function withActionLock(key, fn){
+  if(inFlightActions.has(key)) return;
+  inFlightActions.add(key);
+  try{ await fn(); } finally { inFlightActions.delete(key); }
+}
 function normalizeDealerName(name){
   const trimmed = (name||'').trim();
   if(!trimmed) return trimmed;
@@ -184,6 +216,7 @@ async function loadAll(){
 
 // =================== ENTRY TAB ===================
 document.getElementById('f-date').value = todayStr();
+wireDateField('f-date','f-date-display');
 
 function updateCategoryUI(){
   const cat = document.getElementById('f-category').value;
@@ -245,6 +278,7 @@ function editEntry(id){
   updateCategoryUI();
   document.getElementById('toggle-full').click(); // always edit as a full amount, not partial
   document.getElementById('f-date').value = entry.date;
+  syncDateDisplay('f-date','f-date-display');
   document.getElementById('f-dealer').value = entry.dealer==='Self' ? '' : entry.dealer;
   document.getElementById('f-mode').value = entry.mode;
   document.getElementById('f-amount').value = entry.amount;
@@ -382,7 +416,7 @@ function renderEntries(){
     <div class="entry-row">
       <div>
         <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+escapeHtml(e.note)+')':''}</div>
-        <div class="meta">${e.date} · ${e.mode}</div>
+        <div class="meta">${formatDateDDMonYY(e.date)} · ${e.mode}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
         ${entryAmountHtml(e)}
@@ -393,36 +427,38 @@ function renderEntries(){
   `;}).join('');
 }
 async function deleteEntry(id){
-  const entry = entries.find(e=>e.id===id);
-  let confirmMsg = 'Delete this entry? This cannot be undone.';
-  let k = null;
-  let isPaymentEntry = false;
-  if(entry && entry.kadan_id){
-    k = kadanById.get(entry.kadan_id);
-    if(k){
-      isPaymentEntry = (k.payments||[]).some(p=>p.entryId===id);
-      confirmMsg = isPaymentEntry
-        ? `Delete this ${money(entry.amount)} payment? The linked Kadan for ${k.dealer} will go back to Pending for that amount.`
-        : `Delete this record? The Kadan for ${k.dealer} (${money(Number(k.total_amount)-Number(k.paid_amount))} pending) will stay — manage it from the Kadan tab.`;
+  await withActionLock('deleteEntry-'+id, async ()=>{
+    const entry = entries.find(e=>e.id===id);
+    let confirmMsg = 'Delete this entry? This cannot be undone.';
+    let k = null;
+    let isPaymentEntry = false;
+    if(entry && entry.kadan_id){
+      k = kadanById.get(entry.kadan_id);
+      if(k){
+        isPaymentEntry = (k.payments||[]).some(p=>p.entryId===id);
+        confirmMsg = isPaymentEntry
+          ? `Delete this ${money(entry.amount)} payment? The linked Kadan for ${k.dealer} will go back to Pending for that amount.`
+          : `Delete this record? The Kadan for ${k.dealer} (${money(Number(k.total_amount)-Number(k.paid_amount))} pending) will stay — manage it from the Kadan tab.`;
+      }
     }
-  }
-  const ok = await confirmDialog(confirmMsg);
-  if(!ok) return;
-  await withSync(async ()=>{
-    if(entry && entry.kadan_id && k){
-      const remainingPayments = (k.payments||[]).filter(p=>p.entryId!==id);
-      const newPaid = remainingPayments.reduce((s,p)=>s+Number(p.amount),0);
-      const newStatus = newPaid >= k.total_amount ? 'Cleared' : 'Pending';
-      const {error:eK} = await sb.from('kadans').update({paid_amount:newPaid, status:newStatus, payments:remainingPayments}).eq('id', k.id);
-      if(eK) throw eK;
-    }
-    const {error} = await sb.from('entries').delete().eq('id', id);
-    if(error) throw error;
-    await Promise.all([fetchEntries(), fetchKadans()]);
+    const ok = await confirmDialog(confirmMsg);
+    if(!ok) return;
+    await withSync(async ()=>{
+      if(entry && entry.kadan_id && k){
+        const remainingPayments = (k.payments||[]).filter(p=>p.entryId!==id);
+        const newPaid = remainingPayments.reduce((s,p)=>s+Number(p.amount),0);
+        const newStatus = newPaid >= k.total_amount ? 'Cleared' : 'Pending';
+        const {error:eK} = await sb.from('kadans').update({paid_amount:newPaid, status:newStatus, payments:remainingPayments}).eq('id', k.id);
+        if(eK) throw eK;
+      }
+      const {error} = await sb.from('entries').delete().eq('id', id);
+      if(error) throw error;
+      await Promise.all([fetchEntries(), fetchKadans()]);
+    });
+    if(editingEntryId===id) cancelEditEntry();
+    showToast('🗑️ Entry deleted' + (isPaymentEntry ? ' — Kadan updated back to Pending' : ''));
+    renderAll();
   });
-  if(editingEntryId===id) cancelEditEntry();
-  showToast('🗑️ Entry deleted' + (isPaymentEntry ? ' — Kadan updated back to Pending' : ''));
-  renderAll();
 }
 
 // =================== KADAN TAB ===================
@@ -534,33 +570,35 @@ async function addPayment(id){
   });
 }
 async function deleteKadan(id){
-  const k = kadanById.get(id);
-  if(!k) return;
-  const remaining = Number(k.total_amount) - Number(k.paid_amount);
-  const confirmMsg = remaining>0
-    ? `Delete this Kadan? ${money(remaining)} pending will be removed. Any money already collected stays in your Entry records.`
-    : 'Delete this Kadan record? This cannot be undone.';
-  const ok = await confirmDialog(confirmMsg);
-  if(!ok) return;
-  await withSync(async ()=>{
-    const linkedEntries = entries.filter(e=>e.kadan_id===id);
-    // Pure marker entries (₹0, no real money) are only a reference to this Kadan — remove them too.
-    const zeroEntryIds = linkedEntries.filter(e=>Number(e.amount)===0).map(e=>e.id);
-    if(zeroEntryIds.length){
-      const {error:eD} = await sb.from('entries').delete().in('id', zeroEntryIds);
-      if(eD) throw eD;
-    }
-    // Real payment entries (actual money collected) are kept, just unlinked so they don't
-    // point at a deleted Kadan.
-    const {error:eU} = await sb.from('entries').update({kadan_id:null}).eq('kadan_id', id);
-    if(eU) throw eU;
-    const {error} = await sb.from('kadans').delete().eq('id', id);
-    if(error) throw error;
-    await Promise.all([fetchKadans(), fetchEntries()]);
+  await withActionLock('deleteKadan-'+id, async ()=>{
+    const k = kadanById.get(id);
+    if(!k) return;
+    const remaining = Number(k.total_amount) - Number(k.paid_amount);
+    const confirmMsg = remaining>0
+      ? `Delete this Kadan? ${money(remaining)} pending will be removed. Any money already collected stays in your Entry records.`
+      : 'Delete this Kadan record? This cannot be undone.';
+    const ok = await confirmDialog(confirmMsg);
+    if(!ok) return;
+    await withSync(async ()=>{
+      const linkedEntries = entries.filter(e=>e.kadan_id===id);
+      // Pure marker entries (₹0, no real money) are only a reference to this Kadan — remove them too.
+      const zeroEntryIds = linkedEntries.filter(e=>Number(e.amount)===0).map(e=>e.id);
+      if(zeroEntryIds.length){
+        const {error:eD} = await sb.from('entries').delete().in('id', zeroEntryIds);
+        if(eD) throw eD;
+      }
+      // Real payment entries (actual money collected) are kept, just unlinked so they don't
+      // point at a deleted Kadan.
+      const {error:eU} = await sb.from('entries').update({kadan_id:null}).eq('kadan_id', id);
+      if(eU) throw eU;
+      const {error} = await sb.from('kadans').delete().eq('id', id);
+      if(error) throw error;
+      await Promise.all([fetchKadans(), fetchEntries()]);
+    });
+    if(editingKadanId===id) cancelEditKadan();
+    showToast('🗑️ Kadan deleted');
+    renderAll();
   });
-  if(editingKadanId===id) cancelEditKadan();
-  showToast('🗑️ Kadan deleted');
-  renderAll();
 }
 
 function kadanLinkStatusHtml(k){
@@ -574,16 +612,18 @@ function kadanLinkStatusHtml(k){
   return `<div class="kadan-link warn">⚠️ ${money(k.paid_amount)} already paid but not linked to any Entry — please review manually.</div>`;
 }
 async function backfillKadanEntry(id){
-  const k = kadanById.get(id);
-  if(!k) return;
-  await withSync(async ()=>{
-    const note = k.source==='sale' ? 'Full Kadan — nothing paid yet (linked later)' : 'Manual Kadan (linked later)';
-    const {error} = await sb.from('entries').insert({date:k.date, dealer:k.dealer, category:'Sell', mode:'Cash', amount:0, type:'credit', note, kadan_id:k.id});
-    if(error) throw error;
-    await fetchEntries();
+  await withActionLock('backfillKadanEntry-'+id, async ()=>{
+    const k = kadanById.get(id);
+    if(!k) return;
+    await withSync(async ()=>{
+      const note = k.source==='sale' ? 'Full Kadan — nothing paid yet (linked later)' : 'Manual Kadan (linked later)';
+      const {error} = await sb.from('entries').insert({date:k.date, dealer:k.dealer, category:'Sell', mode:'Cash', amount:0, type:'credit', note, kadan_id:k.id});
+      if(error) throw error;
+      await fetchEntries();
+    });
+    showToast('✅ Now visible in Entry tab!');
+    renderAll();
   });
-  showToast('✅ Now visible in Entry tab!');
-  renderAll();
 }
 function renderKadans(){
   const pending = kadans.filter(k=>k.status==='Pending');
@@ -608,7 +648,10 @@ function renderKadans(){
         </div>
         ${kadanLinkStatusHtml(k)}
         <div class="pay-row">
-          <input type="date" id="pay-date-${k.id}" value="${todayStr()}" style="flex:0 0 130px;">
+          <div class="date-field" style="flex:0 0 130px;">
+            <input type="date" id="pay-date-${k.id}" value="${todayStr()}">
+            <div class="date-display" id="pay-date-${k.id}-display"></div>
+          </div>
           <input type="number" id="pay-${k.id}" placeholder="Max ${money(remaining)}" min="0" max="${remaining}" step="0.01">
           <select id="pay-mode-${k.id}"><option value="Cash">Cash</option><option value="Digital">Digital</option></select>
           <button class="btn small" id="pay-btn-${k.id}" onclick="addPayment('${k.id}')">Add Payment</button>
@@ -617,6 +660,7 @@ function renderKadans(){
         </div>
       </div>`;
     }).join('');
+    pending.forEach(k=>wireDateField('pay-date-'+k.id, 'pay-date-'+k.id+'-display'));
   }
   const clearedWrap = document.getElementById('cleared-list');
   const clearedLabel = document.getElementById('cleared-label');
@@ -640,6 +684,8 @@ function renderKadans(){
 // =================== TIME LOG TAB ===================
 document.getElementById('t-date-in').value = todayStr();
 document.getElementById('t-date-out').value = todayStr();
+wireDateField('t-date-in','t-date-in-display');
+wireDateField('t-date-out','t-date-out-display');
 
 let editingTimelogId = null;
 
@@ -651,6 +697,8 @@ function cancelEditTimelog(){
   document.getElementById('t-date-out').value = todayStr();
   document.getElementById('t-time-in').value = '';
   document.getElementById('t-time-out').value = '';
+  syncDateDisplay('t-date-in','t-date-in-display');
+  syncDateDisplay('t-date-out','t-date-out-display');
 }
 document.getElementById('btn-cancel-edit-time').addEventListener('click', cancelEditTimelog);
 
@@ -662,6 +710,8 @@ function editTimelog(id){
   document.getElementById('t-time-in').value = t.in_time;
   document.getElementById('t-date-out').value = t.out_date || t.date;
   document.getElementById('t-time-out').value = t.out_time;
+  syncDateDisplay('t-date-in','t-date-in-display');
+  syncDateDisplay('t-date-out','t-date-out-display');
   document.getElementById('btn-save-manual-time').textContent = 'Update Time Entry';
   document.getElementById('btn-cancel-edit-time').style.display = 'block';
   window.scrollTo({top:0, behavior:'smooth'});
@@ -719,7 +769,7 @@ function renderTimeLog(){
     return `
     <div class="time-item">
       <div class="time-top">
-        <span class="kadan-name">${t.date}${t.out_date && t.out_date!==t.date ? ' → '+t.out_date : ''}</span>
+        <span class="kadan-name">${formatDateDDMonYY(t.date)}${t.out_date && t.out_date!==t.date ? ' → '+formatDateDDMonYY(t.out_date) : ''}</span>
         <div style="display:flex;gap:6px;">
           <button class="edit-btn" onclick="editTimelog('${t.id}')">Edit</button>
           <button class="del-btn" onclick="deleteTimelog('${t.id}')">✕</button>
@@ -736,19 +786,22 @@ function renderTimeLog(){
   }).join('');
 }
 async function deleteTimelog(id){
-  const ok = await confirmDialog('Delete this time session? This cannot be undone.');
-  if(!ok) return;
-  await withSync(async ()=>{
-    const {error} = await sb.from('timelogs').delete().eq('id', id);
-    if(error) throw error;
-    await fetchTimelogs();
+  await withActionLock('deleteTimelog-'+id, async ()=>{
+    const ok = await confirmDialog('Delete this time session? This cannot be undone.');
+    if(!ok) return;
+    await withSync(async ()=>{
+      const {error} = await sb.from('timelogs').delete().eq('id', id);
+      if(error) throw error;
+      await fetchTimelogs();
+    });
+    if(editingTimelogId===id) cancelEditTimelog();
+    renderAll();
   });
-  if(editingTimelogId===id) cancelEditTimelog();
-  renderAll();
 }
 
 // =================== TASKS TAB ===================
 document.getElementById('task-date').value = todayStr();
+wireDateField('task-date','task-date-display');
 
 let editingTaskId = null;
 
@@ -759,6 +812,7 @@ function cancelEditTask(){
   document.getElementById('task-text').value='';
   document.getElementById('task-date').value = todayStr();
   document.getElementById('task-tag').value = 'Other';
+  syncDateDisplay('task-date','task-date-display');
 }
 document.getElementById('btn-cancel-edit-task').addEventListener('click', cancelEditTask);
 
@@ -769,6 +823,7 @@ function editTask(id){
   document.querySelector('.tab[data-tab="data"]').click();
   document.querySelector('.sub-tab[data-sub="tasks"]').click();
   document.getElementById('task-date').value = t.date;
+  syncDateDisplay('task-date','task-date-display');
   document.getElementById('task-text').value = t.text;
   document.getElementById('task-tag').value = taskTag(t);
   document.getElementById('btn-save-task').textContent = 'Update Task';
@@ -847,27 +902,31 @@ setupTagFilterBar('task-history-filter', (tag)=>{ taskHistoryFilter = tag; rende
 setupTagFilterBar('dash-task-filter', (tag)=>{ dashTaskFilter = tag; renderDashTasks(); });
 
 async function toggleTask(id){
-  const t = tasks.find(x=>x.id===id);
-  if(!t) return;
-  const newDone = !t.done;
-  const completedAt = newDone ? new Date().toISOString() : null;
-  await withSync(async ()=>{
-    const {error} = await sb.from('tasks').update({done:newDone, completed_at:completedAt}).eq('id', id);
-    if(error) throw error;
-    await fetchTasks();
+  await withActionLock('toggleTask-'+id, async ()=>{
+    const t = tasks.find(x=>x.id===id);
+    if(!t) return;
+    const newDone = !t.done;
+    const completedAt = newDone ? new Date().toISOString() : null;
+    await withSync(async ()=>{
+      const {error} = await sb.from('tasks').update({done:newDone, completed_at:completedAt}).eq('id', id);
+      if(error) throw error;
+      await fetchTasks();
+    });
+    renderAll();
   });
-  renderAll();
 }
 async function deleteTask(id){
-  const ok = await confirmDialog('Delete this task? This cannot be undone.');
-  if(!ok) return;
-  await withSync(async ()=>{
-    const {error} = await sb.from('tasks').delete().eq('id', id);
-    if(error) throw error;
-    await fetchTasks();
+  await withActionLock('deleteTask-'+id, async ()=>{
+    const ok = await confirmDialog('Delete this task? This cannot be undone.');
+    if(!ok) return;
+    await withSync(async ()=>{
+      const {error} = await sb.from('tasks').delete().eq('id', id);
+      if(error) throw error;
+      await fetchTasks();
+    });
+    if(editingTaskId===id) cancelEditTask();
+    renderAll();
   });
-  if(editingTaskId===id) cancelEditTask();
-  renderAll();
 }
 
 function renderTaskHistory(){
@@ -878,7 +937,7 @@ function renderTaskHistory(){
   filtered.forEach(t=>{ (byDate[t.date] = byDate[t.date]||[]).push(t); });
   const dates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
   wrap.innerHTML = dates.map(d=>`
-    <div class="day-heading">${d}</div>
+    <div class="day-heading">${formatDateDDMonYY(d)}</div>
     <div class="card" style="padding:6px 16px;">
       ${byDate[d].map(t=>`
         <div class="task-row">
@@ -914,7 +973,7 @@ function renderDashTasks(){
           <span class="txt ${t.done?'done':''}">${escapeHtml(t.text)}</span>
           ${tagBadge(taskTag(t))}
         </div>
-        <div class="meta" style="margin-top:2px;">${t.date===today ? 'Today' : 'Added: '+t.date}</div>
+        <div class="meta" style="margin-top:2px;">${t.date===today ? 'Today' : 'Added: '+formatDateDDMonYY(t.date)}</div>
       </div>
       <button class="del-btn" onclick="deleteTask('${t.id}')">✕</button>
     </div>
@@ -955,13 +1014,17 @@ function renderStatus(){
       warnWrap.innerHTML = `
         <div class="warning-card">
           <b>⚠️ Forgot to Charge Out?</b>
-          You charged in on ${activeSession.date} and haven't charged out yet. Enter the correct Charge Out time:
+          You charged in on ${formatDateDDMonYY(activeSession.date)} and haven't charged out yet. Enter the correct Charge Out time:
           <div class="row2" style="margin-top:10px;">
-            <input type="date" id="fix-date-out" value="${today}">
+            <div class="date-field">
+              <input type="date" id="fix-date-out" value="${today}">
+              <div class="date-display" id="fix-date-out-display"></div>
+            </div>
             <input type="time" id="fix-time-out" value="${nowTimeStr()}">
           </div>
           <button class="btn warn" onclick="fixActiveSession()">Save & Close Session</button>
         </div>`;
+      wireDateField('fix-date-out','fix-date-out-display');
     } else {
       warnWrap.innerHTML = '';
     }
@@ -975,34 +1038,41 @@ function renderStatus(){
 }
 
 document.getElementById('btn-charge-toggle').addEventListener('click', async ()=>{
-  if(activeSession && activeSession.is_active){
-    const outDT = new Date();
-    const inDT = new Date(activeSession.in_datetime);
-    const minutes = (outDT - inDT) / 60000;
-    await withSync(async ()=>{
-      const {error:e1} = await sb.from('timelogs').insert({
-        date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
-        out_date:todayStr(), out_time:outDT.toTimeString().slice(0,5), minutes, manual:false, hourly_rate:currentHourlyRate
+  const btn = document.getElementById('btn-charge-toggle');
+  if(btn.disabled) return;
+  const busyLabel = (activeSession && activeSession.is_active) ? 'Charging out...' : 'Charging in...';
+  await withBtnLock(btn, busyLabel, async ()=>{
+    if(activeSession && activeSession.is_active){
+      const outDT = new Date();
+      const inDT = new Date(activeSession.in_datetime);
+      const minutes = (outDT - inDT) / 60000;
+      await withSync(async ()=>{
+        const {error:e1} = await sb.from('timelogs').insert({
+          date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
+          out_date:todayStr(), out_time:outDT.toTimeString().slice(0,5), minutes, manual:false, hourly_rate:currentHourlyRate
+        });
+        if(e1) throw e1;
+        const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
+        if(e2) throw e2;
+        await Promise.all([fetchTimelogs(), fetchActiveSession()]);
       });
-      if(e1) throw e1;
-      const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
-      if(e2) throw e2;
-      await Promise.all([fetchTimelogs(), fetchActiveSession()]);
-    });
-    showToast('✅ Charge Out done! '+fmtMinutes(minutes)+' recorded.');
-  } else {
-    const nowISO = new Date().toISOString();
-    await withSync(async ()=>{
-      const {error} = await sb.from('active_session').update({date:todayStr(), in_datetime:nowISO, is_active:true}).eq('id',1);
-      if(error) throw error;
-      await fetchActiveSession();
-    });
-    showToast('🟢 Charge In done!');
-  }
-  renderAll();
+      showToast('✅ Charge Out done! '+fmtMinutes(minutes)+' recorded.');
+    } else {
+      const nowISO = new Date().toISOString();
+      await withSync(async ()=>{
+        const {error} = await sb.from('active_session').update({date:todayStr(), in_datetime:nowISO, is_active:true}).eq('id',1);
+        if(error) throw error;
+        await fetchActiveSession();
+      });
+      showToast('🟢 Charge In done!');
+    }
+    renderAll();
+  });
 });
 
 async function fixActiveSession(){
+  const btn = document.querySelector('.warning-card .btn.warn');
+  if(btn && btn.disabled) return;
   const dOut = document.getElementById('fix-date-out').value;
   const tOut = document.getElementById('fix-time-out').value;
   if(!dOut || !tOut){ showToast('Please fill date & time', true); return; }
@@ -1010,18 +1080,20 @@ async function fixActiveSession(){
   const outDT = new Date(dOut+'T'+tOut);
   const minutes = (outDT - inDT) / 60000;
   if(minutes<=0){ showToast('Out time must be after In time', true); return; }
-  await withSync(async ()=>{
-    const {error:e1} = await sb.from('timelogs').insert({
-      date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
-      out_date:dOut, out_time:tOut, minutes, manual:true, hourly_rate:currentHourlyRate
+  await withBtnLock(btn, 'Saving...', async ()=>{
+    await withSync(async ()=>{
+      const {error:e1} = await sb.from('timelogs').insert({
+        date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
+        out_date:dOut, out_time:tOut, minutes, manual:true, hourly_rate:currentHourlyRate
+      });
+      if(e1) throw e1;
+      const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
+      if(e2) throw e2;
+      await Promise.all([fetchTimelogs(), fetchActiveSession()]);
     });
-    if(e1) throw e1;
-    const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
-    if(e2) throw e2;
-    await Promise.all([fetchTimelogs(), fetchActiveSession()]);
+    showToast('✅ Session fixed & closed!');
+    renderAll();
   });
-  showToast('✅ Session fixed & closed!');
-  renderAll();
 }
 
 // =================== DASHBOARD: Quick Stats ===================
@@ -1106,7 +1178,7 @@ function renderRecords(){
     <div class="entry-row">
       <div>
         <div>${escapeHtml(e.dealer)} · ${e.category}${e.note?' ('+escapeHtml(e.note)+')':''}</div>
-        <div class="meta">${e.date} · ${e.mode}</div>
+        <div class="meta">${formatDateDDMonYY(e.date)} · ${e.mode}</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;">
         ${entryAmountHtml(e)}
@@ -1175,7 +1247,7 @@ function renderDealerDetail(d){
       const remaining = k.total_amount - k.paid_amount;
       return `<div class="kadan-item ${k.status==='Cleared'?'cleared':''}" style="margin-bottom:8px;">
         <div class="kadan-top">
-          <span style="font-size:13px;">${k.date}</span>
+          <span style="font-size:13px;">${formatDateDDMonYY(k.date)}</span>
           <span class="kadan-badge ${k.status==='Cleared'?'cleared':''}">${k.status.toUpperCase()}</span>
         </div>
         <div class="kadan-amounts">
@@ -1193,7 +1265,7 @@ function renderDealerDetail(d){
       <div class="entry-row">
         <div>
           <div>${e.category}${e.note?' ('+escapeHtml(e.note)+')':''}</div>
-          <div class="meta">${e.date} · ${e.mode}</div>
+          <div class="meta">${formatDateDDMonYY(e.date)} · ${e.mode}</div>
         </div>
         ${entryAmountHtml(e)}
       </div>
@@ -1386,27 +1458,37 @@ function lockSettings(){
 }
 
 document.getElementById('btn-save-rate').addEventListener('click', async ()=>{
-  const newRate = Number(document.getElementById('settings-rate-input').value);
-  if(!newRate || newRate<=0){ showToast('Please enter a valid rate', true); return; }
-  await withSync(async ()=>{
-    const {error} = await sb.from('settings').update({hourly_rate:newRate}).eq('id', 1);
-    if(error) throw error;
-    await fetchSettings();
+  const btn = document.getElementById('btn-save-rate');
+  if(btn.disabled) return;
+  const rateInput = document.getElementById('settings-rate-input');
+  const newRate = Number(rateInput.value);
+  if(!newRate || newRate<=0){ flagInvalid(rateInput); showToast('Please enter a valid rate', true); return; }
+  await withBtnLock(btn, 'Updating...', async ()=>{
+    await withSync(async ()=>{
+      const {error} = await sb.from('settings').update({hourly_rate:newRate}).eq('id', 1);
+      if(error) throw error;
+      await fetchSettings();
+    });
+    showToast('✅ Rate updated to ₹'+newRate+'/hour for future sessions!');
+    renderAll();
   });
-  showToast('✅ Rate updated to ₹'+newRate+'/hour for future sessions!');
-  renderAll();
 });
 
 document.getElementById('btn-save-pin').addEventListener('click', async ()=>{
-  const newPin = document.getElementById('settings-new-pin').value.trim();
-  if(!/^\d{4}$/.test(newPin)){ showToast('PIN must be exactly 4 digits', true); return; }
-  await withSync(async ()=>{
-    const {error} = await sb.from('settings').update({admin_pin:newPin}).eq('id', 1);
-    if(error) throw error;
-    await fetchSettings();
+  const btn = document.getElementById('btn-save-pin');
+  if(btn.disabled) return;
+  const pinInput = document.getElementById('settings-new-pin');
+  const newPin = pinInput.value.trim();
+  if(!/^\d{4}$/.test(newPin)){ flagInvalid(pinInput); showToast('PIN must be exactly 4 digits', true); return; }
+  await withBtnLock(btn, 'Updating...', async ()=>{
+    await withSync(async ()=>{
+      const {error} = await sb.from('settings').update({admin_pin:newPin}).eq('id', 1);
+      if(error) throw error;
+      await fetchSettings();
+    });
+    pinInput.value = '';
+    showToast('✅ Admin PIN updated!');
   });
-  document.getElementById('settings-new-pin').value = '';
-  showToast('✅ Admin PIN updated!');
 });
 
 function renderAll(){

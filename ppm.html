@@ -89,7 +89,10 @@
     <div class="card">
       <h2>📝 New Entry</h2>
       <label>Date</label>
-      <input type="date" id="f-date">
+      <div class="date-field">
+        <input type="date" id="f-date">
+        <div class="date-display" id="f-date-display"></div>
+      </div>
 
       <div id="dealer-wrap">
         <label>Dealer Name</label>
@@ -210,11 +213,23 @@
       <div class="card">
         <h2>🖊️ Add Manual Entry</h2>
         <div class="row2">
-          <div><label>Date In</label><input type="date" id="t-date-in"></div>
+          <div>
+            <label>Date In</label>
+            <div class="date-field">
+              <input type="date" id="t-date-in">
+              <div class="date-display" id="t-date-in-display"></div>
+            </div>
+          </div>
           <div><label>Time In</label><input type="time" id="t-time-in"></div>
         </div>
         <div class="row2">
-          <div><label>Date Out</label><input type="date" id="t-date-out"></div>
+          <div>
+            <label>Date Out</label>
+            <div class="date-field">
+              <input type="date" id="t-date-out">
+              <div class="date-display" id="t-date-out-display"></div>
+            </div>
+          </div>
           <div><label>Time Out</label><input type="time" id="t-time-out"></div>
         </div>
         <div class="form-actions">
@@ -238,7 +253,10 @@
       <div class="card">
         <h2>➕ Add Task</h2>
         <label>Date</label>
-        <input type="date" id="task-date">
+        <div class="date-field">
+          <input type="date" id="task-date">
+          <div class="date-display" id="task-date-display"></div>
+        </div>
         <label>Task</label>
         <input type="text" id="task-text" placeholder="What needs to be done?">
         <label>Tag</label>

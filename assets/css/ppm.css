@@ -147,6 +147,32 @@ input,
   background: #ffffff;
   box-shadow: 0 0 0 4px var(--green-light);
 }
+/* Custom date display: the native <input type="date"> stays functional (so the
+   OS/browser date picker still works when tapped) but its own locale-formatted
+   text (e.g. 08/07/2026) is made invisible, and we draw our own dd/Mon/yy text
+   on top. This lets the whole app show one consistent date format everywhere,
+   regardless of the visitor's browser or device locale. */
+#page-ppm .date-field { position: relative; }
+#page-ppm .date-field input[type="date"] { color: transparent; }
+#page-ppm .date-field input[type="date"]::-webkit-datetime-edit,
+#page-ppm .date-field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+#page-ppm .date-field input[type="date"]::-webkit-datetime-edit-text,
+#page-ppm .date-field input[type="date"]::-webkit-datetime-edit-month-field,
+#page-ppm .date-field input[type="date"]::-webkit-datetime-edit-day-field,
+#page-ppm .date-field input[type="date"]::-webkit-datetime-edit-year-field {
+  color: transparent;
+}
+#page-ppm .date-field .date-display {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  font-family: inherit;
+}
 #page-ppm .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 #page-ppm /* Micro-interactive Buttons */
 .btn {

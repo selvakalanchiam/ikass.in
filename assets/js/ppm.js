@@ -13,6 +13,7 @@ let tasks = [];
 let activeSession = null; // {date, in_datetime, is_active}
 let currentHourlyRate = 52; // fallback until fetched
 let adminPin = '1234'; // fallback until fetched
+let ceoPin = '5678'; // fallback until fetched — grants app access but NOT Settings
 let settingsUnlocked = false;
 let pinEntry = '';
 
@@ -204,6 +205,7 @@ async function fetchSettings(){
   if(error) throw error;
   currentHourlyRate = Number(data.hourly_rate);
   adminPin = data.admin_pin || '1234';
+  ceoPin = data.ceo_pin || '5678';
 }
 
 async function loadAll(){
@@ -1480,6 +1482,7 @@ document.getElementById('btn-save-pin').addEventListener('click', async ()=>{
   const pinInput = document.getElementById('settings-new-pin');
   const newPin = pinInput.value.trim();
   if(!/^\d{4}$/.test(newPin)){ flagInvalid(pinInput); showToast('PIN must be exactly 4 digits', true); return; }
+  if(newPin === ceoPin){ flagInvalid(pinInput); showToast('Admin PIN can\'t be the same as the CEO PIN', true); return; }
   await withBtnLock(btn, 'Updating...', async ()=>{
     await withSync(async ()=>{
       const {error} = await sb.from('settings').update({admin_pin:newPin}).eq('id', 1);
@@ -1488,6 +1491,24 @@ document.getElementById('btn-save-pin').addEventListener('click', async ()=>{
     });
     pinInput.value = '';
     showToast('✅ Admin PIN updated!');
+  });
+});
+
+document.getElementById('btn-save-ceo-pin').addEventListener('click', async ()=>{
+  const btn = document.getElementById('btn-save-ceo-pin');
+  if(btn.disabled) return;
+  const pinInput = document.getElementById('settings-new-ceo-pin');
+  const newPin = pinInput.value.trim();
+  if(!/^\d{4}$/.test(newPin)){ flagInvalid(pinInput); showToast('PIN must be exactly 4 digits', true); return; }
+  if(newPin === adminPin){ flagInvalid(pinInput); showToast('CEO PIN can\'t be the same as the Admin PIN', true); return; }
+  await withBtnLock(btn, 'Updating...', async ()=>{
+    await withSync(async ()=>{
+      const {error} = await sb.from('settings').update({ceo_pin:newPin}).eq('id', 1);
+      if(error) throw error;
+      await fetchSettings();
+    });
+    pinInput.value = '';
+    showToast('✅ CEO PIN updated!');
   });
 });
 
@@ -1512,8 +1533,10 @@ function renderAll(){
 // Admin PIN) — no new Supabase field needed. Unlock is remembered for the current
 // browser tab session only (sessionStorage), so it asks again on a fresh visit.
 const APP_LOCK_SESSION_KEY = 'ppm_app_unlocked';
+const APP_LOCK_ROLE_KEY = 'ppm_app_role';
 let appLockPin = '';
 let appLockReady = false; // becomes true once settings (admin_pin) have loaded
+let appRole = null; // 'admin' or 'ceo'
 
 function updateAppLockDots(){
   document.querySelectorAll('#applock-pin-dots .dot').forEach((d,i)=>{
@@ -1532,9 +1555,9 @@ function appLockPinPress(digit){
   if(appLockPin.length===4){
     setTimeout(()=>{
       if(appLockPin === adminPin){
-        try{ sessionStorage.setItem(APP_LOCK_SESSION_KEY, 'true'); }catch(e){}
-        appLockPin = '';
-        showSplashWelcome();
+        loginAs('admin');
+      } else if(appLockPin === ceoPin){
+        loginAs('ceo');
       } else {
         document.getElementById('applock-pin-error').textContent = 'Incorrect PIN, try again';
         appLockPin = '';
@@ -1542,6 +1565,23 @@ function appLockPinPress(digit){
       }
     }, 150);
   }
+}
+function loginAs(role){
+  appRole = role;
+  try{
+    sessionStorage.setItem(APP_LOCK_SESSION_KEY, 'true');
+    sessionStorage.setItem(APP_LOCK_ROLE_KEY, role);
+  }catch(e){}
+  appLockPin = '';
+  applyRoleRestrictions();
+  showSplashWelcome();
+}
+function applyRoleRestrictions(){
+  // CEO PIN grants access to everything except the Settings tab. The Settings tab's
+  // own PIN lock still only accepts the admin PIN either way — this just hides the
+  // tab up front for a cleaner CEO experience instead of showing a tab that always rejects them.
+  const settingsTab = document.querySelector('.tab[data-tab="settings"]');
+  if(settingsTab) settingsTab.style.display = (appRole==='ceo') ? 'none' : '';
 }
 function appLockPinBackspace(){
   appLockPin = appLockPin.slice(0,-1);
@@ -1567,8 +1607,12 @@ function showSplashWelcome(){
 }
 function initAppLock(){
   let alreadyUnlocked = false;
-  try{ alreadyUnlocked = sessionStorage.getItem(APP_LOCK_SESSION_KEY) === 'true'; }catch(e){}
+  try{
+    alreadyUnlocked = sessionStorage.getItem(APP_LOCK_SESSION_KEY) === 'true';
+    appRole = sessionStorage.getItem(APP_LOCK_ROLE_KEY) || null;
+  }catch(e){}
   if(alreadyUnlocked){
+    applyRoleRestrictions();
     showSplashWelcome();
     return;
   }

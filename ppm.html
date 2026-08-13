@@ -371,9 +371,18 @@
 
       <div class="card">
         <h2>🔑 Change Admin PIN</h2>
+        <div style="font-size:11px;color:#999;margin-bottom:4px;">Full access — including this Settings tab.</div>
         <label>New 4-digit PIN</label>
         <input type="password" id="settings-new-pin" maxlength="4" inputmode="numeric" placeholder="••••">
         <button class="btn secondary" id="btn-save-pin">Update PIN</button>
+      </div>
+
+      <div class="card">
+        <h2>🔑 Change CEO PIN</h2>
+        <div style="font-size:11px;color:#999;margin-bottom:4px;">Full access to the app — Settings tab stays hidden with this PIN.</div>
+        <label>New 4-digit PIN</label>
+        <input type="password" id="settings-new-ceo-pin" maxlength="4" inputmode="numeric" placeholder="••••">
+        <button class="btn secondary" id="btn-save-ceo-pin">Update CEO PIN</button>
       </div>
 
       <button class="btn" style="background:#888;" onclick="lockSettings()">🔒 Lock Settings</button>

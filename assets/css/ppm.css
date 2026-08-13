@@ -594,8 +594,9 @@ input,
   background:radial-gradient(circle at 50% 35%, #2d4a2d 0%, #142414 55%, #0a140a 100%);
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;
+}
+#page-ppm #splash-screen.ppm-exit {
   animation:ppm-splashExit 0.6s cubic-bezier(.4,0,.2,1) forwards;
-  animation-delay:1.6s;
 }
 #page-ppm .splash-glow {
   position:absolute;width:480px;height:480px;border-radius:50%;
@@ -650,6 +651,38 @@ input,
 @keyframes ppm-splashExit {
   to{opacity:0;visibility:hidden;transform:scale(1.04);}
 }
+
+/* =================== APP ENTRY PIN LOCK (dark, on the splash gradient) =================== */
+#page-ppm .applock-title { font-size:22px!important; margin-bottom:2px; }
+#page-ppm #splash-lock-view { opacity:0; animation:ppm-textRise 0.5s ease 0.1s both; }
+#page-ppm .pin-dots.on-dark .dot {
+  border-color: rgba(255,255,255,.35);
+  background: rgba(255,255,255,.08);
+}
+#page-ppm .pin-dots.on-dark .dot.filled {
+  background: #fff;
+  border-color: #fff;
+}
+#page-ppm .pin-pad.on-dark { max-width: 240px; }
+#page-ppm .pin-pad.on-dark .pin-key {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff;
+  backdrop-filter: blur(2px);
+}
+#page-ppm .pin-pad.on-dark .pin-key:active { background: rgba(255,255,255,.2); }
+#page-ppm .pin-pad.on-dark .pin-key.wide { color: rgba(255,255,255,.7); font-size: 12.5px; }
+#page-ppm .pin-pad.on-dark .pin-key:disabled { opacity:.35; cursor:default; }
+#page-ppm .applock-error {
+  color:#FCA5A5; font-size:12px; height:16px; margin-top:4px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+#page-ppm .applock-loading {
+  display:none;
+  color:rgba(255,255,255,.55); font-size:12px; margin-top:14px;
+  font-family:'Plus Jakarta Sans',sans-serif; letter-spacing:0.5px;
+}
+#page-ppm .applock-loading.show { display:block; }
 
 /* =================== RESPONSIVE: TABLET / DESKTOP =================== */
 /* Mobile stays exactly as designed above (default, no media query). */

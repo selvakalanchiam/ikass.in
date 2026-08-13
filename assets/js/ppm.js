@@ -1506,13 +1506,84 @@ function renderAll(){
   renderSettingsLock();
 }
 
-setTimeout(()=>{
-  const splash = document.getElementById('splash-screen');
-  if(splash) splash.style.display = 'none';
-}, 2300);
+// =================== APP ENTRY PIN LOCK ===================
+// A separate PIN gate shown before anyone can see the app at all. Uses the SAME
+// admin_pin stored in Supabase settings (the same PIN set from Settings → Change
+// Admin PIN) — no new Supabase field needed. Unlock is remembered for the current
+// browser tab session only (sessionStorage), so it asks again on a fresh visit.
+const APP_LOCK_SESSION_KEY = 'ppm_app_unlocked';
+let appLockPin = '';
+let appLockReady = false; // becomes true once settings (admin_pin) have loaded
+
+function updateAppLockDots(){
+  document.querySelectorAll('#applock-pin-dots .dot').forEach((d,i)=>{
+    d.classList.toggle('filled', i < appLockPin.length);
+  });
+}
+function setAppLockPadEnabled(enabled){
+  document.querySelectorAll('#applock-pin-pad .pin-key').forEach(b=>{ b.disabled = !enabled; });
+  document.getElementById('applock-loading').classList.toggle('show', !enabled);
+}
+function appLockPinPress(digit){
+  if(!appLockReady || appLockPin.length>=4) return;
+  appLockPin += digit;
+  document.getElementById('applock-pin-error').textContent = '';
+  updateAppLockDots();
+  if(appLockPin.length===4){
+    setTimeout(()=>{
+      if(appLockPin === adminPin){
+        try{ sessionStorage.setItem(APP_LOCK_SESSION_KEY, 'true'); }catch(e){}
+        appLockPin = '';
+        showSplashWelcome();
+      } else {
+        document.getElementById('applock-pin-error').textContent = 'Incorrect PIN, try again';
+        appLockPin = '';
+        updateAppLockDots();
+      }
+    }, 150);
+  }
+}
+function appLockPinBackspace(){
+  appLockPin = appLockPin.slice(0,-1);
+  document.getElementById('applock-pin-error').textContent = '';
+  updateAppLockDots();
+}
+function appLockPinClear(){
+  appLockPin = '';
+  document.getElementById('applock-pin-error').textContent = '';
+  updateAppLockDots();
+}
+function showSplashWelcome(){
+  const lockView = document.getElementById('splash-lock-view');
+  const welcomeView = document.getElementById('splash-welcome-view');
+  if(lockView) lockView.style.display = 'none';
+  if(welcomeView) welcomeView.style.display = 'block';
+  setTimeout(()=>{
+    const splash = document.getElementById('splash-screen');
+    if(!splash) return;
+    splash.classList.add('ppm-exit');
+    setTimeout(()=>{ splash.style.display = 'none'; }, 650);
+  }, 1400);
+}
+function initAppLock(){
+  let alreadyUnlocked = false;
+  try{ alreadyUnlocked = sessionStorage.getItem(APP_LOCK_SESSION_KEY) === 'true'; }catch(e){}
+  if(alreadyUnlocked){
+    showSplashWelcome();
+    return;
+  }
+  setAppLockPadEnabled(false); // wait until admin_pin has loaded from Supabase
+}
+initAppLock();
 
 updateCategoryUI();
-loadAll();
+loadAll().then(()=>{
+  appLockReady = true;
+  // only matters if the lock screen is still showing (i.e. not already unlocked)
+  if(document.getElementById('splash-lock-view').style.display !== 'none'){
+    setAppLockPadEnabled(true);
+  }
+});
 
 
 // expose handlers referenced via inline onclick="..." in generated HTML
@@ -1520,6 +1591,9 @@ loadAll();
   window.pinBackspace = pinBackspace;
   window.pinClear = pinClear;
   window.pinPress = pinPress;
+  window.appLockPinPress = appLockPinPress;
+  window.appLockPinBackspace = appLockPinBackspace;
+  window.appLockPinClear = appLockPinClear;
   window.addPayment = addPayment;
   window.backfillKadanEntry = backfillKadanEntry;
   window.deleteEntry = deleteEntry;

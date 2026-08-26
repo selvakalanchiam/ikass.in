@@ -1039,37 +1039,52 @@ function renderStatus(){
   }
 }
 
+async function doChargeIn(){
+  const nowISO = new Date().toISOString();
+  await withSync(async ()=>{
+    const {error} = await sb.from('active_session').update({date:todayStr(), in_datetime:nowISO, is_active:true}).eq('id',1);
+    if(error) throw error;
+    await fetchActiveSession();
+  });
+  showToast('🟢 Charge In done!');
+  renderAll();
+}
+async function doChargeOut(){
+  const outDT = new Date();
+  const inDT = new Date(activeSession.in_datetime);
+  const minutes = (outDT - inDT) / 60000;
+  await withSync(async ()=>{
+    const {error:e1} = await sb.from('timelogs').insert({
+      date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
+      out_date:todayStr(), out_time:outDT.toTimeString().slice(0,5), minutes, manual:false, hourly_rate:currentHourlyRate
+    });
+    if(e1) throw e1;
+    const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
+    if(e2) throw e2;
+    await Promise.all([fetchTimelogs(), fetchActiveSession()]);
+  });
+  showToast('✅ Charge Out done! '+fmtMinutes(minutes)+' recorded.');
+  renderAll();
+}
+
+document.getElementById('chargein-popup-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('chargein-popup-btn');
+  if(btn.disabled) return;
+  await withBtnLock(btn, 'Charging in...', doChargeIn);
+  document.getElementById('chargein-overlay').classList.remove('show');
+});
+document.getElementById('chargein-skip-btn').addEventListener('click', ()=>{
+  document.getElementById('chargein-overlay').classList.remove('show');
+});
+document.getElementById('chargein-overlay').addEventListener('click', (e)=>{
+  if(e.target.id==='chargein-overlay') document.getElementById('chargein-overlay').classList.remove('show');
+});
+
 document.getElementById('btn-charge-toggle').addEventListener('click', async ()=>{
   const btn = document.getElementById('btn-charge-toggle');
   if(btn.disabled) return;
-  const busyLabel = (activeSession && activeSession.is_active) ? 'Charging out...' : 'Charging in...';
-  await withBtnLock(btn, busyLabel, async ()=>{
-    if(activeSession && activeSession.is_active){
-      const outDT = new Date();
-      const inDT = new Date(activeSession.in_datetime);
-      const minutes = (outDT - inDT) / 60000;
-      await withSync(async ()=>{
-        const {error:e1} = await sb.from('timelogs').insert({
-          date:activeSession.date, in_time:inDT.toTimeString().slice(0,5),
-          out_date:todayStr(), out_time:outDT.toTimeString().slice(0,5), minutes, manual:false, hourly_rate:currentHourlyRate
-        });
-        if(e1) throw e1;
-        const {error:e2} = await sb.from('active_session').update({is_active:false}).eq('id',1);
-        if(e2) throw e2;
-        await Promise.all([fetchTimelogs(), fetchActiveSession()]);
-      });
-      showToast('✅ Charge Out done! '+fmtMinutes(minutes)+' recorded.');
-    } else {
-      const nowISO = new Date().toISOString();
-      await withSync(async ()=>{
-        const {error} = await sb.from('active_session').update({date:todayStr(), in_datetime:nowISO, is_active:true}).eq('id',1);
-        if(error) throw error;
-        await fetchActiveSession();
-      });
-      showToast('🟢 Charge In done!');
-    }
-    renderAll();
-  });
+  const isActive = activeSession && activeSession.is_active;
+  await withBtnLock(btn, isActive ? 'Charging out...' : 'Charging in...', isActive ? doChargeOut : doChargeIn);
 });
 
 async function fixActiveSession(){
@@ -1593,6 +1608,16 @@ function appLockPinClear(){
   document.getElementById('applock-pin-error').textContent = '';
   updateAppLockDots();
 }
+let splashDone = false;
+let dataReadyForReminder = false;
+let chargeReminderShown = false;
+function maybeShowChargeInReminder(){
+  if(!splashDone || !dataReadyForReminder || chargeReminderShown) return;
+  chargeReminderShown = true;
+  if(!(activeSession && activeSession.is_active)){
+    document.getElementById('chargein-overlay').classList.add('show');
+  }
+}
 function showSplashWelcome(){
   const lockView = document.getElementById('splash-lock-view');
   const welcomeView = document.getElementById('splash-welcome-view');
@@ -1602,7 +1627,11 @@ function showSplashWelcome(){
     const splash = document.getElementById('splash-screen');
     if(!splash) return;
     splash.classList.add('ppm-exit');
-    setTimeout(()=>{ splash.style.display = 'none'; }, 650);
+    setTimeout(()=>{
+      splash.style.display = 'none';
+      splashDone = true;
+      maybeShowChargeInReminder();
+    }, 650);
   }, 1400);
 }
 function initAppLock(){
@@ -1627,6 +1656,8 @@ loadAll().then(()=>{
   if(document.getElementById('splash-lock-view').style.display !== 'none'){
     setAppLockPadEnabled(true);
   }
+  dataReadyForReminder = true;
+  maybeShowChargeInReminder();
 });
 
 

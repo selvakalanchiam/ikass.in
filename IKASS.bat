@@ -23,19 +23,27 @@ if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
 call :LOGINIT
 
 :MENU
+:: Aggressively drain ANY pending/stray keystrokes sitting in the
+:: console input buffer before asking for a new choice.
+call :DRAIN_INPUT
 cls
 echo ============================================================
 echo                          IKASS
 echo ============================================================
-echo   1. Kill everything    (background apps, startup, updates)
-echo   2. Restart everything (restore normal settings)
-echo   3. Exit
+echo   Type KILL    - Kill everything (background apps, startup, updates)
+echo   Type RESTORE - Restart everything (restore normal settings)
+echo   Type EXIT    - Exit
 echo ============================================================
-set /p choice="Enter your choice (1/2/3): "
+echo   (Full word required on purpose - prevents any stray leftover
+echo    keypress from accidentally triggering an action)
+echo ============================================================
+set "choice="
+set /p choice="Type KILL / RESTORE / EXIT: "
 
-if "%choice%"=="1" goto KILL_CONFIRM
-if "%choice%"=="2" goto RESTART
-if "%choice%"=="3" goto EXITMENU
+if /I "%choice%"=="KILL" goto KILL_CONFIRM
+if /I "%choice%"=="RESTORE" goto RESTART
+if /I "%choice%"=="RESTART" goto RESTART
+if /I "%choice%"=="EXIT" goto EXITMENU
 echo Invalid choice, try again.
 timeout /t 2 >nul
 goto MENU
@@ -44,6 +52,7 @@ goto MENU
 :: 0. CONFIRMATION BEFORE KILL
 :: ============================================================
 :KILL_CONFIRM
+call :DRAIN_INPUT
 cls
 echo ============================================================
 echo   WARNING: Kill mode will:
@@ -51,11 +60,12 @@ echo   - Disable startup apps, background apps, notifications
 echo   - Stop Windows Update permanently
 echo   - Kill non-essential running processes
 echo   - Clean temp files and trim RAM
-echo   (Everything is reversible via option 2, except temp cleanup)
+echo   (Everything is reversible via RESTORE, except temp cleanup)
 echo ============================================================
-set /p confirm="Sure ah? Continue pannalama? (Y/N): "
-if /I "%confirm%"=="Y" goto KILL
-if /I "%confirm%"=="N" goto MENU
+set "confirm="
+set /p confirm="Type YES to continue, or NO to cancel: "
+if /I "%confirm%"=="YES" goto KILL
+if /I "%confirm%"=="NO" goto MENU
 goto KILL_CONFIRM
 
 :: ============================================================
@@ -168,7 +178,9 @@ echo   Temp files cleaned, RAM trimmed, %PKILLED% process(es) killed
 echo   Log saved to: %LOG_FILE%
 echo.
 call :LOG "===== KILL MODE COMPLETE (%PKILLED% processes killed) ====="
-pause
+call :DRAIN_INPUT
+set "resume="
+set /p resume="Type anything + ENTER to return to menu: "
 goto MENU
 
 :: ============================================================
@@ -226,8 +238,10 @@ echo ============================================================
 echo.
 call :LOG "===== RESTART MODE COMPLETE ====="
 
-set /p wupdate="Windows Update check pannanuma ippo? (Y/N): "
-if /I "%wupdate%"=="Y" (
+call :DRAIN_INPUT
+set "wupdate="
+set /p wupdate="Windows Update check pannanuma ippo? Type YES or NO: "
+if /I "%wupdate%"=="YES" (
     start ms-settings:windowsupdate
     call :LOG "Opened Windows Update settings"
 )
@@ -236,7 +250,9 @@ echo.
 echo   Ellame normal ah restore pannachu.
 echo   Log saved to: %LOG_FILE%
 echo.
-pause
+call :DRAIN_INPUT
+set "resume="
+set /p resume="Type anything + ENTER to return to menu: "
 goto MENU
 
 :: ============================================================
@@ -282,4 +298,11 @@ goto :EOF
 
 :LOG
 echo [%DATE% %TIME%] %~1 >> "%LOG_FILE%"
+goto :EOF
+
+:DRAIN_INPUT
+:: Aggressively discards every pending keystroke in the console
+:: input buffer (stronger than FlushInputBuffer - actively reads
+:: and throws away each buffered key one by one).
+powershell -NoProfile -Command "try { while ([Console]::KeyAvailable) { [Console]::ReadKey($true) | Out-Null } } catch {}" >nul 2>&1
 goto :EOF

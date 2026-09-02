@@ -4,8 +4,8 @@ title IKASS
 color 0A
 
 :: ============================================================
-::                          IKASS
-::   Aggressive Performance Mode - Kill / Restart / Exit
+::                         IKASS
+::    Aggressive Performance Mode - Kill / Restart / Exit
 :: ============================================================
 
 net session >nul 2>&1
@@ -23,19 +23,17 @@ if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
 call :LOGINIT
 
 :MENU
-:: Aggressively drain ANY pending/stray keystrokes sitting in the
-:: console input buffer before asking for a new choice.
 call :DRAIN_INPUT
 cls
 echo ============================================================
-echo                          IKASS
+echo                           IKASS
 echo ============================================================
-echo   Type KILL    - Kill everything (background apps, startup, updates)
-echo   Type RESTORE - Restart everything (restore normal settings)
-echo   Type EXIT    - Exit
+echo    Type KILL    - Kill everything (background apps, startup, updates)
+echo    Type RESTORE - Restart everything (restore normal settings)
+echo    Type EXIT    - Exit
 echo ============================================================
-echo   (Full word required on purpose - prevents any stray leftover
-echo    keypress from accidentally triggering an action)
+echo    (Full word required on purpose - prevents any stray leftover
+echo     keypress from accidentally triggering an action)
 echo ============================================================
 set "choice="
 set /p choice="Type KILL / RESTORE / EXIT: " <CON
@@ -55,12 +53,12 @@ goto MENU
 call :DRAIN_INPUT
 cls
 echo ============================================================
-echo   WARNING: Kill mode will:
-echo   - Disable startup apps, background apps, notifications
-echo   - Stop Windows Update permanently
-echo   - Kill non-essential running processes
-echo   - Clean temp files and trim RAM
-echo   (Everything is reversible via RESTORE, except temp cleanup)
+echo    WARNING: Kill mode will:
+echo    - Disable startup apps, background apps, notifications
+echo    - Stop Windows Update permanently
+echo    - Kill non-essential running processes
+echo    - Clean temp files and trim RAM
+echo    (Everything is reversible via RESTORE, except temp cleanup)
 echo ============================================================
 set "confirm="
 set /p confirm="Type YES to continue, or NO to cancel: " <CON
@@ -127,28 +125,20 @@ for /d %%d in ("%TEMP%\*") do rd /s /q "%%d" >nul 2>&1
 del /f /s /q "C:\Windows\Temp\*" >nul 2>&1
 
 call :PROGRESS 11 %KTOTAL% "Killing non-essential background processes"
-set "SAFE=System Idle Process^,System^,smss.exe^,csrss.exe^,wininit.exe^,services.exe^,lsass.exe^,winlogon.exe^,explorer.exe^,svchost.exe^,dwm.exe^,fontdrvhost.exe^,cmd.exe^,conhost.exe^,IKASS.bat^,wmic.exe^,taskeng.exe^,taskhostw.exe^,sihost.exe^,ctfmon.exe^,RuntimeBroker.exe^,SearchIndexer.exe^,SearchHost.exe^,spoolsv.exe^,audiodg.exe^,powershell.exe"
+set "SAFE=system idle process system smss.exe csrss.exe wininit.exe services.exe lsass.exe winlogon.exe explorer.exe svchost.exe dwm.exe fontdrvhost.exe cmd.exe conhost.exe ikass.bat wmic.exe taskeng.exe taskhostw.exe sihost.exe ctfmon.exe runtimebroker.exe searchindexer.exe searchhost.exe spoolsv.exe audiodg.exe powershell.exe"
 
 echo.
-echo   Scanning running processes...
-set "PLIST_COUNT=0"
-for /f "skip=3 tokens=1" %%a in ('tasklist /fo table') do (
-    set "PNAME=%%a"
-    set "IS_SAFE=0"
-    for %%s in (%SAFE%) do if /I "!PNAME!"=="%%s" set "IS_SAFE=1"
-    if "!IS_SAFE!"=="0" set /a PLIST_COUNT+=1
-)
-echo   %PLIST_COUNT% process^(es^) to kill.
-echo.
-
+echo    Scanning running processes...
 set "PKILLED=0"
-for /f "skip=3 tokens=1" %%a in ('tasklist /fo table') do (
-    set "PNAME=%%a"
+for /f "tokens=1 delims=," %%a in ('tasklist /fo csv /nh') do (
+    set "PNAME=%%~a"
     set "IS_SAFE=0"
-    for %%s in (%SAFE%) do if /I "!PNAME!"=="%%s" set "IS_SAFE=1"
+    for %%s in (%SAFE%) do (
+        if /I "!PNAME!"=="%%s" set "IS_SAFE=1"
+    )
     if "!IS_SAFE!"=="0" (
         set /a PKILLED+=1
-        echo   [!PKILLED!/%PLIST_COUNT%] Killing: !PNAME!
+        echo    Killing: !PNAME!
         taskkill /IM "!PNAME!" /F >nul 2>&1
         call :LOG "Killed process: !PNAME!"
     )
@@ -156,9 +146,11 @@ for /f "skip=3 tokens=1" %%a in ('tasklist /fo table') do (
 timeout /t 1 >nul
 
 call :PROGRESS 12 %KTOTAL% "Boosting priority of active app"
-for /f "tokens=2" %%p in ('powershell -NoProfile -Command "(Get-Process | Where-Object {$_.MainWindowHandle -eq (Add-Type -MemberDefinition '\''[DllImport(\"user32.dll\")] public static extern IntPtr GetForegroundWindow();'\'' -Name Win32 -Namespace Win32Functions -PassThru)::GetForegroundWindow()}).Id"') do (
-    wmic process where ProcessId=%%p CALL setpriority "128" >nul 2>&1
-    call :LOG "Boosted priority for foreground process PID %%p"
+for /f "tokens=*" %%p in ('powershell -NoProfile -Command "$code = '[DllImport(\"user32.dll\")] public static extern IntPtr GetForegroundWindow();'; $type = Add-Type -MemberDefinition $code -Name Win32 -Namespace Win32 -PassThru; $hwnd = $type::GetForegroundWindow(); (Get-Process | Where-Object {$_.MainWindowHandle -eq $hwnd}).Id"') do (
+    if not "%%p"=="" (
+        wmic process where ProcessId=%%p CALL setpriority "128" >nul 2>&1
+        call :LOG "Boosted priority for foreground process PID %%p"
+    )
 )
 
 call :PROGRESS 13 %KTOTAL% "Trimming RAM (clearing working sets)"
@@ -166,21 +158,20 @@ powershell -NoProfile -Command "Get-Process | ForEach-Object { try { $_.MinWorki
 
 cls
 echo ============================================================
-echo                          IKASS
+echo                           IKASS
 echo ============================================================
-echo   [##############################] 100%%
-echo   KILL MODE COMPLETE
+echo    [##############################] 100%%
+echo    KILL MODE COMPLETE
 echo ============================================================
 echo.
-echo   Background apps, startup, notifications, updates - OFF
-echo   Visual effects OFF, High Performance mode ON
-echo   Temp files cleaned, RAM trimmed, %PKILLED% process(es) killed
-echo   Log saved to: %LOG_FILE%
+echo    Background apps, startup, notifications, updates - OFF
+echo    Visual effects OFF, High Performance mode ON
+echo    Temp files cleaned, RAM trimmed, %PKILLED% process(es) killed
+echo    Log saved to: %LOG_FILE%
 echo.
 call :LOG "===== KILL MODE COMPLETE (%PKILLED% processes killed) ====="
-call :DRAIN_INPUT
-set "resume="
-set /p resume="Type anything + ENTER to return to menu: " <CON
+echo Press ANY key to return to menu...
+pause >nul
 goto MENU
 
 :: ============================================================
@@ -230,15 +221,14 @@ start explorer.exe
 
 cls
 echo ============================================================
-echo                          IKASS
+echo                           IKASS
 echo ============================================================
-echo   [##############################] 100%%
-echo   RESTART MODE COMPLETE
+echo    [##############################] 100%%
+echo    RESTART MODE COMPLETE
 echo ============================================================
 echo.
 call :LOG "===== RESTART MODE COMPLETE ====="
 
-call :DRAIN_INPUT
 set "wupdate="
 set /p wupdate="Windows Update check pannanuma ippo? Type YES or NO: " <CON
 if /I "%wupdate%"=="YES" (
@@ -247,16 +237,15 @@ if /I "%wupdate%"=="YES" (
 )
 
 echo.
-echo   Ellame normal ah restore pannachu.
-echo   Log saved to: %LOG_FILE%
+echo    Ellame normal ah restore pannachu.
+echo    Log saved to: %LOG_FILE%
 echo.
-call :DRAIN_INPUT
-set "resume="
-set /p resume="Type anything + ENTER to return to menu: " <CON
+echo Press ANY key to return to menu...
+pause >nul
 goto MENU
 
 :: ============================================================
-:: 3. EXIT  (real, immediate close - no fallthrough)
+:: 3. EXIT
 :: ============================================================
 :EXITMENU
 cls
@@ -267,23 +256,22 @@ endlocal
 exit
 
 :: ============================================================
-:: HELPER FUNCTIONS  (only ever reached via CALL - never fallthrough)
+:: HELPER FUNCTIONS
 :: ============================================================
 :PROGRESS
-:: %1=current step  %2=total steps  %3=step description
 setlocal
 set /a "PCT=(%~1*100)/%~2"
 set /a "FILL=(%~1*30)/%~2"
 set "BAR="
-for /l %%i in (1,1,%FILL%) do set "BAR=!BAR!#"
+if %FILL% gtr 0 for /l %%i in (1,1,%FILL%) do set "BAR=!BAR!#"
 set /a "EMPTY=30-FILL"
 if %EMPTY% gtr 0 for /l %%i in (1,1,%EMPTY%) do set "BAR=!BAR!-"
 cls
 echo ============================================================
-echo                          IKASS
+echo                           IKASS
 echo ============================================================
-echo   [!BAR!] !PCT!%%
-echo   Step %~1 of %~2: %~3...
+echo    [!BAR!] !PCT!%%
+echo    Step %~1 of %~2: %~3...
 echo ============================================================
 endlocal
 call :LOG "Step %~1/%~2: %~3"
@@ -301,8 +289,5 @@ echo [%DATE% %TIME%] %~1 >> "%LOG_FILE%"
 goto :EOF
 
 :DRAIN_INPUT
-:: Aggressively discards every pending keystroke in the console
-:: input buffer (stronger than FlushInputBuffer - actively reads
-:: and throws away each buffered key one by one).
-powershell -NoProfile -Command "try { while ([Console]::KeyAvailable) { [Console]::ReadKey($true) | Out-Null } } catch {}" >nul 2>&1
+powershell -NoProfile -Command "while ([Console]::KeyAvailable) { [Console]::ReadKey($true) | Out-Null }" >nul 2>&1
 goto :EOF

@@ -38,7 +38,7 @@ echo   (Full word required on purpose - prevents any stray leftover
 echo    keypress from accidentally triggering an action)
 echo ============================================================
 set "choice="
-set /p choice="Type KILL / RESTORE / EXIT: "
+set /p choice="Type KILL / RESTORE / EXIT: " <CON
 
 if /I "%choice%"=="KILL" goto KILL_CONFIRM
 if /I "%choice%"=="RESTORE" goto RESTART
@@ -63,7 +63,7 @@ echo   - Clean temp files and trim RAM
 echo   (Everything is reversible via RESTORE, except temp cleanup)
 echo ============================================================
 set "confirm="
-set /p confirm="Type YES to continue, or NO to cancel: "
+set /p confirm="Type YES to continue, or NO to cancel: " <CON
 if /I "%confirm%"=="YES" goto KILL
 if /I "%confirm%"=="NO" goto MENU
 goto KILL_CONFIRM
@@ -180,7 +180,7 @@ echo.
 call :LOG "===== KILL MODE COMPLETE (%PKILLED% processes killed) ====="
 call :DRAIN_INPUT
 set "resume="
-set /p resume="Type anything + ENTER to return to menu: "
+set /p resume="Type anything + ENTER to return to menu: " <CON
 goto MENU
 
 :: ============================================================
@@ -240,7 +240,7 @@ call :LOG "===== RESTART MODE COMPLETE ====="
 
 call :DRAIN_INPUT
 set "wupdate="
-set /p wupdate="Windows Update check pannanuma ippo? Type YES or NO: "
+set /p wupdate="Windows Update check pannanuma ippo? Type YES or NO: " <CON
 if /I "%wupdate%"=="YES" (
     start ms-settings:windowsupdate
     call :LOG "Opened Windows Update settings"
@@ -252,7 +252,7 @@ echo   Log saved to: %LOG_FILE%
 echo.
 call :DRAIN_INPUT
 set "resume="
-set /p resume="Type anything + ENTER to return to menu: "
+set /p resume="Type anything + ENTER to return to menu: " <CON
 goto MENU
 
 :: ============================================================
